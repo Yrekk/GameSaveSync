@@ -2,7 +2,7 @@
 
 Generic and safe game save synchronization between multiple PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H0 bootstrap in progress.
+> **Status:** pre-V1 — H0 bootstrap validated.
 
 ## Purpose
 
@@ -17,11 +17,15 @@ H0 builds the **skeleton only**:
 - solution and project boundaries;
 - dependency direction;
 - build conventions;
+- ASP.NET Core server-host boundary;
+- shared development launch configuration;
 - test projects;
 - CI;
 - documentation and session-continuity workflow.
 
 H0 contains **no synchronization business rule**. Domain concepts and synchronization decisions belong to H1 and later tranches.
+
+H0 is validated both in CI and locally.
 
 ## Repository structure
 

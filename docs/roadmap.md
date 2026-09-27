@@ -1,10 +1,10 @@
 # Roadmap
 
-The validated technical solution defines the progression below. H0 only creates the structure needed to host later work.
+The validated technical solution defines the progression below.
 
 | Tranche | Purpose | State |
 | --- | --- | --- |
-| H0 | Bootstrap, boundaries, CI and documentation system | Validation pending |
+| H0 | Bootstrap, boundaries, CI and documentation system | Validated |
 | H1 | Generic deterministic domain | Planned |
 | H2 | Minimal central server | Planned |
 | H3 | Minimal Windows agent | Planned |

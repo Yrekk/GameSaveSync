@@ -3,7 +3,7 @@
 **Date:** 27 September 2026  
 **Repository:** `Yrekk/GameSaveSync`  
 **Working branch:** `feature/h0-bootstrap`  
-**Current tranche:** H0 — Bootstrap
+**Current tranche:** H0 — Bootstrap — VALIDATED
 
 Always verify the actual remote HEAD before modifying the repository.
 
@@ -13,56 +13,39 @@ Always verify the actual remote HEAD before modifying the repository.
 - The technical solution is validated.
 - H0 scope is explicitly limited to skeleton/boundaries/infrastructure/documentation.
 - Development continuity follows the proven Claviger model, adapted to GameSaveSync.
-- GitHub Actions successfully restores, builds and runs the test projects on the current H0 structure.
-- `GameSave.Server` is now correctly materialized as an ASP.NET Core host without business API behavior.
+- .NET 10 solution structure is in place.
+- Five production project boundaries and three test project boundaries are in place.
+- Shared build conventions are in place.
+- Agent-side boundaries target Windows.
+- `GameSave.Server` is an ASP.NET Core host without business API behavior.
+- The common Visual Studio launch profile is versioned.
+- CI is green on the final H0 structure.
+- Damien completed local restore, build, test, `git diff --check` and `git status --short` successfully.
+- Expected "no tests available" warnings are accepted for the intentionally empty H0 test projects.
 
-## IMPLEMENTED BUT NOT YET VALIDATED LOCALLY
+## IMPLEMENTED BUT NOT YET VALIDATED
 
-On `feature/h0-bootstrap`:
-
-- .NET 10 solution structure;
-- five production project boundaries;
-- three test project boundaries;
-- shared build conventions;
-- Windows targeting for agent-side boundaries;
-- ASP.NET Core host boundary for `GameSave.Server`;
-- CI;
-- root and local architectural READMEs;
-- development workflow;
-- tranche tracking and continuity system;
-- roadmap.
-
-The server host contains no business endpoint, controller, DTO, persistence or synchronization behavior.
-
-Damien's local review and validation remain required before H0 is accepted.
+None for H0.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
-Business/domain work starts only after H0 validation.
+Business/domain work starts in H1.
 
-No H1 domain type or H2 business API behavior is part of the current tranche.
+No H1 domain type or H2 business API behavior is part of H0.
 
 ## TESTS / SMOKE
 
-Remote CI after ASP.NET Core host adjustment: green.
+Remote CI: green.
 
-Local sequence still to run:
-
-```text
-dotnet restore
-→ dotnet build
-→ dotnet test
-→ git diff --check
-→ git status --short
-```
+Local validation: green.
 
 No real save, NAS share or synchronization operation has been touched.
 
 ## KNOWN RISKS
 
-The current risk is structural/build correctness rather than save-data safety because H0 performs no data operation.
+H0 performs no save-data operation, so the remaining risks are future implementation risks rather than current data-loss risks.
 
-Documentation drift is treated as a defect and must be corrected in the same tranche that changes the documented architecture.
+Documentation drift remains a defect and must be corrected in the same tranche that changes the documented architecture.
 
 ## READ FIRST NEXT SESSION
 
@@ -70,8 +53,10 @@ Documentation drift is treated as a defect and must be corrected in the same tra
 2. this file;
 3. `docs/tranches/H0-bootstrap.md`;
 4. actual remote branch and HEAD;
-5. any file implicated by failed validation.
+5. the H1 tranche document once created.
 
 ## NEXT EXACT ACTION
 
-Damien pulls `feature/h0-bootstrap`, reviews the updated server skeleton and runs the H0 local validation sequence. If everything is green and the structure is accepted, mark H0 validated before opening H1.
+H0 is validated but not merged.
+
+Do not merge without Damien's explicit approval. Once approved, merge H0 to `main` and start H1 from the agreed base.
