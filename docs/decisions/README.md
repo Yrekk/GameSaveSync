@@ -15,3 +15,5 @@ H0 contains no ADR because the current boundaries come directly from the validat
 - [ADR-0003 — Metadata recovery uses validated snapshots and restricted mode](ADR-0003-metadata-snapshot-recovery.md)
 
 - [ADR-0004 — Administrative operations are reusable application use cases](ADR-0004-reusable-administrative-use-cases.md)
+
+- [ADR-0005 — Application and Persistence are separate extractable modules](ADR-0005-application-persistence-modules.md)
