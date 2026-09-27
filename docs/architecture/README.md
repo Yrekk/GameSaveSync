@@ -91,3 +91,13 @@ Managed recovery checkpoints are temporary recovery candidates created while a c
 Normal synchronization and managed recovery remain separate concerns so games with their own adequate autosave/recovery do not inherit unnecessary behavior.
 
 The detailed contract is documented in [managed recovery checkpoints](recovery-checkpoints.md).
+
+## Central metadata persistence direction
+
+Server-side configuration and metadata will use one central SQLite database on Succumbrae local storage.
+
+The active database must not live on the Custodia SMB share. Custodia remains the file-storage and backup target.
+
+Core remains persistence-agnostic. SQLite mapping and schema/migration work belong to the Server infrastructure beginning in H2.
+
+See [ADR-0001 — Central server metadata uses SQLite](../decisions/ADR-0001-server-metadata-sqlite.md).

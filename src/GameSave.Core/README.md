@@ -8,7 +8,7 @@ This project stays independent from Windows APIs, ASP.NET Core, NAS access, conc
 
 H1 introduces deterministic synchronization vocabulary and rules here. Infrastructure components may provide inputs to Core, but they do not own or duplicate the synchronization policy.
 
-Current domain work lives under [Synchronization](Synchronization/README.md).
+Current domain work lives under [Synchronization](Synchronization/README.md) and [Profiles](Profiles/README.md).
 
 ## Diagnostics boundary
 

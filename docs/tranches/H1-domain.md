@@ -118,6 +118,41 @@ Tests cover the four core disposition cases, cumulative findings, integrity find
 
 Validated remotely and locally on 27 September 2026. CI is green; local Release build is green; `GameSave.Core.Tests` reports 15/15 passing tests; `git diff --check` and working-tree status are clean. The expected no-test warnings remain only for the intentionally empty Server/Integration test projects.
 
+## H1.3 — IMPLEMENTED, PENDING VALIDATION
+
+H1.3 adds a generic profile domain under `GameSave.Core/Profiles`.
+
+A `GameProfile` is always complete and structurally valid. UI drafts and incomplete forms do not enter the domain.
+
+Implemented profile concepts:
+
+- stable normalized `ProfileId` slug;
+- display name and enabled state;
+- one or more process names;
+- one or more logical `GameDataRoot` values;
+- optional per-machine root path overrides;
+- exclusion expressions stored without defining matching syntax yet;
+- validated central-version retention;
+- optional `RecoveryPolicy` with managed-checkpoint interval and retention;
+- external-cloud warning configuration.
+
+`CentralVersion` is intentionally not stored inside `GameProfile`; runtime synchronization state remains in the synchronization domain.
+
+A profile may be disabled, but it must still be structurally complete. There are no persisted incomplete domain drafts.
+
+SQLite is now the accepted central metadata persistence direction, recorded in ADR-0001. H1.3 does not implement persistence: Core remains independent of SQLite. Global profile-ID uniqueness will be enforced later by the Server repository/database boundary.
+
+### H1.3 invariants
+
+- profile and data-root identifiers are normalized lowercase slugs;
+- a profile has at least one process name and one data root;
+- process names, exclusions and data-root IDs cannot be duplicated;
+- one data root cannot define two overrides for the same machine;
+- normal version retention is greater than zero;
+- managed checkpoint interval is greater than zero;
+- managed checkpoint retention is at least two (current + previous);
+- no filesystem/process/NAS/database access occurs in Core.
+
 ## Next exact action
 
-Design H1.3 generic game-profile invariants before implementation.
+Validate H1.3 in CI and locally. If green, review the major profile-domain files before H1.4 consolidation.

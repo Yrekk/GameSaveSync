@@ -6,7 +6,7 @@ The validated technical solution defines the progression below.
 | --- | --- | --- |
 | H0 | Bootstrap, boundaries, CI and documentation system | Validated |
 | H1 | Generic deterministic domain | In progress |
-| H2 | Minimal central server | Planned |
+| H2 | Minimal central server, including SQLite metadata persistence boundary | Planned |
 | H3 | Minimal Windows agent | Planned |
 | H4 | Replaceable minimal UI | Planned |
 | H5 | Reliable transactional transfers | Planned |
@@ -48,3 +48,11 @@ They remain parallel to normal synchronization:
 Implementation is intentionally deferred across the Agent/transfer/monitoring/lifecycle/storage/PZ tranches rather than pulled into H1.
 
 See `docs/architecture/recovery-checkpoints.md`.
+
+## Accepted persistence direction
+
+The central server will use SQLite for GameSaveSync configuration and metadata. The active database lives locally on Succumbrae; Custodia receives safe backups rather than hosting the live SQLite file.
+
+H1 defines persistence-independent domain objects only. Schema, migrations and repository implementation begin in H2.
+
+See `docs/decisions/ADR-0001-server-metadata-sqlite.md`.

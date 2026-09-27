@@ -5,3 +5,7 @@ This directory is reserved for ADR-style records when a decision is significant,
 Do not create an ADR for every class, DTO, package or routine implementation choice.
 
 H0 contains no ADR because the current boundaries come directly from the validated technical solution and do not yet require an additional decision record.
+
+## Accepted records
+
+- [ADR-0001 — Central server metadata uses SQLite](ADR-0001-server-metadata-sqlite.md)

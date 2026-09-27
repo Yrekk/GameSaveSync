@@ -13,75 +13,93 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 ## VALIDATED
 
 - H0 bootstrap is validated and promoted through `main`.
-- H1.1 is validated locally and remotely on `feature/h1-domain`:
-  - non-negative `SyncVersion` value object;
-  - local synchronization state with base version, dirty state, game-running state and integrity state;
-  - central synchronization state;
-  - fail-closed `SaveIntegrityState` vocabulary;
-  - Core synchronization boundary documentation;
-  - unit tests for the version invariant and default integrity state.
+- H1.1 is validated locally and remotely.
+- H1.2 is validated locally and remotely:
+  - deterministic `SyncAssessment`;
+  - underlying `SyncDisposition`;
+  - cumulative `SyncFindings`;
+  - 15/15 Core tests locally;
+  - Release build, diff-check and working tree clean.
 - Branch promotion policy is `feature/* → develop → deploy/succumbrae → main`.
 - Starting with H1, validated feature work stops at `develop` unless Damien explicitly approves deployment promotion.
-- The technical solution and central-server architecture remain the design baseline.
-
-## VALIDATED
-
-- H0 bootstrap is validated and promoted through `main`.
-- H1.1 is validated locally and remotely on `feature/h1-domain`.
-- H1.2 is validated locally and remotely on `feature/h1-domain`:
-  - `SyncDisposition` for the underlying Local/Central relationship;
-  - cumulative `SyncFindings` so simultaneous observations are not hidden;
-  - `SyncAssessment` result model;
-  - pure `SyncAssessmentEngine`;
-  - decision-table and multi-finding unit tests;
-  - explicit inconsistent-state handling when central version is behind the local base.
-- H1.2 local validation: Release build green, 15/15 Core tests passing, diff-check clean, working tree clean. Expected no-test warnings remain only for intentionally empty Server/Integration test projects.
-- Branch promotion policy remains `feature/* → develop → deploy/succumbrae → main`.
-- Starting with H1, validated feature work stops at `develop` unless Damien explicitly approves deployment promotion.
-- The technical solution and central-server architecture remain the design baseline.
 
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
-None for H1.3 yet.
+H1.3 on `feature/h1-domain`:
+
+- `ProfileId` stable normalized slug;
+- `DataRootId` stable logical-root slug;
+- `MachinePathOverride`;
+- `GameDataRoot` with default path and per-machine overrides;
+- `RecoveryPolicy` with disabled/managed-checkpoint modes;
+- complete/always-valid `GameProfile`;
+- profile-domain invariant tests;
+- profile-domain README;
+- ADR-0001 accepting central SQLite metadata persistence.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
-H1.2 implements a deterministic normal synchronization assessment: underlying disposition plus all simultaneously detectable findings. Recovery checkpoint availability remains a separate later assessment that the UI may combine with synchronization findings.
+### Persistence
 
-Safety requirements carried forward:
+GameSaveSync will use one central SQLite database for server-side configuration and metadata.
 
-- a dirty save that is `Unknown`, `RequiresValidation` or `Invalid` must not be automatically promoted centrally;
-- abnormal session termination can later move local integrity to `RequiresValidation`;
-- the UI must tell the user to launch the game and verify the save, then accept **OK**, **KO**, or **later**;
-- no response keeps synchronization blocked;
-- divergent local/central evolution returns a conflict;
-- timestamps do not choose a winner;
-- both sides are preserved before destructive conflict resolution.
+- active DB on Succumbrae local storage;
+- not hosted live on Custodia/SMB;
+- Custodia receives SQLite-safe backups;
+- save payloads remain files, not DB blobs;
+- Core has no SQLite dependency;
+- repository/schema/migration work begins in H2;
+- global `ProfileId` uniqueness is a repository/database invariant.
 
-Crash/unclean-exit detection itself belongs to later Agent/lifecycle work. The future UI belongs to its own tranche.
+### Recovery
 
-Managed recovery checkpoints are now an explicit parallel architecture for profiles that need them. They are temporary recovery candidates, not central versions. Initial direction: approximately 10-minute capture for Project Zomboid, current + previous retention, source machine/base-version metadata, quarantine before restore, explicit user validation, and deletion only after successful final central promotion acknowledgement. See `docs/architecture/recovery-checkpoints.md`.
+Managed recovery checkpoints remain parallel to normal synchronization.
 
-Operational diagnostics are also decided but not implemented: structured logs feed console, local files and a filterable live Admin stream. Normal remote levels are Information through Critical; Debug/Trace stay local unless temporarily enabled from Admin with an automatic expiry.
+- opt-in per profile;
+- initial Project Zomboid direction: approximately 10-minute interval;
+- minimum two rolling checkpoints: current + previous;
+- checkpoint carries source machine and base-version context;
+- local state is quarantined before recovery restoration;
+- cleanup waits for user validation plus successful final central promotion acknowledgement.
+
+See `docs/architecture/recovery-checkpoints.md`.
+
+### Operational diagnostics
+
+Structured runtime diagnostics feed console, local files and a future filterable live Admin stream. Normal remote levels are Information through Critical; Debug/Trace remain local unless temporarily enabled with expiry.
 
 ## TESTS / SMOKE
 
-H1.1 and H1.2 remote CI and Damien's local validation are green.
+H1.1 and H1.2 are green remotely and locally.
 
-No filesystem, save, NAS, Windows process, network or synchronization transfer has been touched.
+H1.3 remote/local validation is pending.
+
+Expected local-test warnings that may be ignored for now:
+
+- `GameSave.Server.Tests`: no tests available;
+- `GameSave.IntegrationTests`: no tests available.
+
+These projects are intentionally empty at the current tranche. Do not add fake tests to silence the warnings.
+
+No filesystem, save, NAS, Windows process, network, SQLite or synchronization transfer behavior has been introduced in Core.
 
 ## KNOWN RISKS
 
-The important H1 risk is semantic: ambiguous state or decision types could later make destructive synchronization behavior harder to reason about. Keep the domain small, explicit and deterministic.
+- Keep profile configuration generic; no hard-coded Project Zomboid rule may enter Core.
+- Do not let UI drafts become persisted `GameProfile` objects.
+- Core validates ID shape, but only the future repository/database can enforce global profile-ID uniqueness.
+- Recovery configuration must remain separate from actual checkpoint execution/storage.
 
 ## READ FIRST NEXT SESSION
 
 1. root `README.md`;
 2. this file;
 3. `docs/tranches/H1-domain.md`;
-4. `src/GameSave.Core/Synchronization/README.md`;
-5. actual remote branch and HEAD.
+4. `src/GameSave.Core/Profiles/README.md`;
+5. `src/GameSave.Core/Synchronization/README.md`;
+6. `docs/decisions/ADR-0001-server-metadata-sqlite.md`;
+7. actual remote branch and HEAD.
 
 ## NEXT EXACT ACTION
 
-Design H1.3 generic game-profile invariants before implementation.
+Validate H1.3 remotely and locally. If green, review the profile-domain implementation before H1.4 consolidation.
