@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1A — Modular persistence foundation (validated)
+**Current tranche:** H2.1A — Post-review MachineId hardening (awaiting local validation)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -40,7 +40,7 @@ Validated H2.1A scope:
 - focused Application/Persistence/Storage test projects;
 - EF Core + SQLite isolated to Persistence;
 - empty `GameSaveDbContext` foundation;
-- `MachineId` value object in Core;
+- `MachineId` value object in Core (original H2.1A representation superseded by the approved GUID hardening below);
 - `MachinePathOverride` now requires `MachineId`;
 - module/dependency boundary tests and documentation.
 
@@ -48,7 +48,13 @@ No profile persistence schema, migrations, runtime recovery coordinator, storage
 
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
-None.
+Post-review MachineId hardening:
+
+- `MachineId.Value` is now `Guid`, rejecting `Guid.Empty`;
+- `GameDataRoot` compares MachineId value objects directly;
+- obsolete case-insensitive string identity semantics are removed;
+- tests/documentation are updated for GUID identity;
+- generation remains deferred to future Application/Server enrollment using UUID v7.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
@@ -95,6 +101,11 @@ See `docs/decisions/ADR-0007-first-system-status-api.md`.
 
 ### Machine identity
 
+- post-H2.1A review found that string MachineId semantics could diverge between value equality and case-insensitive duplicate checks;
+- approved correction changes MachineId to a non-empty `Guid` value object;
+- future new identities are generated as UUID v7 by the authoritative Application/Server enrollment workflow, not by Core, Agent or SQLite;
+- Persistence stores the assigned GUID; no database IDENTITY/autoincrement substitutes for MachineId;
+- this correction is implemented after the validated H2.1A baseline and requires local validation before the next slice;
 - H2 introduces a stable opaque `MachineId` value object;
 - MachineId identifies a logical GameSaveSync machine, not hostname, username or a specific Agent installation;
 - a new PC always receives a new MachineId;
@@ -209,4 +220,4 @@ As soon as H2 adds real Server behavior, the first warning should naturally disa
 
 ## NEXT EXACT ACTION
 
-Walk through the new H2.1A projects/files in Visual Studio and explain the dependency direction and responsibilities before defining the next H2 slice.
+Damien pulls the MachineId hardening and reruns the Release build/tests. After local validation, finish the architecture review and define H2.1B.

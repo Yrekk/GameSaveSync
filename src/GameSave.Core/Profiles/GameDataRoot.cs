@@ -19,13 +19,13 @@ public sealed class GameDataRoot
         DefaultPath = defaultPath;
 
         var overrides = machineOverrides?.ToArray() ?? [];
-        var machineIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var machineIds = new HashSet<MachineId>();
 
         foreach (var pathOverride in overrides)
         {
             ArgumentNullException.ThrowIfNull(pathOverride);
 
-            if (!machineIds.Add(pathOverride.MachineId.Value))
+            if (!machineIds.Add(pathOverride.MachineId))
             {
                 throw new ArgumentException(
                     $"Machine '{pathOverride.MachineId}' has more than one path override for data root '{id}'.",

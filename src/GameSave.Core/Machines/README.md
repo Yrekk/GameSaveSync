@@ -4,7 +4,11 @@ This folder contains machine identity concepts that are independent from Windows
 
 `MachineId` identifies one logical GameSaveSync machine.
 
-It is stable and opaque. Core validates that the identifier is present and contains no whitespace, but Core does not generate identifiers, register machines or decide whether a new Agent installation may reuse an existing identity.
+It is stable and opaque. Its internal representation is a non-empty `Guid`.
+
+Core validates an existing identity but does not generate identifiers, register machines or decide whether a new Agent installation may reuse an existing identity.
+
+The accepted generation direction is UUID v7 (`Guid.CreateVersion7()`) from the future Application/Server enrollment use case. Generation does not belong to Core, the Agent or SQLite.
 
 Mutable values such as hostname, Windows username, workgroup/domain, IP address, paths, Agent version and last-seen timestamps are not identity.
 

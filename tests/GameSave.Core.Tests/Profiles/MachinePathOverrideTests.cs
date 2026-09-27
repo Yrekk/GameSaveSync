@@ -8,7 +8,8 @@ public sealed class MachinePathOverrideTests
     [Fact]
     public void Constructor_UsesStableMachineIdentity()
     {
-        var machineId = new MachineId("machine-01");
+        var machineId = new MachineId(
+            Guid.Parse("019d2c5e-7f6a-7b21-9b6d-0b6d2f7b2d11"));
 
         var pathOverride = new MachinePathOverride(machineId, @"D:\GameData");
 

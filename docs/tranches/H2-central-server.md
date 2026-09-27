@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1A VALIDATED  
+**Status:** H2.1A VALIDATED BASELINE / MACHINE-ID HARDENING AWAITING VALIDATION  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -69,7 +69,7 @@ Implemented scope:
 - wire dependency direction so Application stays framework-independent and Server remains the composition root;
 - add EF Core + SQLite to Persistence only;
 - add an intentionally empty `GameSaveDbContext` with no speculative business tables;
-- introduce `MachineId` in Core and replace raw machine-id strings in `MachinePathOverride`;
+- introduce `MachineId` in Core and replace raw machine-id strings in `MachinePathOverride`; post-review hardening changes its representation to a non-empty GUID;
 - add architecture/domain tests and module documentation.
 
 Explicitly deferred from H2.1A:
@@ -134,7 +134,7 @@ The exact API surface is deliberately undecided.
 4. **Startup/failure policy — RESOLVED:** fail closed for synchronization authority, keep a restricted recovery/diagnostic mode, and use explicit validated snapshot restoration. No automatic snapshot promotion. See ADR-0003.
 5. **H2 storage scope — RESOLVED:** introduce a separate `GameSave.Storage` project. Application owns GameSaveSync-specific storage ports; Storage provides a minimal controlled local-filesystem backend in H2. H5/H8 retain transactional transfer/version publication and real Custodia integration. See ADR-0006.
 6. **First real API use case — RESOLVED:** `GetSystemStatus` exposed initially as read-only `GET /api/system/status`. It reports application mode/readiness across metadata persistence and storage, while process liveness remains a separate concept. The use case lives in Application and Contracts carries only the transport DTO. See ADR-0007.
-7. **Machine metadata — RESOLVED:** H2 introduces only a stable opaque `MachineId` value object and uses it for existing per-machine configuration. Hostname, username, workgroup and paths are mutable metadata and never identity. No full machine registry is created until the Agent provides the real consumer. Reinstall/rebind to an existing MachineId must later be explicit/authorized; a new machine always gets a new ID. See ADR-0008.
+7. **Machine metadata — RESOLVED:** H2 introduces only a stable opaque `MachineId` value object backed by a non-empty GUID and uses it for existing per-machine configuration. Hostname, username, workgroup and paths are mutable metadata and never identity. No full machine registry is created until the Agent provides the real consumer. Reinstall/rebind to an existing MachineId must later be explicit/authorized; a new machine always gets a new ID. See ADR-0008.
 
 No code should answer these silently. The design discussion comes first.
 
@@ -171,4 +171,6 @@ Damien completed the local validation successfully:
 
 H2.1A is validated.
 
-Next: walk through the new projects/files and dependency direction in Visual Studio before opening the next H2 slice.
+Post-review architecture walkthrough identified and corrected one identity inconsistency before persistence: MachineId is now GUID-backed, with future UUID v7 generation owned by Application/Server rather than Core, Agent or SQLite.
+
+Run local validation for this hardening, then finish the walkthrough before opening the next H2 slice.

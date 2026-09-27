@@ -4,33 +4,35 @@ namespace GameSave.Core.Tests.Machines;
 
 public sealed class MachineIdTests
 {
-    [Fact]
-    public void Constructor_AcceptsOpaqueStableValue()
-    {
-        var id = new MachineId("01JQ7MACHINE9Y4");
+    private static readonly Guid SampleValue =
+        Guid.Parse("019d2c5e-7f6a-7b21-9b6d-0b6d2f7b2d11");
 
-        Assert.Equal("01JQ7MACHINE9Y4", id.Value);
-        Assert.Equal("01JQ7MACHINE9Y4", id.ToString());
+    [Fact]
+    public void Constructor_AcceptsNonEmptyGuid()
+    {
+        var id = new MachineId(SampleValue);
+
+        Assert.Equal(SampleValue, id.Value);
+        Assert.Equal("019d2c5e-7f6a-7b21-9b6d-0b6d2f7b2d11", id.ToString());
     }
 
     [Fact]
-    public void Constructor_RejectsWhitespaceOnlyValue()
+    public void Constructor_RejectsEmptyGuid()
     {
-        Assert.Throws<ArgumentException>(() => new MachineId("   "));
-    }
-
-    [Theory]
-    [InlineData(" machine-01")]
-    [InlineData("machine-01 ")]
-    [InlineData("machine 01")]
-    public void Constructor_RejectsWhitespaceInsideIdentity(string value)
-    {
-        Assert.Throws<ArgumentException>(() => new MachineId(value));
+        Assert.Throws<ArgumentException>(() => new MachineId(Guid.Empty));
     }
 
     [Fact]
     public void Equality_IsValueBased()
     {
-        Assert.Equal(new MachineId("machine-01"), new MachineId("machine-01"));
+        Assert.Equal(new MachineId(SampleValue), new MachineId(SampleValue));
+    }
+
+    [Fact]
+    public void DifferentGuids_AreDifferentMachineIdentities()
+    {
+        var otherValue = Guid.Parse("019d2c5e-7f6a-7b21-9b6d-0b6d2f7b2d12");
+
+        Assert.NotEqual(new MachineId(SampleValue), new MachineId(otherValue));
     }
 }

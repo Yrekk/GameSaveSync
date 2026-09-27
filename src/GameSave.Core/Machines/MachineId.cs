@@ -5,21 +5,19 @@ namespace GameSave.Core.Machines;
 /// </summary>
 public sealed record MachineId
 {
-    public MachineId(string value)
+    public MachineId(Guid value)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(value);
-
-        if (value.Any(char.IsWhiteSpace))
+        if (value == Guid.Empty)
         {
             throw new ArgumentException(
-                "Machine id must not contain whitespace.",
+                "Machine id must not be the empty GUID.",
                 nameof(value));
         }
 
         Value = value;
     }
 
-    public string Value { get; }
+    public Guid Value { get; }
 
-    public override string ToString() => Value;
+    public override string ToString() => Value.ToString("D");
 }
