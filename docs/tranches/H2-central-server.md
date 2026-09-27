@@ -68,7 +68,7 @@ Potential scope:
 - EF Core + SQLite persistence foundation (ADR-0002);
 - choose schema migration/versioning strategy;
 - define DB configuration/bootstrap;
-- define repository/application boundary placement;
+- define repository placement beneath the accepted reusable application-use-case boundary (ADR-0004);
 - restricted recovery/minimal mode with validated metadata snapshots (ADR-0003);
 
 ### H2.2 — profile persistence
@@ -105,7 +105,7 @@ The exact API surface is deliberately undecided.
 ## Design questions to answer before implementation
 
 1. **SQLite access style — RESOLVED:** EF Core with the SQLite provider is the default persistence layer. Core remains persistence-independent; raw SQL remains allowed only as an isolated, justified persistence escape hatch. See ADR-0002.
-2. **Migrations** — how are EF Core migrations created, reviewed, applied and rejected when incompatible?
+2. **Migrations — RESOLVED:** EF migration code is authored during development, reviewed and versioned in Git. Runtime execution uses a reusable Server application use case shared by startup, desktop/API and future Web Admin entry points. Known migrations may be applied automatically or explicitly through that same mechanism. Pre-migration snapshot, application, validation and recovery-mode failure handling are one implementation, never UI-specific. See ADR-0004.
 3. **Repository placement** — where should persistence abstractions live so Core remains pure without turning Contracts into a shared-model dump?
 4. **Startup/failure policy — RESOLVED:** fail closed for synchronization authority, keep a restricted recovery/diagnostic mode, and use explicit validated snapshot restoration. No automatic snapshot promotion. See ADR-0003.
 5. **H2 storage scope** — how much of the validated "fake/local storage" server direction belongs in H2 versus later transactional-transfer/storage tranches?
@@ -128,4 +128,4 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Continue the H2 design discussion with migration mechanics and repository placement before writing H2.1 persistence code.
+Continue the H2 design discussion with repository placement before writing H2.1 persistence code.
