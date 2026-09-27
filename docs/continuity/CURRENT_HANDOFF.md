@@ -30,7 +30,7 @@ None for H1.2 yet.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
-H1.2 will implement the deterministic decision table.
+H1.2 will implement a deterministic normal synchronization assessment: underlying disposition plus all simultaneously detectable findings. Recovery checkpoint availability remains a separate later assessment that the UI may combine with synchronization findings.
 
 Safety requirements carried forward:
 
@@ -43,6 +43,8 @@ Safety requirements carried forward:
 - both sides are preserved before destructive conflict resolution.
 
 Crash/unclean-exit detection itself belongs to later Agent/lifecycle work. The future UI belongs to its own tranche.
+
+Managed recovery checkpoints are now an explicit parallel architecture for profiles that need them. They are temporary recovery candidates, not central versions. Initial direction: approximately 10-minute capture for Project Zomboid, current + previous retention, source machine/base-version metadata, quarantine before restore, explicit user validation, and deletion only after successful final central promotion acknowledgement. See `docs/architecture/recovery-checkpoints.md`.
 
 Operational diagnostics are also decided but not implemented: structured logs feed console, local files and a filterable live Admin stream. Normal remote levels are Information through Critical; Debug/Trace stay local unless temporarily enabled from Admin with an automatic expiry.
 

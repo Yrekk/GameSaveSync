@@ -81,3 +81,13 @@ Admin may temporarily enable Debug mode for a selected application or machine. R
 Local persistent logs remain required even when live diagnostics exist, so failures that occur while the server or network is unavailable remain recoverable.
 
 Diagnostics must not expose secrets, authentication material or NAS credentials.
+
+## Managed recovery checkpoints
+
+Some games may need an optional recovery layer in addition to normal synchronization.
+
+Managed recovery checkpoints are temporary recovery candidates created while a configured game is running. They are not validated central versions and they never become authoritative merely because capture succeeded.
+
+Normal synchronization and managed recovery remain separate concerns so games with their own adequate autosave/recovery do not inherit unnecessary behavior.
+
+The detailed contract is documented in [managed recovery checkpoints](recovery-checkpoints.md).

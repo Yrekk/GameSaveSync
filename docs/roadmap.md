@@ -31,3 +31,20 @@ A later infrastructure/admin tranche must provide structured runtime diagnostics
 - secret redaction.
 
 This requirement is recorded now but is not part of H1 domain implementation.
+
+## Cross-cutting managed recovery requirement
+
+Optional managed recovery checkpoints are now part of the target architecture for games that need them, especially the first Project Zomboid profile.
+
+They remain parallel to normal synchronization:
+
+- temporary checkpoints are not central versions;
+- recovery is opt-in per profile;
+- initial retention target is current + previous checkpoint;
+- unclean session recovery is user-validated;
+- local data is quarantined before checkpoint restoration;
+- recovery material is removed only after confirmed usability and successful central promotion acknowledgement.
+
+Implementation is intentionally deferred across the Agent/transfer/monitoring/lifecycle/storage/PZ tranches rather than pulled into H1.
+
+See `docs/architecture/recovery-checkpoints.md`.

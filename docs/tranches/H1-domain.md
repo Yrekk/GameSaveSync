@@ -90,7 +90,14 @@ H1 work stops at `develop` after validation and explicit acceptance. No promotio
 
 ## H1.2 — next slice
 
-Define the explicit decision result shape and implement the deterministic synchronization decision table.
+Define the explicit normal synchronization assessment and implement the deterministic Local + Central decision table.
+
+H1.2 must expose all simultaneously detectable synchronization findings instead of hiding them behind a first-match blocker. The intended result shape is an assessment containing:
+
+- the underlying synchronization disposition;
+- zero or more findings/conditions that require attention or prevent immediate execution.
+
+Managed recovery checkpoints remain a parallel later subsystem. H1.2 must not require checkpoint state in order to assess normal synchronization. A future UI can combine synchronization findings with recovery options in one user-facing session.
 
 ## Next exact action
 
