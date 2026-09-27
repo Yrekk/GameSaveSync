@@ -24,16 +24,25 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 - Starting with H1, validated feature work stops at `develop` unless Damien explicitly approves deployment promotion.
 - The technical solution and central-server architecture remain the design baseline.
 
+## VALIDATED
+
+- H0 bootstrap is validated and promoted through `main`.
+- H1.1 is validated locally and remotely on `feature/h1-domain`.
+- H1.2 is validated locally and remotely on `feature/h1-domain`:
+  - `SyncDisposition` for the underlying Local/Central relationship;
+  - cumulative `SyncFindings` so simultaneous observations are not hidden;
+  - `SyncAssessment` result model;
+  - pure `SyncAssessmentEngine`;
+  - decision-table and multi-finding unit tests;
+  - explicit inconsistent-state handling when central version is behind the local base.
+- H1.2 local validation: Release build green, 15/15 Core tests passing, diff-check clean, working tree clean. Expected no-test warnings remain only for intentionally empty Server/Integration test projects.
+- Branch promotion policy remains `feature/* → develop → deploy/succumbrae → main`.
+- Starting with H1, validated feature work stops at `develop` unless Damien explicitly approves deployment promotion.
+- The technical solution and central-server architecture remain the design baseline.
+
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
-H1.2 on `feature/h1-domain`:
-
-- `SyncDisposition` for the underlying Local/Central relationship;
-- cumulative `SyncFindings` so simultaneous problems are not hidden;
-- `SyncAssessment` result model;
-- pure `SyncAssessmentEngine`;
-- decision-table and multi-finding unit tests;
-- explicit inconsistent-state handling when central version is behind the local base.
+None for H1.3 yet.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
@@ -57,7 +66,7 @@ Operational diagnostics are also decided but not implemented: structured logs fe
 
 ## TESTS / SMOKE
 
-H1.1 remote CI and Damien's local validation are green.
+H1.1 and H1.2 remote CI and Damien's local validation are green.
 
 No filesystem, save, NAS, Windows process, network or synchronization transfer has been touched.
 
@@ -75,4 +84,4 @@ The important H1 risk is semantic: ambiguous state or decision types could later
 
 ## NEXT EXACT ACTION
 
-Validate H1.2 remotely and locally, then review the model before starting H1.3.
+Design H1.3 generic game-profile invariants before implementation.
