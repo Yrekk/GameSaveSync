@@ -1,6 +1,6 @@
 # H0 — Bootstrap
 
-**Status:** IMPLEMENTED — VALIDATION PENDING  
+**Status:** CI GREEN — LOCAL VALIDATION PENDING  
 **Branch:** `feature/h0-bootstrap`
 
 ## Objective
@@ -59,7 +59,9 @@ Test projects are present so later tranches have an immediate home for tests. H0
 
 ## Validation
 
-Run locally:
+GitHub Actions has successfully completed restore, build and test on the feature branch.
+
+Local validation remains:
 
 ```bash
 dotnet restore GameSaveSync.sln
@@ -77,12 +79,10 @@ git diff --check
 git status --short
 ```
 
-CI runs the same restore/build/test sequence on the feature branch.
-
 ## Current state
 
-Implementation is present on the feature branch but is not considered validated until CI and Damien's local checks are green.
+The remote skeleton builds successfully in CI. H0 is not considered validated until Damien has pulled the branch, reviewed the structure and completed the local validation sequence.
 
 ## Next exact action
 
-Inspect CI, then have Damien pull the branch and execute the validation sequence.
+Damien pulls `feature/h0-bootstrap`, reviews the skeleton, then executes the local validation commands above.
