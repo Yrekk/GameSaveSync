@@ -15,7 +15,7 @@ Build the pure deterministic synchronization domain without filesystem, network,
 - H1.3 — generic game profile domain and invariants;
 - H1.4 — consolidation, tests and documentation.
 
-## H1.1 — current slice
+## H1.1 — VALIDATED
 
 ### Scope
 
@@ -80,10 +80,18 @@ A later version may add local TTS/voice/AI assistance so natural-language answer
 
 H1.1 adds tests only for real invariants introduced by the slice. The default integrity state is tested because its fail-closed value is safety-significant.
 
+## H1.1 validation
+
+Validated locally by Damien on 27 September 2026. Restore/build/test are green; `GameSave.Core.Tests` discovered and executed the real H1.1 tests successfully. The remaining no-test warnings are expected for the intentionally empty Server/Integration test projects. Remote CI is green.
+
 ## Branch promotion
 
 H1 work stops at `develop` after validation and explicit acceptance. No promotion to `deploy/succumbrae` or `main` is implicit.
 
+## H1.2 — next slice
+
+Define the explicit decision result shape and implement the deterministic synchronization decision table.
+
 ## Next exact action
 
-Complete H1.1 remote/local validation, then define H1.2's decision result shape before implementing the decision table.
+Design H1.2's decision result shape, then implement and test the decision table.
