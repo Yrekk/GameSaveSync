@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1A IMPLEMENTED / AWAITING VALIDATION  
+**Status:** H2.1A VALIDATED  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -162,4 +162,13 @@ Remote CI validation for H2.1A is green:
 - total executed tests: 62 passed, 0 failed;
 - the existing empty Server.Tests and IntegrationTests projects still report the expected no-test warnings.
 
-Run the same Release build/tests locally and inspect the new module boundaries with Damien. H2.1A is not validated until that local review succeeds.
+Damien completed the local validation successfully:
+
+- 62 executed tests passed;
+- 0 failed;
+- only the two expected no-test warnings for Server.Tests and IntegrationTests;
+- local validation accepted by Damien.
+
+H2.1A is validated.
+
+Next: walk through the new projects/files and dependency direction in Visual Studio before opening the next H2 slice.

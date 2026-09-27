@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1A — Modular persistence foundation (awaiting validation)
+**Current tranche:** H2.1A — Modular persistence foundation (validated)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -26,13 +26,15 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 - Branch promotion remains `feature/* → develop → deploy/succumbrae → main`.
 - H1 stopped at `develop`; no deployment/main promotion was authorized.
 
-## IMPLEMENTED BUT NOT YET VALIDATED
+## VALIDATED H2 WORK
 
-H2.1A is implemented on the feature branch and awaits Damien's local validation.
+H2.1A is validated.
 
-Remote CI for the implementation commit is green: Release build 0 warnings/0 errors; 62 executed tests passed (59 Core + 1 Application + 1 Persistence + 1 Storage), with only the two pre-existing expected no-test notices for Server.Tests and IntegrationTests.
+Remote CI is green: Release build 0 warnings/0 errors; 62 executed tests passed (59 Core + 1 Application + 1 Persistence + 1 Storage), with only the two expected no-test notices for Server.Tests and IntegrationTests.
 
-Implemented:
+Damien also completed local validation successfully: 62 tests passed, 0 failed, with the same two expected warnings.
+
+Validated H2.1A scope:
 
 - `GameSave.Application`, `GameSave.Persistence`, `GameSave.Storage`;
 - focused Application/Persistence/Storage test projects;
@@ -43,6 +45,10 @@ Implemented:
 - module/dependency boundary tests and documentation.
 
 No profile persistence schema, migrations, runtime recovery coordinator, storage backend or HTTP endpoint is implemented yet.
+
+## IMPLEMENTED BUT NOT YET VALIDATED
+
+None.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
@@ -203,13 +209,4 @@ As soon as H2 adds real Server behavior, the first warning should naturally disa
 
 ## NEXT EXACT ACTION
 
-Damien pulls the H2.1A implementation, then runs:
-
-```powershell
-dotnet build GameSaveSync.sln --configuration Release
-dotnet test GameSaveSync.sln --configuration Release --no-build
-git diff --check
-git status --short
-```
-
-After local validation, walk through the new projects/files in Visual Studio before opening the next H2 slice.
+Walk through the new H2.1A projects/files in Visual Studio and explain the dependency direction and responsibilities before defining the next H2 slice.
