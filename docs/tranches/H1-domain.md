@@ -99,7 +99,7 @@ H1.2 must expose all simultaneously detectable synchronization findings instead 
 
 Managed recovery checkpoints remain a parallel later subsystem. H1.2 must not require checkpoint state in order to assess normal synchronization. A future UI can combine synchronization findings with recovery options in one user-facing session.
 
-## H1.2 — IMPLEMENTED, PENDING VALIDATION
+## H1.2 — VALIDATED
 
 H1.2 now models a complete `SyncAssessment` instead of a first-match blocking decision.
 
@@ -112,6 +112,12 @@ A running game does not erase the underlying disposition. Example: a dirty local
 
 Tests cover the four core disposition cases, cumulative findings, integrity findings, running-game behavior and inconsistent version history.
 
+`SyncFindings` are observations, not only blockers: for example, `Disposition = Nothing` may still legitimately carry `GameRunning`. Later layers decide whether a finding is informational, warning-level or action-blocking.
+
+## H1.2 validation
+
+Validated remotely and locally on 27 September 2026. CI is green; local Release build is green; `GameSave.Core.Tests` reports 15/15 passing tests; `git diff --check` and working-tree status are clean. The expected no-test warnings remain only for the intentionally empty Server/Integration test projects.
+
 ## Next exact action
 
-Validate H1.2 in CI and locally. If green, review the model together before starting H1.3 generic game-profile invariants.
+Design H1.3 generic game-profile invariants before implementation.
