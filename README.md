@@ -2,7 +2,7 @@
 
 Generic and safe game save synchronization between multiple PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 merged to develop; H2 central-server design in progress.
+> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A central-server foundation fully validated on `feature/h2-central-server`. Next step: define H2.1B.
 
 ## Purpose
 
@@ -10,49 +10,104 @@ GameSaveSync is intended to synchronize local game data between several PCs thro
 
 Project Zomboid will be the first real profile used to validate the system, but the repository is deliberately structured around generic synchronization components rather than one game.
 
-## H0 scope
+## Current architecture
 
-H0 builds the **skeleton only**:
+The architecture now separates domain rules, application use cases, metadata persistence, save-payload storage, transport hosting and Windows-side concerns.
 
-- solution and project boundaries;
-- dependency direction;
-- build conventions;
-- ASP.NET Core server-host boundary;
-- shared development launch configuration;
-- test projects;
-- CI;
-- documentation and session-continuity workflow.
+```text
+Windows PC(s)
+  GameSave.Agent.UI
+        ↓
+  GameSave.Agent
+        │
+        │ HTTP/API
+        ▼
+  GameSave.Server
+        │
+        ├── GameSave.Application
+        │      ↓
+        │   GameSave.Core
+        │
+        ├── GameSave.Persistence
+        │      └── EF Core / SQLite metadata
+        │
+        └── GameSave.Storage
+               └── save payloads / file artifacts
 
-H0 contains **no synchronization business rule**. Domain concepts and synchronization decisions belong to H1 and later tranches.
+Future real storage target: Custodia
+```
 
-H0 is validated both in CI and locally.
+Important boundaries:
 
-## Current H1 domain
+- **GameSave.Core** — pure domain rules and value objects; no infrastructure dependency.
+- **GameSave.Application** — application use cases and ports; no EF Core, ASP.NET, desktop UI or SMB/NAS implementation.
+- **GameSave.Persistence** — concrete metadata persistence with EF Core + SQLite.
+- **GameSave.Storage** — concrete save-payload/file storage implementations, deliberately separate from metadata persistence.
+- **GameSave.Contracts** — transport/shared boundary contracts only when a real boundary needs them.
+- **GameSave.Server** — ASP.NET Core host and composition root; not a second domain or persistence layer.
+- **GameSave.Agent** — future Windows-side engine.
+- **GameSave.Agent.UI** — future replaceable local UI adapter.
 
-H1 now contains the pure deterministic synchronization and game-profile domain:
+See [src/README.md](src/README.md) and the project-local READMEs for detailed boundaries.
+
+## Validated H1 domain
+
+H1 contains the pure deterministic synchronization and game-profile domain:
 
 - explicit local/central synchronization state;
 - deterministic synchronization assessments and cumulative findings;
 - strictly-positive published synchronization versions with explicit no-version state;
 - complete always-valid game profiles;
 - logical data roots and per-machine path overrides;
-- optional managed-recovery configuration;
-- SQLite accepted as the later Server metadata persistence direction while Core remains persistence-agnostic.
+- stable GUID-backed `MachineId`;
+- optional managed-recovery configuration.
 
-H1.4 consolidation and validation are green. H1 was explicitly accepted and merged into `develop`. H2 now starts on `feature/h2-central-server` with design/planning before persistence code.
+H1 was explicitly accepted and merged into `develop`.
+
+## Current H2 state
+
+H2 turns the existing server host into the first real central-authority boundary without pulling Agent, Windows lifecycle, real Custodia storage or save-transfer behavior forward.
+
+H2.1A is fully validated and has established:
+
+- `GameSave.Application`;
+- `GameSave.Persistence`;
+- `GameSave.Storage`;
+- matching focused test projects;
+- EF Core + SQLite isolated inside Persistence;
+- an intentionally empty `GameSaveDbContext` with no speculative business tables;
+- Server as a thin composition root;
+- the hardened GUID-backed `MachineId` identity model.
+
+Still intentionally deferred:
+
+- business/profile persistence schema and repositories;
+- runtime migration/snapshot/recovery coordinator;
+- local save-artifact backend;
+- first system-status endpoint;
+- full machine registry;
+- Agent behavior and real save transfers.
+
+The next implementation slice is H2.1B, which must be defined before coding.
 
 ## Repository structure
 
 ```text
 src/
   GameSave.Core/
+  GameSave.Application/
   GameSave.Contracts/
+  GameSave.Persistence/
+  GameSave.Storage/
   GameSave.Server/
   GameSave.Agent/
   GameSave.Agent.UI/
 
 tests/
   GameSave.Core.Tests/
+  GameSave.Application.Tests/
+  GameSave.Persistence.Tests/
+  GameSave.Storage.Tests/
   GameSave.Server.Tests/
   GameSave.IntegrationTests/
 
@@ -64,7 +119,7 @@ docs/
   tranches/
 ```
 
-See [docs/architecture/README.md](docs/architecture/README.md) for the project boundaries.
+See [docs/architecture/README.md](docs/architecture/README.md) for the project boundaries and [docs/tranches/H2-central-server.md](docs/tranches/H2-central-server.md) for the active tranche.
 
 ## Documentation and continuity
 
@@ -78,7 +133,7 @@ A new development session starts with:
 4. verification of the actual remote branch and HEAD;
 5. inspection of the code relevant to the next action.
 
-Meaningful architectural folders have concise READMEs explaining their role and boundaries. Trivial code and obvious DTO/model choices are not over-documented.
+Shared development conventions are maintained in [NexusPrincipia](https://github.com/Yrekk/NexusPrincipia). GameSaveSync keeps only project-specific workflow rules locally.
 
 ## Development workflow
 
