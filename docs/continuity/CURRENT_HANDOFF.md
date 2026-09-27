@@ -63,6 +63,18 @@ See `docs/decisions/ADR-0005-application-persistence-modules.md`.
 
 See `docs/decisions/ADR-0006-separate-storage-module.md`.
 
+### First transport use case
+
+- first Application/network use case is `GetSystemStatus`;
+- initial endpoint is read-only `GET /api/system/status`;
+- it reports operational mode/readiness, including database/migration and storage health relevant to H2;
+- synchronization authority availability is explicit;
+- process liveness is a separate concept and must not be confused with readiness;
+- desktop/local UI and future Web Admin will reuse the same Application use case;
+- Contracts now has a real transport reason, but must not expose EF entities or Core models directly.
+
+See `docs/decisions/ADR-0007-first-system-status-api.md`.
+
 ### Persistence access
 
 - EF Core is the default persistence layer;
@@ -128,7 +140,7 @@ The first discussion must resolve:
 3. repository boundary placement — RESOLVED: Application ports + Persistence implementations in separate projects;
 4. Server failure policy — RESOLVED: restricted recovery mode + explicit validated snapshot restore;
 5. exact H2 fake/local storage scope — RESOLVED: separate Storage module + minimal local backend;
-6. first real API use case;
+6. first real API use case — RESOLVED: read-only GetSystemStatus / `GET /api/system/status`;
 7. minimum machine metadata required now.
 
 Do not silently answer these in code.
