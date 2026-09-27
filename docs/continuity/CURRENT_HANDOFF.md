@@ -59,9 +59,22 @@ See `docs/decisions/ADR-0002-ef-core-sqlite-persistence.md`.
 - save payloads remain files;
 - Core remains SQLite-independent.
 
-### Recovery
+### Metadata database recovery
 
-Managed recovery checkpoints remain parallel to normal synchronization and are not implemented in H2 unless a later explicitly accepted H2 design requires only metadata needed by future recovery work.
+- keep SQLite-safe known-good metadata snapshots;
+- initial retention direction is at least the two most recent rolling snapshots;
+- create a pre-migration snapshot before data-changing schema migration;
+- database failure enters restricted recovery/minimal mode;
+- normal synchronization authority is disabled in that mode;
+- snapshot restoration requires explicit administrative selection/confirmation;
+- restored metadata must be validated before normal mode resumes;
+- later, when real save-version storage exists, metadata recovery must reconcile against that storage to prevent authority rewind.
+
+See `docs/decisions/ADR-0003-metadata-snapshot-recovery.md`.
+
+### Managed save recovery
+
+Managed recovery checkpoints for game saves remain parallel to normal synchronization and are separate from metadata database snapshots. They are not implemented in H2 unless a later explicitly accepted H2 design requires only metadata needed by future recovery work.
 
 ### Operational diagnostics
 
@@ -76,7 +89,7 @@ The first discussion must resolve:
 1. SQLite access style — RESOLVED: EF Core + SQLite provider;
 2. migration/schema versioning;
 3. repository boundary placement;
-4. Server failure policy for unavailable/corrupt/incompatible DB;
+4. Server failure policy — RESOLVED: restricted recovery mode + explicit validated snapshot restore;
 5. exact H2 fake/local storage scope;
 6. first real API use case;
 7. minimum machine metadata required now.
