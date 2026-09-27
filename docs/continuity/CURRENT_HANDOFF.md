@@ -23,7 +23,7 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 - Branch promotion policy is `feature/* → develop → deploy/succumbrae → main`.
 - Starting with H1, validated feature work stops at `develop` unless Damien explicitly approves deployment promotion.
 
-## IMPLEMENTED BUT NOT YET VALIDATED
+## READY FOR ACCEPTANCE
 
 H1.4 consolidation:
 
@@ -96,7 +96,9 @@ These projects are intentionally empty at the current tranche. Do not add fake t
 
 No filesystem, save, NAS, Windows process, network, SQLite or synchronization transfer behavior has been introduced in Core.
 
-H1.4 consolidation validation is pending.
+H1.4 remote and local validation are green: Release build green, 51/51 tests passing, diff-check clean and working tree clean. Final feature-branch CI is green.
+
+Final H1 audit confirms the branch is ahead of `develop` with no H2 infrastructure pulled forward.
 
 ## KNOWN RISKS
 
@@ -117,4 +119,4 @@ H1.4 consolidation validation is pending.
 
 ## NEXT EXACT ACTION
 
-Validate H1.4 remotely and locally. If green, perform final H1 acceptance/audit before opening H2.
+Obtain Damien's explicit H1 tranche acceptance. If accepted, merge `feature/h1-domain` into `develop` and stop there.
