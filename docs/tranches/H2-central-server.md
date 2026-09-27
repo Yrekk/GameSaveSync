@@ -152,4 +152,14 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Run local Release build/tests and inspect the new module boundaries with Damien. H2.1A is not validated until that local review succeeds.
+Remote CI validation for H2.1A is green:
+
+- Release build: 0 warnings, 0 errors;
+- Core tests: 59 passed;
+- Application tests: 1 passed;
+- Persistence tests: 1 passed;
+- Storage tests: 1 passed;
+- total executed tests: 62 passed, 0 failed;
+- the existing empty Server.Tests and IntegrationTests projects still report the expected no-test warnings.
+
+Run the same Release build/tests locally and inspect the new module boundaries with Damien. H2.1A is not validated until that local review succeeds.
