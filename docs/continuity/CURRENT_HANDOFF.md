@@ -13,19 +13,24 @@ Always verify the actual remote HEAD before modifying the repository.
 - The technical solution is validated.
 - H0 scope is explicitly limited to skeleton/boundaries/infrastructure/documentation.
 - Development continuity follows the proven Claviger model, adapted to GameSaveSync.
+- GitHub Actions successfully restores, builds and runs the test projects on the H0 feature branch.
 
-## IMPLEMENTED BUT NOT YET VALIDATED
+## IMPLEMENTED BUT NOT YET VALIDATED LOCALLY
 
 On `feature/h0-bootstrap`:
 
 - .NET 10 solution structure;
-- production project boundaries;
-- test project boundaries;
-- build conventions;
-- architecture/workflow/tranche documentation;
-- this continuity entry point.
+- five production project boundaries;
+- three test project boundaries;
+- shared build conventions;
+- Windows targeting for agent-side boundaries;
+- CI;
+- root and local architectural READMEs;
+- development workflow;
+- tranche tracking and continuity system;
+- roadmap.
 
-CI and Damien's local validation remain required.
+Damien's local review and validation remain required before H0 is accepted.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
@@ -35,7 +40,17 @@ No H1 domain type or synchronization rule is part of the current tranche.
 
 ## TESTS / SMOKE
 
-Pending CI and local H0 validation.
+Remote CI: green.
+
+Local sequence still to run:
+
+```text
+dotnet restore
+→ dotnet build
+→ dotnet test
+→ git diff --check
+→ git status --short
+```
 
 No real save, NAS share or synchronization operation has been touched.
 
@@ -55,4 +70,4 @@ Documentation drift is treated as a defect and must be corrected in the same tra
 
 ## NEXT EXACT ACTION
 
-Inspect H0 CI. If green, Damien pulls `feature/h0-bootstrap` and runs the local validation commands documented in the H0 tranche.
+Damien pulls `feature/h0-bootstrap`, reviews the skeleton and runs the H0 local validation sequence. If everything is green and the structure is accepted, mark H0 validated before opening H1.
