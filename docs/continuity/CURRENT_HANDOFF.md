@@ -38,6 +38,18 @@ The H2 branch currently contains planning/documentation only.
 
 H2 will turn the existing ASP.NET Core host into the first real central application/persistence boundary.
 
+### Persistence access
+
+- EF Core is the default persistence layer;
+- SQLite is the initial provider;
+- Core remains independent from EF Core and SQLite;
+- persistence entities/mappings live in Server infrastructure;
+- targeted raw SQL is allowed only when explicitly justified and isolated;
+- no lazy loading;
+- provider/database changes remain explicit migration projects, not assumed automatic.
+
+See `docs/decisions/ADR-0002-ef-core-sqlite-persistence.md`.
+
 ### SQLite
 
 - one central SQLite database for GameSaveSync metadata/configuration;
@@ -61,7 +73,7 @@ Read `docs/tranches/H2-central-server.md` before implementation.
 
 The first discussion must resolve:
 
-1. SQLite access style;
+1. SQLite access style — RESOLVED: EF Core + SQLite provider;
 2. migration/schema versioning;
 3. repository boundary placement;
 4. Server failure policy for unavailable/corrupt/incompatible DB;
