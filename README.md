@@ -2,7 +2,7 @@
 
 Generic and safe game save synchronization between multiple PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 domain accepted; H2 not yet implemented.
+> **Status:** pre-V1 — H1 merged to develop; H2 central-server design in progress.
 
 ## Purpose
 
@@ -39,7 +39,7 @@ H1 now contains the pure deterministic synchronization and game-profile domain:
 - optional managed-recovery configuration;
 - SQLite accepted as the later Server metadata persistence direction while Core remains persistence-agnostic.
 
-H1.4 consolidation and validation are green. H1 was explicitly accepted on 27 September 2026 and is authorized for merge into `develop`. H2 has not started.
+H1.4 consolidation and validation are green. H1 was explicitly accepted and merged into `develop`. H2 now starts on `feature/h2-central-server` with design/planning before persistence code.
 
 ## Repository structure
 
