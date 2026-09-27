@@ -28,8 +28,48 @@ public sealed class SyncAssessmentEngineTests
         Assert.Equal(SyncFindings.None, assessment.Findings);
     }
 
+    [Theory]
+    [InlineData(false, SyncDisposition.Nothing)]
+    [InlineData(true, SyncDisposition.Push)]
+    public void Assess_HandlesProfileBeforeFirstCentralPublication(
+        bool isDirty,
+        SyncDisposition expectedDisposition)
+    {
+        var local = new LocalSyncState(
+            null,
+            isDirty,
+            false,
+            SaveIntegrityState.Trusted);
+        var central = new CentralSyncState(null);
+
+        var assessment = SyncAssessmentEngine.Assess(local, central);
+
+        Assert.Equal(expectedDisposition, assessment.Disposition);
+        Assert.True(assessment.HasFinding(SyncFindings.LocalBaseVersionMissing));
+    }
+
+    [Theory]
+    [InlineData(false, SyncDisposition.Pull)]
+    [InlineData(true, SyncDisposition.Conflict)]
+    public void Assess_HandlesLocalStateWithoutBaseWhenCentralVersionExists(
+        bool isDirty,
+        SyncDisposition expectedDisposition)
+    {
+        var local = new LocalSyncState(
+            null,
+            isDirty,
+            false,
+            SaveIntegrityState.Trusted);
+        var central = new CentralSyncState(new SyncVersion(1));
+
+        var assessment = SyncAssessmentEngine.Assess(local, central);
+
+        Assert.Equal(expectedDisposition, assessment.Disposition);
+        Assert.True(assessment.HasFinding(SyncFindings.LocalBaseVersionMissing));
+    }
+
     [Fact]
-    public void Assess_ReturnsAllSimultaneousFindings()
+    public void Assess_ReportsAllSimultaneousFindings()
     {
         var local = new LocalSyncState(
             new SyncVersion(42),
@@ -82,6 +122,24 @@ public sealed class SyncAssessmentEngineTests
 
         Assert.Equal(SyncDisposition.Push, assessment.Disposition);
         Assert.Equal(SyncFindings.GameRunning, assessment.Findings);
+    }
+
+    [Fact]
+    public void Assess_ReportsInconsistentStateWhenCentralVersionIsMissingForKnownLocalBase()
+    {
+        var local = new LocalSyncState(
+            new SyncVersion(42),
+            true,
+            true,
+            SaveIntegrityState.RequiresValidation);
+        var central = new CentralSyncState(null);
+
+        var assessment = SyncAssessmentEngine.Assess(local, central);
+
+        Assert.Equal(SyncDisposition.InconsistentState, assessment.Disposition);
+        Assert.True(assessment.HasFinding(SyncFindings.CentralVersionMissingForKnownLocalBase));
+        Assert.True(assessment.HasFinding(SyncFindings.GameRunning));
+        Assert.True(assessment.HasFinding(SyncFindings.LocalSaveRequiresValidation));
     }
 
     [Fact]

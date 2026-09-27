@@ -35,7 +35,15 @@ public static class SyncAssessmentEngine
             _ => SyncFindings.LocalIntegrityUnknown
         };
 
-        if (central.CurrentVersion.CompareTo(local.BaseVersion) < 0)
+        if (local.BaseVersion is null)
+        {
+            findings |= SyncFindings.LocalBaseVersionMissing;
+        }
+        else if (central.CurrentVersion is null)
+        {
+            findings |= SyncFindings.CentralVersionMissingForKnownLocalBase;
+        }
+        else if (central.CurrentVersion.CompareTo(local.BaseVersion) < 0)
         {
             findings |= SyncFindings.CentralVersionBehindLocalBase;
         }
@@ -47,6 +55,25 @@ public static class SyncAssessmentEngine
         LocalSyncState local,
         CentralSyncState central)
     {
+        if (local.BaseVersion is null)
+        {
+            if (central.CurrentVersion is null)
+            {
+                return local.IsDirty
+                    ? SyncDisposition.Push
+                    : SyncDisposition.Nothing;
+            }
+
+            return local.IsDirty
+                ? SyncDisposition.Conflict
+                : SyncDisposition.Pull;
+        }
+
+        if (central.CurrentVersion is null)
+        {
+            return SyncDisposition.InconsistentState;
+        }
+
         var versionComparison = central.CurrentVersion.CompareTo(local.BaseVersion);
 
         if (versionComparison < 0)
