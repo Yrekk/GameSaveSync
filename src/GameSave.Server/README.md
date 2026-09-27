@@ -1,9 +1,19 @@
 # GameSave.Server
 
-Reserved for the central server application hosted on Succumbrae.
+Central HTTP API host intended to run on Succumbrae.
 
 ## Boundary
 
 The server may depend on Core and Contracts. It must not become a second copy of domain logic.
 
-H0 does not select an API surface, persistence mechanism or storage implementation and contains no server behavior.
+H0 deliberately materializes this project as an **ASP.NET Core host** because HTTP/API communication is already part of the validated architecture.
+
+That does **not** mean H0 defines the future API surface. There are currently:
+
+- no business endpoint;
+- no controller;
+- no transport DTO;
+- no persistence implementation;
+- no storage implementation.
+
+The host exists so later tranches can add real application/API behavior without changing the fundamental server boundary.

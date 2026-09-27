@@ -1,6 +1,6 @@
 # H0 — Bootstrap
 
-**Status:** CI GREEN — LOCAL VALIDATION PENDING  
+**Status:** IMPLEMENTED — CI REVALIDATION PENDING  
 **Branch:** `feature/h0-bootstrap`
 
 ## Objective
@@ -14,6 +14,7 @@ H0 prepares the repository to **receive** future business logic. It does not imp
 - solution and project boundaries;
 - dependency direction;
 - shared build conventions;
+- ASP.NET Core server-host boundary;
 - test project boundaries;
 - CI;
 - root and local architecture documentation;
@@ -35,7 +36,8 @@ H0 contains no:
 - transfer implementation;
 - NAS access;
 - persistence choice;
-- server API;
+- business API endpoint or controller;
+- transport DTO;
 - desktop UI implementation;
 - game-specific rule.
 
@@ -44,6 +46,12 @@ H0 contains no:
 ### Projects exist before behavior
 
 The five production projects reserve architectural locations without filling them with speculative classes.
+
+### Server is an ASP.NET Core host
+
+HTTP/API communication with the central server is already a validated architectural boundary, so H0 materializes `GameSave.Server` with `Microsoft.NET.Sdk.Web` and a minimal composition root.
+
+This does not pull H2 forward: H0 defines no business route, controller, DTO or application behavior.
 
 ### Agent is Windows-targeted
 
@@ -59,9 +67,11 @@ Test projects are present so later tranches have an immediate home for tests. H0
 
 ## Validation
 
-GitHub Actions has successfully completed restore, build and test on the feature branch.
+The original skeleton passed CI before the ASP.NET Core host boundary was materialized.
 
-Local validation remains:
+The updated H0 state must pass CI again before local validation.
+
+Local validation after pull:
 
 ```bash
 dotnet restore GameSaveSync.sln
@@ -81,8 +91,8 @@ git status --short
 
 ## Current state
 
-The remote skeleton builds successfully in CI. H0 is not considered validated until Damien has pulled the branch, reviewed the structure and completed the local validation sequence.
+The server boundary now matches the architecture more precisely: ASP.NET Core exists as the host, while all business API behavior remains deferred.
 
 ## Next exact action
 
-Damien pulls `feature/h0-bootstrap`, reviews the skeleton, then executes the local validation commands above.
+Wait for the updated CI result. If green, Damien pulls `feature/h0-bootstrap`, reviews the skeleton and runs the local validation sequence.
