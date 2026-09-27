@@ -1,6 +1,6 @@
 # H1 — Generic deterministic domain
 
-**Status:** READY FOR ACCEPTANCE  
+**Status:** ACCEPTED  
 **Branch:** `feature/h1-domain`  
 **Base:** `develop`
 
@@ -220,8 +220,12 @@ The H1 diff is limited to:
 
 No H2 infrastructure has been pulled forward: no SQLite package/schema/repository, HTTP business API, filesystem/NAS access, Windows process access, save transfer or UI behavior has been introduced.
 
-H1 is therefore technically ready for explicit tranche acceptance.
+H1 is technically complete and was explicitly accepted by Damien on 27 September 2026.
+
+## Acceptance
+
+Damien explicitly accepted H1 on 27 September 2026 and authorized merge into `develop`.
 
 ## Next exact action
 
-Damien explicitly accepts or rejects H1. On acceptance, merge `feature/h1-domain` into `develop` and stop there unless a later deployment promotion is explicitly approved.
+Merge `feature/h1-domain` into `develop`. Do not promote beyond `develop` without a separate explicit approval.

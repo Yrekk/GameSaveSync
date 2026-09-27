@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H1 — Generic deterministic domain
+**Current tranche:** H1 — Generic deterministic domain (accepted)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -23,7 +23,7 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 - Branch promotion policy is `feature/* → develop → deploy/succumbrae → main`.
 - Starting with H1, validated feature work stops at `develop` unless Damien explicitly approves deployment promotion.
 
-## READY FOR ACCEPTANCE
+## ACCEPTED
 
 H1.4 consolidation:
 
@@ -119,4 +119,4 @@ Final H1 audit confirms the branch is ahead of `develop` with no H2 infrastructu
 
 ## NEXT EXACT ACTION
 
-Obtain Damien's explicit H1 tranche acceptance. If accepted, merge `feature/h1-domain` into `develop` and stop there.
+H1 is explicitly accepted. Merge `feature/h1-domain` into `develop`, then create the H2 feature branch from the resulting `develop` head. Do not promote to `deploy/succumbrae` or `main`.
