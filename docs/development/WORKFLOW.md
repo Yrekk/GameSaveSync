@@ -29,10 +29,42 @@ Before substantial work:
 
 If Damien says he pushed changes, re-read the remote HEAD before continuing.
 
+## Branching policy
+
+The repository uses the following promotion path:
+
+```text
+feature/*
+   ↓
+develop
+   ↓
+deploy/succumbrae
+   ↓
+main
+```
+
+Responsibilities:
+
+- `feature/*` contains work for an active tranche or focused change. New feature branches start from `develop`.
+- `develop` is the integration branch for work that has been validated and explicitly accepted.
+- `deploy/succumbrae` is the deployment-candidate branch for the Succumbrae environment.
+- `main` represents the stable state whose deployment has been validated.
+
+Promotion is deliberate:
+
+- a feature does not bypass `develop`;
+- `develop` is not promoted to `deploy/succumbrae` without an explicit deployment decision;
+- `main` is updated only after the deployment candidate has been validated;
+- no direct feature-to-`main` merge is part of the normal workflow.
+
+H0 is the bootstrap exception explicitly approved for promotion through the complete chain so all long-lived branches start from the same validated baseline.
+
+Starting with H1, the default stopping point is `develop`. Promotion beyond `develop` requires Damien's explicit approval.
+
 ## Feature workflow
 
 ```text
-feature branch
+feature branch from develop
 → code + tests + documentation
 → remote branch update
 → Damien pulls locally
@@ -40,7 +72,9 @@ feature branch
 → targeted/full tests as relevant
 → smoke tests when relevant
 → corrections on the feature branch
-→ merge only after explicit acceptance
+→ explicit tranche acceptance
+→ merge into develop
+→ stop unless deployment promotion is explicitly approved
 ```
 
 ## Tranches
