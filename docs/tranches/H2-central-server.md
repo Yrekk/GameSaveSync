@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1A VALIDATED BASELINE / MACHINE-ID HARDENING AWAITING VALIDATION  
+**Status:** H2.1A FULLY VALIDATED  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -173,4 +173,6 @@ H2.1A is validated.
 
 Post-review architecture walkthrough identified and corrected one identity inconsistency before persistence: MachineId is now GUID-backed, with future UUID v7 generation owned by Application/Server rather than Core, Agent or SQLite.
 
-Run local validation for this hardening, then finish the walkthrough before opening the next H2 slice.
+The hardening is now validated locally and remotely. The follow-up compile fix at commit `1e9514a` is green in CI.
+
+H2.1A is fully validated. Next: define H2.1B.

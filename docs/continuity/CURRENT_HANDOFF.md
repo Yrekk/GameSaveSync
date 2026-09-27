@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1A — Post-review MachineId hardening (awaiting local validation)
+**Current tranche:** H2.1A — Modular persistence foundation + MachineId hardening (validated)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -48,16 +48,21 @@ No profile persistence schema, migrations, runtime recovery coordinator, storage
 
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
-Post-review MachineId hardening:
+None.
 
-- remote CI on the first hardening commit exposed a missing namespace import in `GameDataRoot.cs`; local validation had not exposed it;
-- the compile-only fix adds `using GameSave.Core.Machines;` and must pass CI before the hardening is considered validated;
+## VALIDATED POST-REVIEW HARDENING
+
+The post-H2.1A MachineId hardening is validated locally and remotely.
+
+Validated changes:
 
 - `MachineId.Value` is now `Guid`, rejecting `Guid.Empty`;
 - `GameDataRoot` compares MachineId value objects directly;
 - obsolete case-insensitive string identity semantics are removed;
-- tests/documentation are updated for GUID identity;
-- generation remains deferred to future Application/Server enrollment using UUID v7.
+- future generation remains deferred to Application/Server enrollment using UUID v7;
+- SQLite and Agent do not generate authoritative MachineId values;
+- the CI-only missing namespace import in `GameDataRoot.cs` was corrected;
+- latest CI for commit `1e9514a` is green.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
@@ -223,4 +228,4 @@ As soon as H2 adds real Server behavior, the first warning should naturally disa
 
 ## NEXT EXACT ACTION
 
-Damien pulls the MachineId hardening and reruns the Release build/tests. After local validation, finish the architecture review and define H2.1B.
+Define H2.1B from the now fully validated H2.1A baseline, keeping the validated module boundaries and GUID-based MachineId semantics intact.
