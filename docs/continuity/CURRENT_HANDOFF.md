@@ -25,6 +25,10 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
+None. H1.3 is validated.
+
+## H1.3 VALIDATED DETAILS
+
 H1.3 on `feature/h1-domain`:
 
 - `ProfileId` stable normalized slug as an immutable reference value object;
@@ -72,7 +76,7 @@ Structured runtime diagnostics feed console, local files and a future filterable
 
 H1.1 and H1.2 are green remotely and locally.
 
-H1.3 remote/local validation is pending.
+H1.3 remote CI and local validation are green: Release build green, 44/44 tests passing, diff-check clean, working tree clean.
 
 Expected local-test warnings that may be ignored for now:
 
@@ -102,4 +106,4 @@ No filesystem, save, NAS, Windows process, network, SQLite or synchronization tr
 
 ## NEXT EXACT ACTION
 
-Validate H1.3 remotely and locally. If green, review the profile-domain implementation before H1.4 consolidation.
+Prepare H1.4 consolidation: audit H1 domain boundaries/invariants/tests/documentation without pulling H2 infrastructure work forward.
