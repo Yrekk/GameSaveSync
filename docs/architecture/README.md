@@ -58,29 +58,13 @@ When later architecture becomes non-obvious, document the **reason** near the re
 
 ## Operational diagnostics direction
 
-Runtime diagnostics are a shared structured event stream, not a screen-scrape of process consoles.
+GameSaveSync follows the shared NexusPrincipia Debug & Observability reference:
 
-The same diagnostic event may be rendered to:
+[Debug & observability — NexusPrincipia](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/debug-observability.md)
 
-- the local console;
-- rotating local log files;
-- a live Admin diagnostics stream.
+GameSaveSync-specific diagnostics should expose relevant context such as application/component, `MachineId`, profile, event/category and correlation identifier when those concepts have a real runtime consumer.
 
-The Admin interface should behave like an operations runtime console: filterable by application/component, machine, profile, severity, event/category, correlation identifier and time window.
-
-Normal live forwarding includes `Information`, `Warning`, `Error` and `Critical`. `Debug` and `Trace` remain local by default.
-
-Admin may temporarily enable Debug mode for a selected application or machine. Remote Debug activation must:
-
-- be explicit;
-- have a bounded duration/TTL;
-- automatically return to the normal level;
-- be auditable;
-- never require an application restart when the logging provider supports runtime level changes.
-
-Local persistent logs remain required even when live diagnostics exist, so failures that occur while the server or network is unavailable remain recoverable.
-
-Diagnostics must not expose secrets, authentication material or NAS credentials.
+The shared reference owns the cross-application rules for runtime Debug sessions, TTL/expiry, structured logs, secret redaction, local rotating logs and future Admin integration. Those rules are not duplicated here.
 
 ## Managed recovery checkpoints
 

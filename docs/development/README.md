@@ -1,5 +1,11 @@
 # Development
 
-This folder documents how GameSaveSync is developed rather than product behavior.
+GameSaveSync uses the shared engineering method maintained in NexusPrincipia.
 
-Start with [`WORKFLOW.md`](WORKFLOW.md). It defines sources of truth, feature-branch workflow, documentation expectations, validation and handoff rules.
+Start with:
+
+- [GameSaveSync local workflow](WORKFLOW.md) — branch policy, validation commands and project-specific rules.
+- [NexusPrincipia shared Dev + AI operating model](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/ai-development-operating-model.md)
+- [NexusPrincipia C# / .NET conventions](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/languages/csharp-dotnet.md)
+
+Generic rules are no longer duplicated in this repository.
