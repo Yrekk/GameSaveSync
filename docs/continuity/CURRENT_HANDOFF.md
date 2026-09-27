@@ -2,73 +2,61 @@
 
 **Date:** 27 September 2026  
 **Repository:** `Yrekk/GameSaveSync`  
+**Working branch:** `feature/h1-domain`  
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Last completed tranche:** H0 — Bootstrap — VALIDATED
+**Current tranche:** H1 — Generic deterministic domain
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
 ## VALIDATED
 
-- Repository and initial `main` exist.
-- The technical solution is validated.
-- H0 scope is explicitly limited to skeleton/boundaries/infrastructure/documentation.
-- Development continuity follows the proven Claviger model, adapted to GameSaveSync.
-- .NET 10 solution structure is in place.
-- Five production project boundaries and three test project boundaries are in place.
-- Shared build conventions are in place.
-- Agent-side boundaries target Windows.
-- `GameSave.Server` is an ASP.NET Core host without business API behavior.
-- The common Visual Studio launch profile is versioned.
-- CI is green on the final H0 structure.
-- Damien completed local restore, build, test, `git diff --check` and `git status --short` successfully.
-- Expected "no tests available" warnings are accepted for the intentionally empty H0 test projects.
+- H0 bootstrap is validated and promoted through `main`.
 - Branch promotion policy is `feature/* → develop → deploy/succumbrae → main`.
-
-## BRANCH POLICY
-
-- Feature branches are created from `develop`.
-- Validated and explicitly accepted feature work merges into `develop`.
-- Starting with H1, `develop` is the default stopping point.
-- Promotion to `deploy/succumbrae` requires an explicit deployment decision.
-- `main` is updated only after the deployment candidate is validated.
-- H0 is explicitly approved as the bootstrap exception to be promoted through the full chain.
+- Starting with H1, validated feature work stops at `develop` unless Damien explicitly approves deployment promotion.
+- The technical solution and central-server architecture remain the design baseline.
 
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
-None for H0.
+H1.1 on `feature/h1-domain`:
+
+- non-negative `SyncVersion` value object;
+- local synchronization state with base version, dirty state and game-running state;
+- central synchronization state;
+- Core synchronization boundary documentation;
+- unit tests for the new version invariant.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
-Business/domain work starts in H1.
+H1.2 will implement the deterministic decision table.
 
-No H1 domain type or H2 business API behavior is part of H0.
+Conflict semantics are explicit and manual:
+
+- divergent local/central evolution returns a conflict;
+- timestamps do not choose a winner;
+- the future UI must ask the user which side becomes authoritative;
+- cancellation is allowed;
+- both sides must be preserved before destructive resolution.
 
 ## TESTS / SMOKE
 
-Remote CI: green.
+H1.1 CI and Damien's local validation are still pending.
 
-Local validation: green.
-
-No real save, NAS share or synchronization operation has been touched.
+No filesystem, save, NAS, Windows process, network or synchronization transfer has been touched.
 
 ## KNOWN RISKS
 
-H0 performs no save-data operation, so the remaining risks are future implementation risks rather than current data-loss risks.
-
-Documentation drift remains a defect and must be corrected in the same tranche that changes the documented architecture.
+The important H1 risk is semantic: ambiguous state or decision types could later make destructive synchronization behavior harder to reason about. Keep the domain small, explicit and deterministic.
 
 ## READ FIRST NEXT SESSION
 
 1. root `README.md`;
 2. this file;
-3. `docs/development/WORKFLOW.md`;
-4. actual remote branch and HEAD;
-5. the H1 tranche document once created.
+3. `docs/tranches/H1-domain.md`;
+4. `src/GameSave.Core/Synchronization/README.md`;
+5. actual remote branch and HEAD.
 
 ## NEXT EXACT ACTION
 
-Once the H0 baseline is aligned across `develop`, `deploy/succumbrae` and `main`, H1 starts from a feature branch based on `develop`.
-
-Do not promote H1 beyond `develop` without Damien's explicit approval.
+Validate H1.1. If accepted, design H1.2's explicit decision result shape before implementing its decision table.

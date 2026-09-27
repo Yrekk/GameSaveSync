@@ -5,7 +5,7 @@ The validated technical solution defines the progression below.
 | Tranche | Purpose | State |
 | --- | --- | --- |
 | H0 | Bootstrap, boundaries, CI and documentation system | Validated |
-| H1 | Generic deterministic domain | Planned |
+| H1 | Generic deterministic domain | In progress |
 | H2 | Minimal central server | Planned |
 | H3 | Minimal Windows agent | Planned |
 | H4 | Replaceable minimal UI | Planned |
