@@ -50,6 +50,19 @@ H2 will turn the existing ASP.NET Core host into the first real central applicat
 
 See `docs/decisions/ADR-0005-application-persistence-modules.md`.
 
+### Save payload storage boundary
+
+- H2 introduces a separate `GameSave.Storage` project;
+- Application owns GameSaveSync-specific storage ports;
+- Storage provides the concrete local-filesystem backend in H2;
+- Persistence remains metadata/EF/SQLite only;
+- the storage port is not a generic filesystem API;
+- H2 proves basic artifact store/read/existence behavior only;
+- H5/H8 retain transactional transfers/version publication and real Custodia integration;
+- Storage remains extractable/reusable later without premature microservice deployment.
+
+See `docs/decisions/ADR-0006-separate-storage-module.md`.
+
 ### Persistence access
 
 - EF Core is the default persistence layer;
@@ -114,7 +127,7 @@ The first discussion must resolve:
 2. migration/schema versioning — RESOLVED: versioned EF migrations + reusable execution coordinator;
 3. repository boundary placement — RESOLVED: Application ports + Persistence implementations in separate projects;
 4. Server failure policy — RESOLVED: restricted recovery mode + explicit validated snapshot restore;
-5. exact H2 fake/local storage scope;
+5. exact H2 fake/local storage scope — RESOLVED: separate Storage module + minimal local backend;
 6. first real API use case;
 7. minimum machine metadata required now.
 
