@@ -2,7 +2,7 @@
 
 Generic and safe game save synchronization between multiple PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 domain consolidation in progress.
+> **Status:** pre-V1 — H1 domain ready for acceptance.
 
 ## Purpose
 
@@ -39,7 +39,7 @@ H1 now contains the pure deterministic synchronization and game-profile domain:
 - optional managed-recovery configuration;
 - SQLite accepted as the later Server metadata persistence direction while Core remains persistence-agnostic.
 
-H1.4 is the consolidation/audit step before H2 introduces central-server infrastructure.
+H1.4 consolidation and validation are green. H1 is awaiting explicit tranche acceptance before merge into `develop`; H2 has not started.
 
 ## Repository structure
 
