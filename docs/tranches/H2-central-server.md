@@ -65,7 +65,7 @@ These are planning candidates, not implementation commitments. They must be conf
 
 Potential scope:
 
-- choose SQLite access strategy;
+- EF Core + SQLite persistence foundation (ADR-0002);
 - choose schema migration/versioning strategy;
 - define DB configuration/bootstrap;
 - define repository/application boundary placement;
@@ -104,8 +104,8 @@ The exact API surface is deliberately undecided.
 
 ## Design questions to answer before implementation
 
-1. **SQLite access style** — explicit SQL with `Microsoft.Data.Sqlite`, EF Core, or another narrowly justified approach?
-2. **Migrations** — how are schema versions created, upgraded and rejected when incompatible?
+1. **SQLite access style — RESOLVED:** EF Core with the SQLite provider is the default persistence layer. Core remains persistence-independent; raw SQL remains allowed only as an isolated, justified persistence escape hatch. See ADR-0002.
+2. **Migrations** — how are EF Core migrations created, reviewed, applied and rejected when incompatible?
 3. **Repository placement** — where should persistence abstractions live so Core remains pure without turning Contracts into a shared-model dump?
 4. **Startup/failure policy** — if the database is unavailable, locked, corrupted or at an unsupported schema version, does Server fail startup or expose a restricted diagnostic mode?
 5. **H2 storage scope** — how much of the validated "fake/local storage" server direction belongs in H2 versus later transactional-transfer/storage tranches?
@@ -128,4 +128,4 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Walk through the current Server/Contracts skeleton, explain the H2 architectural choices, answer the design questions above with Damien, then define H2.1 before writing persistence code.
+Continue the H2 design discussion with migrations/schema versioning, repository placement and startup/failure policy before writing H2.1 persistence code.
