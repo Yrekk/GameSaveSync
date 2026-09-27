@@ -26,4 +26,13 @@ public sealed class ProfileIdTests
     {
         Assert.ThrowsAny<ArgumentException>(() => new ProfileId(value));
     }
+
+    [Fact]
+    public void Equality_UsesSlugValue()
+    {
+        var left = new ProfileId("project-zomboid");
+        var right = new ProfileId("project-zomboid");
+
+        Assert.Equal(left, right);
+    }
 }

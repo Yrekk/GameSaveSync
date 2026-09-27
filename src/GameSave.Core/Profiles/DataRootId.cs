@@ -3,7 +3,7 @@ namespace GameSave.Core.Profiles;
 /// <summary>
 /// Stable logical identifier for one synchronized data root inside a profile.
 /// </summary>
-public readonly record struct DataRootId
+public sealed record DataRootId
 {
     public DataRootId(string value)
     {

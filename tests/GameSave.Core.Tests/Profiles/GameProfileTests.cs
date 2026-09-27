@@ -16,6 +16,22 @@ public sealed class GameProfileTests
     }
 
     [Fact]
+    public void Constructor_RejectsNullProfileId()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new GameProfile(
+                null!,
+                "Project Zomboid",
+                true,
+                ["ProjectZomboid64"],
+                [new GameDataRoot(new DataRootId("saves"), "%USERPROFILE%\\Zomboid")],
+                [],
+                5,
+                RecoveryPolicy.Disabled,
+                externalCloudWarning: true));
+    }
+
+    [Fact]
     public void Constructor_RejectsMissingProcessNames()
     {
         Assert.Throws<ArgumentException>(() =>

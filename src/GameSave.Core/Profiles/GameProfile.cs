@@ -20,6 +20,7 @@ public sealed class GameProfile
         RecoveryPolicy recoveryPolicy,
         bool externalCloudWarning)
     {
+        ArgumentNullException.ThrowIfNull(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
         ArgumentNullException.ThrowIfNull(processNames);
         ArgumentNullException.ThrowIfNull(dataRoots);

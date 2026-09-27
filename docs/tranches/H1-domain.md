@@ -144,7 +144,7 @@ SQLite is now the accepted central metadata persistence direction, recorded in A
 
 ### H1.3 invariants
 
-- profile and data-root identifiers are normalized lowercase slugs;
+- profile and data-root identifiers are normalized lowercase slugs represented by immutable reference value objects, preventing `default(struct)` from bypassing construction invariants;
 - a profile has at least one process name and one data root;
 - process names, exclusions and data-root IDs cannot be duplicated;
 - one data root cannot define two overrides for the same machine;

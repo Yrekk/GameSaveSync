@@ -12,6 +12,7 @@ public sealed class GameDataRoot
         string defaultPath,
         IEnumerable<MachinePathOverride>? machineOverrides = null)
     {
+        ArgumentNullException.ThrowIfNull(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(defaultPath);
 
         Id = id;
@@ -22,6 +23,8 @@ public sealed class GameDataRoot
 
         foreach (var pathOverride in overrides)
         {
+            ArgumentNullException.ThrowIfNull(pathOverride);
+
             if (!machineIds.Add(pathOverride.MachineId))
             {
                 throw new ArgumentException(

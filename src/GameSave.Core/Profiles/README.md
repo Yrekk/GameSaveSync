@@ -15,7 +15,7 @@ space-engineers-2
 
 It is intended to remain stable for the lifetime of the profile and may later be used by persistence, logs and storage layout. Display names may change independently.
 
-Core validates the identifier shape. Global uniqueness is a persistence/repository invariant and will be enforced by the central server database.
+Core validates the identifier shape. Profile and data-root identifiers are immutable reference value objects rather than structs, so a default struct value cannot bypass their constructors. Global uniqueness is a persistence/repository invariant and will be enforced by the central server database.
 
 ## Process names
 

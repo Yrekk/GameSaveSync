@@ -27,9 +27,9 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 
 H1.3 on `feature/h1-domain`:
 
-- `ProfileId` stable normalized slug;
-- `DataRootId` stable logical-root slug;
-- `MachinePathOverride`;
+- `ProfileId` stable normalized slug as an immutable reference value object;
+- `DataRootId` stable logical-root slug as an immutable reference value object;
+- `MachinePathOverride` immutable reference object;
 - `GameDataRoot` with default path and per-machine overrides;
 - `RecoveryPolicy` with disabled/managed-checkpoint modes;
 - complete/always-valid `GameProfile`;

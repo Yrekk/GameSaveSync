@@ -19,6 +19,13 @@ public sealed class GameDataRootTests
     }
 
     [Fact]
+    public void Constructor_RejectsNullDataRootId()
+    {
+        Assert.Throws<ArgumentNullException>(
+            () => new GameDataRoot(null!, "%USERPROFILE%\\Zomboid"));
+    }
+
+    [Fact]
     public void Constructor_RejectsDuplicateMachineOverridesCaseInsensitively()
     {
         Assert.Throws<ArgumentException>(() =>
@@ -29,5 +36,15 @@ public sealed class GameDataRootTests
                     new MachinePathOverride("PC-FIXE", "D:\\GameData\\Zomboid"),
                     new MachinePathOverride("pc-fixe", "E:\\Other\\Zomboid")
                 ]));
+    }
+
+    [Fact]
+    public void Constructor_RejectsNullMachineOverride()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new GameDataRoot(
+                new DataRootId("saves"),
+                "%USERPROFILE%\\Zomboid",
+                [null!]));
     }
 }

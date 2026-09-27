@@ -3,7 +3,7 @@ namespace GameSave.Core.Profiles;
 /// <summary>
 /// Stable normalized identifier for a game profile.
 /// </summary>
-public readonly record struct ProfileId
+public sealed record ProfileId
 {
     public ProfileId(string value)
     {
