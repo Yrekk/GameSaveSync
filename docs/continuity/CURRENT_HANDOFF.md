@@ -50,6 +50,9 @@ No profile persistence schema, migrations, runtime recovery coordinator, storage
 
 Post-review MachineId hardening:
 
+- remote CI on the first hardening commit exposed a missing namespace import in `GameDataRoot.cs`; local validation had not exposed it;
+- the compile-only fix adds `using GameSave.Core.Machines;` and must pass CI before the hardening is considered validated;
+
 - `MachineId.Value` is now `Guid`, rejecting `Guid.Empty`;
 - `GameDataRoot` compares MachineId value objects directly;
 - obsolete case-insensitive string identity semantics are removed;

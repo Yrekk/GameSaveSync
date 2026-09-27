@@ -1,3 +1,5 @@
+using GameSave.Core.Machines;
+
 namespace GameSave.Core.Profiles;
 
 /// <summary>
