@@ -2,121 +2,107 @@
 
 **Date:** 27 September 2026  
 **Repository:** `Yrekk/GameSaveSync`  
-**Working branch:** `feature/h1-domain`  
+**Working branch:** `feature/h2-central-server`  
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H1 — Generic deterministic domain (accepted)
+**Current tranche:** H2 — Minimal central server (planning)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
 ## VALIDATED
 
-- H0 bootstrap is validated and promoted through `main`.
-- H1.1 is validated locally and remotely.
-- H1.2 is validated locally and remotely:
-  - deterministic `SyncAssessment`;
-  - underlying `SyncDisposition`;
-  - cumulative `SyncFindings`;
-  - 15/15 Core tests locally;
-  - Release build, diff-check and working tree clean.
-- Branch promotion policy is `feature/* → develop → deploy/succumbrae → main`.
-- Starting with H1, validated feature work stops at `develop` unless Damien explicitly approves deployment promotion.
+- H0 bootstrap is validated and stable.
+- H1 Generic deterministic domain is fully validated, explicitly accepted by Damien and merged into `develop`.
+- H1 final local validation: Release build green, 51/51 tests passing, diff-check clean, working tree clean.
+- H1 includes:
+  - explicit synchronization/no-version semantics;
+  - deterministic `SyncAssessment` + cumulative findings;
+  - integrity/conflict vocabulary;
+  - complete always-valid generic `GameProfile`;
+  - logical data roots and per-machine overrides;
+  - optional managed-recovery configuration;
+  - ADR-0001 accepting central SQLite metadata persistence.
+- Branch promotion remains `feature/* → develop → deploy/succumbrae → main`.
+- H1 stopped at `develop`; no deployment/main promotion was authorized.
 
-## ACCEPTED
+## IMPLEMENTED BUT NOT YET VALIDATED
 
-H1.4 consolidation:
+None for H2 application code.
 
-- `SyncVersion` is now a strictly-positive immutable reference value object;
-- version `0` is no longer valid or used as a sentinel;
-- missing local/central versions are explicit nullable state;
-- initial publication and missing-version truth-table cases are implemented and tested;
-- known local base + missing central is explicit `InconsistentState`;
-- `SyncAssessment` is now a reference result so default struct state cannot masquerade as a valid assessment.
-
-H1.3 remains validated.
-
-## H1.3 VALIDATED DETAILS
-
-H1.3 on `feature/h1-domain`:
-
-- `ProfileId` stable normalized slug as an immutable reference value object;
-- `DataRootId` stable logical-root slug as an immutable reference value object;
-- `MachinePathOverride` immutable reference object;
-- `GameDataRoot` with default path and per-machine overrides;
-- `RecoveryPolicy` with disabled/managed-checkpoint modes;
-- complete/always-valid `GameProfile`;
-- profile-domain invariant tests;
-- profile-domain README;
-- ADR-0001 accepting central SQLite metadata persistence.
+The H2 branch currently contains planning/documentation only.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
-### Persistence
+### H2 central server
 
-GameSaveSync will use one central SQLite database for server-side configuration and metadata.
+H2 will turn the existing ASP.NET Core host into the first real central application/persistence boundary.
 
-- active DB on Succumbrae local storage;
+### SQLite
+
+- one central SQLite database for GameSaveSync metadata/configuration;
+- active DB local to Succumbrae;
 - not hosted live on Custodia/SMB;
-- Custodia receives SQLite-safe backups;
-- save payloads remain files, not DB blobs;
-- Core has no SQLite dependency;
-- repository/schema/migration work begins in H2;
-- global `ProfileId` uniqueness is a repository/database invariant.
+- safe backup to Custodia later;
+- save payloads remain files;
+- Core remains SQLite-independent.
 
 ### Recovery
 
-Managed recovery checkpoints remain parallel to normal synchronization.
-
-- opt-in per profile;
-- initial Project Zomboid direction: approximately 10-minute interval;
-- minimum two rolling checkpoints: current + previous;
-- checkpoint carries source machine and base-version context;
-- local state is quarantined before recovery restoration;
-- cleanup waits for user validation plus successful final central promotion acknowledgement.
-
-See `docs/architecture/recovery-checkpoints.md`.
+Managed recovery checkpoints remain parallel to normal synchronization and are not implemented in H2 unless a later explicitly accepted H2 design requires only metadata needed by future recovery work.
 
 ### Operational diagnostics
 
-Structured runtime diagnostics feed console, local files and a future filterable live Admin stream. Normal remote levels are Information through Critical; Debug/Trace remain local unless temporarily enabled with expiry.
+Structured diagnostics remain a cross-cutting requirement. H2 should avoid designs that make later structured Server diagnostics difficult, but the Admin live stream is not an H2 deliverable.
 
-## TESTS / SMOKE
+## OPEN H2 DESIGN QUESTIONS
 
-H1.1 and H1.2 are green remotely and locally.
+Read `docs/tranches/H2-central-server.md` before implementation.
 
-H1.3 remote CI and local validation are green: Release build green, 44/44 tests passing, diff-check clean, working tree clean.
+The first discussion must resolve:
 
-Expected local-test warnings that may be ignored for now:
+1. SQLite access style;
+2. migration/schema versioning;
+3. repository boundary placement;
+4. Server failure policy for unavailable/corrupt/incompatible DB;
+5. exact H2 fake/local storage scope;
+6. first real API use case;
+7. minimum machine metadata required now.
+
+Do not silently answer these in code.
+
+## CURRENT SERVER STATE
+
+`GameSave.Server` is still the H0 ASP.NET Core host:
+
+- no business endpoint;
+- no controller;
+- no transport DTO;
+- no persistence implementation;
+- no storage implementation.
+
+`GameSave.Contracts` is still intentionally empty of DTOs until a real boundary requires one.
+
+## EXPECTED TEST WARNINGS
+
+Until H2 adds real Server/Integration behavior, these warnings may still appear and are known:
 
 - `GameSave.Server.Tests`: no tests available;
 - `GameSave.IntegrationTests`: no tests available.
 
-These projects are intentionally empty at the current tranche. Do not add fake tests to silence the warnings.
-
-No filesystem, save, NAS, Windows process, network, SQLite or synchronization transfer behavior has been introduced in Core.
-
-H1.4 remote and local validation are green: Release build green, 51/51 tests passing, diff-check clean and working tree clean. Final feature-branch CI is green.
-
-Final H1 audit confirms the branch is ahead of `develop` with no H2 infrastructure pulled forward.
-
-## KNOWN RISKS
-
-- Keep profile configuration generic; no hard-coded Project Zomboid rule may enter Core.
-- Do not let UI drafts become persisted `GameProfile` objects.
-- Core validates ID shape, but only the future repository/database can enforce global profile-ID uniqueness.
-- Recovery configuration must remain separate from actual checkpoint execution/storage.
+As soon as H2 adds real Server behavior, the first warning should naturally disappear because real Server tests should exist. Do not add fake tests.
 
 ## READ FIRST NEXT SESSION
 
 1. root `README.md`;
 2. this file;
-3. `docs/tranches/H1-domain.md`;
-4. `src/GameSave.Core/Profiles/README.md`;
-5. `src/GameSave.Core/Synchronization/README.md`;
-6. `docs/decisions/ADR-0001-server-metadata-sqlite.md`;
-7. actual remote branch and HEAD.
+3. `docs/tranches/H2-central-server.md`;
+4. `docs/decisions/ADR-0001-server-metadata-sqlite.md`;
+5. `src/GameSave.Server/README.md`;
+6. `src/GameSave.Contracts/README.md`;
+7. `src/GameSave.Server/Program.cs`;
+8. actual remote branch and HEAD.
 
 ## NEXT EXACT ACTION
 
-H1 is explicitly accepted. Merge `feature/h1-domain` into `develop`, then create the H2 feature branch from the resulting `develop` head. Do not promote to `deploy/succumbrae` or `main`.
+Explain the current Server/Contracts skeleton and work through the H2 design questions with Damien before implementing H2.1.
