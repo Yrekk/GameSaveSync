@@ -69,7 +69,7 @@ Potential scope:
 - choose schema migration/versioning strategy;
 - define DB configuration/bootstrap;
 - define repository/application boundary placement;
-- define startup behavior when the DB cannot be opened or validated.
+- restricted recovery/minimal mode with validated metadata snapshots (ADR-0003);
 
 ### H2.2 — profile persistence
 
@@ -107,7 +107,7 @@ The exact API surface is deliberately undecided.
 1. **SQLite access style — RESOLVED:** EF Core with the SQLite provider is the default persistence layer. Core remains persistence-independent; raw SQL remains allowed only as an isolated, justified persistence escape hatch. See ADR-0002.
 2. **Migrations** — how are EF Core migrations created, reviewed, applied and rejected when incompatible?
 3. **Repository placement** — where should persistence abstractions live so Core remains pure without turning Contracts into a shared-model dump?
-4. **Startup/failure policy** — if the database is unavailable, locked, corrupted or at an unsupported schema version, does Server fail startup or expose a restricted diagnostic mode?
+4. **Startup/failure policy — RESOLVED:** fail closed for synchronization authority, keep a restricted recovery/diagnostic mode, and use explicit validated snapshot restoration. No automatic snapshot promotion. See ADR-0003.
 5. **H2 storage scope** — how much of the validated "fake/local storage" server direction belongs in H2 versus later transactional-transfer/storage tranches?
 6. **First real API use case** — what is the smallest server operation worth exposing before an Agent exists?
 7. **Machine metadata** — which machine identity fields are truly required now, and which should wait until the Agent provides a real consumer?
@@ -128,4 +128,4 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Continue the H2 design discussion with migrations/schema versioning, repository placement and startup/failure policy before writing H2.1 persistence code.
+Continue the H2 design discussion with migration mechanics and repository placement before writing H2.1 persistence code.
