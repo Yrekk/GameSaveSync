@@ -118,7 +118,7 @@ Tests cover the four core disposition cases, cumulative findings, integrity find
 
 Validated remotely and locally on 27 September 2026. CI is green; local Release build is green; `GameSave.Core.Tests` reports 15/15 passing tests; `git diff --check` and working-tree status are clean. The expected no-test warnings remain only for the intentionally empty Server/Integration test projects.
 
-## H1.3 — IMPLEMENTED, PENDING VALIDATION
+## H1.3 — VALIDATED
 
 H1.3 adds a generic profile domain under `GameSave.Core/Profiles`.
 
@@ -153,6 +153,10 @@ SQLite is now the accepted central metadata persistence direction, recorded in A
 - managed checkpoint retention is at least two (current + previous);
 - no filesystem/process/NAS/database access occurs in Core.
 
+## H1.3 validation
+
+Validated remotely and locally on 27 September 2026. CI is green; local Release build is green; the complete local test run reports 44/44 passing tests; `git diff --check` and working-tree status are clean. The only warnings are the expected no-test warnings for the intentionally empty Server/Integration test projects.
+
 ## Next exact action
 
-Validate H1.3 in CI and locally. If green, review the major profile-domain files before H1.4 consolidation.
+Prepare H1.4 consolidation: audit H1 domain boundaries/invariants/tests/documentation without pulling H2 infrastructure work forward.
