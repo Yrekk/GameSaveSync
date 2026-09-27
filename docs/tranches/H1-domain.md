@@ -1,6 +1,6 @@
 # H1 — Generic deterministic domain
 
-**Status:** IN PROGRESS  
+**Status:** READY FOR ACCEPTANCE  
 **Branch:** `feature/h1-domain`  
 **Base:** `develop`
 
@@ -157,11 +157,6 @@ SQLite is now the accepted central metadata persistence direction, recorded in A
 
 Validated remotely and locally on 27 September 2026. CI is green; local Release build is green; the complete local test run reports 44/44 passing tests; `git diff --check` and working-tree status are clean. The only warnings are the expected no-test warnings for the intentionally empty Server/Integration test projects.
 
-## Next exact action
-
-Prepare H1.4 consolidation: audit H1 domain boundaries/invariants/tests/documentation without pulling H2 infrastructure work forward.
-
-
 ## H1.4 — CONSOLIDATION IN PROGRESS
 
 H1.4 audits the complete H1 domain before H2 infrastructure work begins.
@@ -203,8 +198,30 @@ Those defaults map to explicit, fail-closed semantics rather than a hidden senti
 
 ### H1.4 validation status
 
-Remote/local validation of the consolidation changes is pending.
+H1.4 checks are green remotely and locally on 27 September 2026:
+
+- final branch CI is green;
+- local Release build is green;
+- full local test run reports 51/51 passing tests;
+- the only warnings are the expected no-test warnings for intentionally empty Server/Integration test projects;
+- `git diff --check` is clean;
+- local working tree is clean.
+
+### Final H1 audit
+
+The feature branch is ahead of `develop` only and is not behind it.
+
+The H1 diff is limited to:
+
+- pure Core synchronization/profile domain code;
+- Core unit tests;
+- architecture/tranche/continuity documentation;
+- ADR-0001 for the accepted future SQLite metadata direction.
+
+No H2 infrastructure has been pulled forward: no SQLite package/schema/repository, HTTP business API, filesystem/NAS access, Windows process access, save transfer or UI behavior has been introduced.
+
+H1 is therefore technically ready for explicit tranche acceptance.
 
 ## Next exact action
 
-Validate H1.4 remotely and locally, then perform the final H1 audit/acceptance before opening H2.
+Damien explicitly accepts or rejects H1. On acceptance, merge `feature/h1-domain` into `develop` and stop there unless a later deployment promotion is explicitly approved.
