@@ -68,7 +68,7 @@ Potential scope:
 - EF Core + SQLite persistence foundation (ADR-0002);
 - choose schema migration/versioning strategy;
 - define DB configuration/bootstrap;
-- define repository placement beneath the accepted reusable application-use-case boundary (ADR-0004);
+- separate `GameSave.Application` and `GameSave.Persistence` projects with repository ports in Application and EF/SQLite implementations in Persistence (ADR-0005);
 - restricted recovery/minimal mode with validated metadata snapshots (ADR-0003);
 
 ### H2.2 — profile persistence
@@ -106,7 +106,7 @@ The exact API surface is deliberately undecided.
 
 1. **SQLite access style — RESOLVED:** EF Core with the SQLite provider is the default persistence layer. Core remains persistence-independent; raw SQL remains allowed only as an isolated, justified persistence escape hatch. See ADR-0002.
 2. **Migrations — RESOLVED:** EF migration code is authored during development, reviewed and versioned in Git. Runtime execution uses a reusable Server application use case shared by startup, desktop/API and future Web Admin entry points. Known migrations may be applied automatically or explicitly through that same mechanism. Pre-migration snapshot, application, validation and recovery-mode failure handling are one implementation, never UI-specific. See ADR-0004.
-3. **Repository placement** — where should persistence abstractions live so Core remains pure without turning Contracts into a shared-model dump?
+3. **Repository placement — RESOLVED:** introduce separate `GameSave.Application` and `GameSave.Persistence` projects. Repository/capability interfaces belong to Application; EF/SQLite implementations belong to Persistence; Server remains a thin host/composition root; Contracts stays transport-only. Modules should be extractable later without prematurely becoming microservices. See ADR-0005.
 4. **Startup/failure policy — RESOLVED:** fail closed for synchronization authority, keep a restricted recovery/diagnostic mode, and use explicit validated snapshot restoration. No automatic snapshot promotion. See ADR-0003.
 5. **H2 storage scope** — how much of the validated "fake/local storage" server direction belongs in H2 versus later transactional-transfer/storage tranches?
 6. **First real API use case** — what is the smallest server operation worth exposing before an Agent exists?
@@ -128,4 +128,4 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Continue the H2 design discussion with repository placement before writing H2.1 persistence code.
+Continue the H2 design discussion with H2 storage scope, first real API use case and minimum machine metadata before writing H2.1 persistence code.
