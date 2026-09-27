@@ -24,3 +24,44 @@ Integrity is modeled independently from `Dirty`.
 Only a trusted local save may eventually be eligible for automatic central promotion. The exact decision rule is implemented in H1.2.
 
 Timestamps may later be exposed as diagnostic information, but they must not select a winner during a conflict.
+
+## H1.2 synchronization assessment
+
+Normal synchronization is evaluated as a complete deterministic assessment:
+
+```text
+LocalSyncState
++
+CentralSyncState
+    ↓
+SyncAssessment
+├── Disposition
+└── Findings
+```
+
+The disposition preserves the underlying local/central relationship:
+
+- same base + clean → `Nothing`;
+- central ahead + clean → `Pull`;
+- same base + dirty → `Push`;
+- central ahead + dirty → `Conflict`;
+- central behind the local base → `InconsistentState`.
+
+Findings are independent and cumulative. A running game or a local integrity problem does not hide the underlying disposition.
+
+For example:
+
+```text
+BaseVersion = 42
+Dirty = true
+CentralVersion = 43
+GameRunning = true
+Integrity = RequiresValidation
+
+→ Disposition = Conflict
+→ Findings = GameRunning + LocalSaveRequiresValidation
+```
+
+The normal synchronization executor must later respect these findings before performing destructive work. H1.2 only assesses; it does not execute.
+
+Managed recovery checkpoints are evaluated separately and may later be presented by the UI alongside this assessment.

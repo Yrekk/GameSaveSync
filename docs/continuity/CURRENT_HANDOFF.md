@@ -26,11 +26,18 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
-None for H1.2 yet.
+H1.2 on `feature/h1-domain`:
+
+- `SyncDisposition` for the underlying Local/Central relationship;
+- cumulative `SyncFindings` so simultaneous problems are not hidden;
+- `SyncAssessment` result model;
+- pure `SyncAssessmentEngine`;
+- decision-table and multi-finding unit tests;
+- explicit inconsistent-state handling when central version is behind the local base.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
-H1.2 will implement a deterministic normal synchronization assessment: underlying disposition plus all simultaneously detectable findings. Recovery checkpoint availability remains a separate later assessment that the UI may combine with synchronization findings.
+H1.2 implements a deterministic normal synchronization assessment: underlying disposition plus all simultaneously detectable findings. Recovery checkpoint availability remains a separate later assessment that the UI may combine with synchronization findings.
 
 Safety requirements carried forward:
 
@@ -68,4 +75,4 @@ The important H1 risk is semantic: ambiguous state or decision types could later
 
 ## NEXT EXACT ACTION
 
-Design H1.2's explicit decision result shape before implementing its decision table.
+Validate H1.2 remotely and locally, then review the model before starting H1.3.
