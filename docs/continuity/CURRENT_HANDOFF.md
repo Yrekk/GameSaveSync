@@ -44,6 +44,8 @@ Safety requirements carried forward:
 
 Crash/unclean-exit detection itself belongs to later Agent/lifecycle work. The future UI belongs to its own tranche.
 
+Operational diagnostics are also decided but not implemented: structured logs feed console, local files and a filterable live Admin stream. Normal remote levels are Information through Critical; Debug/Trace stay local unless temporarily enabled from Admin with an automatic expiry.
+
 ## TESTS / SMOKE
 
 H1.1 CI and Damien's local validation are still pending.

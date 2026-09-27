@@ -18,3 +18,16 @@ The validated technical solution defines the progression below.
 | H11 | Measured optimization | Planned |
 
 A tranche must not silently pull work forward from a later tranche simply because the future design is already known.
+
+## Cross-cutting operational requirement
+
+A later infrastructure/admin tranche must provide structured runtime diagnostics:
+
+- live Admin stream for `Information` through `Critical`;
+- local `Debug`/`Trace` by default;
+- temporary remotely enabled Debug mode with automatic expiry;
+- filters by application/component, machine, game profile, severity, event/category, correlation identifier and time;
+- persistent local rotating logs as the fallback source when live forwarding is unavailable;
+- secret redaction.
+
+This requirement is recorded now but is not part of H1 domain implementation.
