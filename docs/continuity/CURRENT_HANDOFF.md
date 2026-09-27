@@ -75,6 +75,18 @@ See `docs/decisions/ADR-0006-separate-storage-module.md`.
 
 See `docs/decisions/ADR-0007-first-system-status-api.md`.
 
+### Machine identity
+
+- H2 introduces a stable opaque `MachineId` value object;
+- MachineId identifies a logical GameSaveSync machine, not hostname, username or a specific Agent installation;
+- a new PC always receives a new MachineId;
+- a reformatted/reinstalled machine may retain its existing MachineId only through a future explicit/authorized rebind flow;
+- hostname, username, workgroup and path data remain mutable metadata;
+- username may later be persisted because it can affect per-machine paths, but it never defines identity;
+- H2 does not create a full machine registry/table yet; path overrides may persist opaque MachineId values until H3 adds the real registry consumer.
+
+See `docs/decisions/ADR-0008-stable-machine-identity.md`.
+
 ### Persistence access
 
 - EF Core is the default persistence layer;
@@ -141,7 +153,7 @@ The first discussion must resolve:
 4. Server failure policy — RESOLVED: restricted recovery mode + explicit validated snapshot restore;
 5. exact H2 fake/local storage scope — RESOLVED: separate Storage module + minimal local backend;
 6. first real API use case — RESOLVED: read-only GetSystemStatus / `GET /api/system/status`;
-7. minimum machine metadata required now.
+7. minimum machine metadata — RESOLVED: stable opaque MachineId only; mutable host metadata deferred.
 
 Do not silently answer these in code.
 
