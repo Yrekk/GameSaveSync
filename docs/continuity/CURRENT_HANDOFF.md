@@ -25,7 +25,16 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
-None. H1.3 is validated.
+H1.4 consolidation:
+
+- `SyncVersion` is now a strictly-positive immutable reference value object;
+- version `0` is no longer valid or used as a sentinel;
+- missing local/central versions are explicit nullable state;
+- initial publication and missing-version truth-table cases are implemented and tested;
+- known local base + missing central is explicit `InconsistentState`;
+- `SyncAssessment` is now a reference result so default struct state cannot masquerade as a valid assessment.
+
+H1.3 remains validated.
 
 ## H1.3 VALIDATED DETAILS
 
@@ -87,6 +96,8 @@ These projects are intentionally empty at the current tranche. Do not add fake t
 
 No filesystem, save, NAS, Windows process, network, SQLite or synchronization transfer behavior has been introduced in Core.
 
+H1.4 consolidation validation is pending.
+
 ## KNOWN RISKS
 
 - Keep profile configuration generic; no hard-coded Project Zomboid rule may enter Core.
@@ -106,4 +117,4 @@ No filesystem, save, NAS, Windows process, network, SQLite or synchronization tr
 
 ## NEXT EXACT ACTION
 
-Prepare H1.4 consolidation: audit H1 domain boundaries/invariants/tests/documentation without pulling H2 infrastructure work forward.
+Validate H1.4 remotely and locally. If green, perform final H1 acceptance/audit before opening H2.

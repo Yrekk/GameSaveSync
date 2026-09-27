@@ -2,7 +2,7 @@
 
 Generic and safe game save synchronization between multiple PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H0 bootstrap validated.
+> **Status:** pre-V1 — H1 domain consolidation in progress.
 
 ## Purpose
 
@@ -26,6 +26,20 @@ H0 builds the **skeleton only**:
 H0 contains **no synchronization business rule**. Domain concepts and synchronization decisions belong to H1 and later tranches.
 
 H0 is validated both in CI and locally.
+
+## Current H1 domain
+
+H1 now contains the pure deterministic synchronization and game-profile domain:
+
+- explicit local/central synchronization state;
+- deterministic synchronization assessments and cumulative findings;
+- strictly-positive published synchronization versions with explicit no-version state;
+- complete always-valid game profiles;
+- logical data roots and per-machine path overrides;
+- optional managed-recovery configuration;
+- SQLite accepted as the later Server metadata persistence direction while Core remains persistence-agnostic.
+
+H1.4 is the consolidation/audit step before H2 introduces central-server infrastructure.
 
 ## Repository structure
 

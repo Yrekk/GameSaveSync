@@ -25,7 +25,7 @@ Introduce the minimum vocabulary needed by later synchronization rules:
 - local state with `BaseVersion`, `IsDirty`, `IsGameRunning` and `IntegrityState`;
 - central state with `CurrentVersion`.
 
-`SyncVersion` rejects negative values because synchronization versions are monotonic non-negative identifiers.
+`SyncVersion` was initially introduced as a non-negative identifier. H1.4 tightens this invariant: a `SyncVersion` now represents only a real published version and is strictly positive; absence is modeled explicitly in local/central state instead of using version `0`.
 
 ### Dirty semantics
 
@@ -160,3 +160,51 @@ Validated remotely and locally on 27 September 2026. CI is green; local Release 
 ## Next exact action
 
 Prepare H1.4 consolidation: audit H1 domain boundaries/invariants/tests/documentation without pulling H2 infrastructure work forward.
+
+
+## H1.4 — CONSOLIDATION IN PROGRESS
+
+H1.4 audits the complete H1 domain before H2 infrastructure work begins.
+
+### Explicit missing-version model
+
+The original H1.1 model allowed `SyncVersion(0)`. This is now intentionally removed.
+
+A synchronization version must be strictly positive and is represented by an immutable reference value object. There is no sentinel version.
+
+Absence is explicit:
+
+- `LocalSyncState.BaseVersion = null` means the local state has never been based on a published central version;
+- `CentralSyncState.CurrentVersion = null` means no central version has been published.
+
+The deterministic assessment now covers initial publication and missing-version cases:
+
+- no local base + no central + clean → `Nothing`;
+- no local base + no central + dirty → `Push`;
+- no local base + central exists + clean → `Pull`;
+- no local base + central exists + dirty → `Conflict`;
+- known local base + missing central → `InconsistentState`;
+- central behind known local base → `InconsistentState`.
+
+`LocalBaseVersionMissing`, `CentralVersionMissingForKnownLocalBase` and `CentralVersionBehindLocalBase` provide explicit findings where relevant.
+
+### Default-value hardening
+
+`SyncVersion` is now a reference value object so `default(struct)` cannot bypass the positive-version invariant.
+
+`SyncAssessment` is also an immutable reference result so an accidental default struct cannot masquerade as `Nothing + None`.
+
+The remaining state structs intentionally have safe defaults:
+
+- default local state = no base + not dirty + game stopped + integrity unknown;
+- default central state = no published version.
+
+Those defaults map to explicit, fail-closed semantics rather than a hidden sentinel.
+
+### H1.4 validation status
+
+Remote/local validation of the consolidation changes is pending.
+
+## Next exact action
+
+Validate H1.4 remotely and locally, then perform the final H1 audit/acceptance before opening H2.
