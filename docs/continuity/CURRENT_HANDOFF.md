@@ -13,9 +13,10 @@ Always verify the actual remote HEAD before modifying the repository.
 - The technical solution is validated.
 - H0 scope is explicitly limited to skeleton/boundaries/infrastructure/documentation.
 - Development continuity follows the proven Claviger model, adapted to GameSaveSync.
-- The previous H0 skeleton passed GitHub Actions restore/build/test.
+- GitHub Actions successfully restores, builds and runs the test projects on the current H0 structure.
+- `GameSave.Server` is now correctly materialized as an ASP.NET Core host without business API behavior.
 
-## IMPLEMENTED BUT NOT YET REVALIDATED
+## IMPLEMENTED BUT NOT YET VALIDATED LOCALLY
 
 On `feature/h0-bootstrap`:
 
@@ -24,16 +25,16 @@ On `feature/h0-bootstrap`:
 - three test project boundaries;
 - shared build conventions;
 - Windows targeting for agent-side boundaries;
+- ASP.NET Core host boundary for `GameSave.Server`;
 - CI;
 - root and local architectural READMEs;
 - development workflow;
 - tranche tracking and continuity system;
-- roadmap;
-- ASP.NET Core host boundary for `GameSave.Server`.
+- roadmap.
 
 The server host contains no business endpoint, controller, DTO, persistence or synchronization behavior.
 
-The latest ASP.NET Core boundary adjustment still requires CI revalidation and Damien's local validation.
+Damien's local review and validation remain required before H0 is accepted.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
@@ -43,9 +44,9 @@ No H1 domain type or H2 business API behavior is part of the current tranche.
 
 ## TESTS / SMOKE
 
-Updated CI: pending.
+Remote CI after ASP.NET Core host adjustment: green.
 
-Local sequence after CI is green:
+Local sequence still to run:
 
 ```text
 dotnet restore
@@ -73,4 +74,4 @@ Documentation drift is treated as a defect and must be corrected in the same tra
 
 ## NEXT EXACT ACTION
 
-Verify CI for the ASP.NET Core host adjustment. If green, Damien pulls `feature/h0-bootstrap` and runs the H0 local validation sequence.
+Damien pulls `feature/h0-bootstrap`, reviews the updated server skeleton and runs the H0 local validation sequence. If everything is green and the structure is accepted, mark H0 validated before opening H1.

@@ -1,6 +1,6 @@
 # H0 — Bootstrap
 
-**Status:** IMPLEMENTED — CI REVALIDATION PENDING  
+**Status:** CI GREEN — LOCAL VALIDATION PENDING  
 **Branch:** `feature/h0-bootstrap`
 
 ## Objective
@@ -67,9 +67,9 @@ Test projects are present so later tranches have an immediate home for tests. H0
 
 ## Validation
 
-The original skeleton passed CI before the ASP.NET Core host boundary was materialized.
+GitHub Actions successfully completed restore, build and test after the ASP.NET Core host boundary was materialized.
 
-The updated H0 state must pass CI again before local validation.
+Remote H0 CI is therefore green.
 
 Local validation after pull:
 
@@ -93,6 +93,8 @@ git status --short
 
 The server boundary now matches the architecture more precisely: ASP.NET Core exists as the host, while all business API behavior remains deferred.
 
+H0 remains unvalidated until Damien completes the local review and validation sequence.
+
 ## Next exact action
 
-Wait for the updated CI result. If green, Damien pulls `feature/h0-bootstrap`, reviews the skeleton and runs the local validation sequence.
+Damien pulls `feature/h0-bootstrap`, reviews the updated server skeleton and runs the local validation sequence.
