@@ -22,22 +22,27 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 H1.1 on `feature/h1-domain`:
 
 - non-negative `SyncVersion` value object;
-- local synchronization state with base version, dirty state and game-running state;
+- local synchronization state with base version, dirty state, game-running state and integrity state;
 - central synchronization state;
+- fail-closed `SaveIntegrityState` vocabulary;
 - Core synchronization boundary documentation;
-- unit tests for the new version invariant.
+- unit tests for the version invariant and default integrity state.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
 H1.2 will implement the deterministic decision table.
 
-Conflict semantics are explicit and manual:
+Safety requirements carried forward:
 
+- a dirty save that is `Unknown`, `RequiresValidation` or `Invalid` must not be automatically promoted centrally;
+- abnormal session termination can later move local integrity to `RequiresValidation`;
+- the UI must tell the user to launch the game and verify the save, then accept **OK**, **KO**, or **later**;
+- no response keeps synchronization blocked;
 - divergent local/central evolution returns a conflict;
 - timestamps do not choose a winner;
-- the future UI must ask the user which side becomes authoritative;
-- cancellation is allowed;
-- both sides must be preserved before destructive resolution.
+- both sides are preserved before destructive conflict resolution.
+
+Crash/unclean-exit detection itself belongs to later Agent/lifecycle work. The future UI belongs to its own tranche.
 
 ## TESTS / SMOKE
 

@@ -6,4 +6,5 @@ namespace GameSave.Core.Synchronization;
 public readonly record struct LocalSyncState(
     SyncVersion BaseVersion,
     bool IsDirty,
-    bool IsGameRunning);
+    bool IsGameRunning,
+    SaveIntegrityState IntegrityState);
