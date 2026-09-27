@@ -110,7 +110,7 @@ The exact API surface is deliberately undecided.
 3. **Repository placement — RESOLVED:** introduce separate `GameSave.Application` and `GameSave.Persistence` projects. Repository/capability interfaces belong to Application; EF/SQLite implementations belong to Persistence; Server remains a thin host/composition root; Contracts stays transport-only. Modules should be extractable later without prematurely becoming microservices. See ADR-0005.
 4. **Startup/failure policy — RESOLVED:** fail closed for synchronization authority, keep a restricted recovery/diagnostic mode, and use explicit validated snapshot restoration. No automatic snapshot promotion. See ADR-0003.
 5. **H2 storage scope — RESOLVED:** introduce a separate `GameSave.Storage` project. Application owns GameSaveSync-specific storage ports; Storage provides a minimal controlled local-filesystem backend in H2. H5/H8 retain transactional transfer/version publication and real Custodia integration. See ADR-0006.
-6. **First real API use case** — what is the smallest server operation worth exposing before an Agent exists?
+6. **First real API use case — RESOLVED:** `GetSystemStatus` exposed initially as read-only `GET /api/system/status`. It reports application mode/readiness across metadata persistence and storage, while process liveness remains a separate concept. The use case lives in Application and Contracts carries only the transport DTO. See ADR-0007.
 7. **Machine metadata** — which machine identity fields are truly required now, and which should wait until the Agent provides a real consumer?
 
 No code should answer these silently. The design discussion comes first.
@@ -129,4 +129,4 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Continue the H2 design discussion with the first real API use case and minimum machine metadata before writing H2.1 implementation code.
+Continue the H2 design discussion with minimum machine metadata before writing H2.1 implementation code.
