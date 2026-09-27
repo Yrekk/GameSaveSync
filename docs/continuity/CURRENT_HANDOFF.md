@@ -129,7 +129,7 @@ See `docs/decisions/ADR-0008-stable-machine-identity.md`.
 - EF Core is the default persistence layer;
 - SQLite is the initial provider;
 - Core remains independent from EF Core and SQLite;
-- persistence entities/mappings live in Server infrastructure;
+- persistence entities/mappings live in `GameSave.Persistence`;
 - targeted raw SQL is allowed only when explicitly justified and isolated;
 - no lazy loading;
 - provider/database changes remain explicit migration projects, not assumed automatic.
@@ -196,13 +196,13 @@ Do not silently answer these in code.
 
 ## CURRENT SERVER STATE
 
-`GameSave.Server` is still the H0 ASP.NET Core host:
+`GameSave.Server` is still a thin ASP.NET Core host:
 
 - no business endpoint;
 - no controller;
 - no transport DTO;
-- no persistence implementation;
-- no storage implementation.
+- no business persistence implementation yet (only the validated empty Persistence foundation exists);
+- no storage backend implementation yet.
 
 `GameSave.Contracts` is still intentionally empty of DTOs until a real boundary requires one.
 
@@ -214,6 +214,21 @@ Until H2 adds real Server/Integration behavior, these warnings may still appear 
 - `GameSave.IntegrationTests`: no tests available.
 
 As soon as H2 adds real Server behavior, the first warning should naturally disappear because real Server tests should exist. Do not add fake tests.
+
+## SHARED ENGINEERING REFERENCES
+
+Cross-project development rules are now centralized in NexusPrincipia rather than duplicated here.
+
+Authoritative shared references:
+
+- Dev + AI operating model: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/ai-development-operating-model.md
+- Project bootstrap: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/project-bootstrap.md
+- Session continuity: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/session-continuity.md
+- Documentation conventions: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/documentation-conventions.md
+- C# / .NET conventions: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/languages/csharp-dotnet.md
+- Debug & Observability: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/debug-observability.md
+
+GameSaveSync keeps only project-specific workflow rules locally.
 
 ## READ FIRST NEXT SESSION
 
