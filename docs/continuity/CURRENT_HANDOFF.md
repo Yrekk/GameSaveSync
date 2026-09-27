@@ -2,10 +2,12 @@
 
 **Date:** 27 September 2026  
 **Repository:** `Yrekk/GameSaveSync`  
-**Working branch:** `feature/h0-bootstrap`  
-**Current tranche:** H0 — Bootstrap — VALIDATED
+**Integration branch:** `develop`  
+**Deployment branch:** `deploy/succumbrae`  
+**Stable branch:** `main`  
+**Last completed tranche:** H0 — Bootstrap — VALIDATED
 
-Always verify the actual remote HEAD before modifying the repository.
+Always verify the actual remote branch and HEAD before modifying the repository.
 
 ## VALIDATED
 
@@ -22,6 +24,16 @@ Always verify the actual remote HEAD before modifying the repository.
 - CI is green on the final H0 structure.
 - Damien completed local restore, build, test, `git diff --check` and `git status --short` successfully.
 - Expected "no tests available" warnings are accepted for the intentionally empty H0 test projects.
+- Branch promotion policy is `feature/* → develop → deploy/succumbrae → main`.
+
+## BRANCH POLICY
+
+- Feature branches are created from `develop`.
+- Validated and explicitly accepted feature work merges into `develop`.
+- Starting with H1, `develop` is the default stopping point.
+- Promotion to `deploy/succumbrae` requires an explicit deployment decision.
+- `main` is updated only after the deployment candidate is validated.
+- H0 is explicitly approved as the bootstrap exception to be promoted through the full chain.
 
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
@@ -51,12 +63,12 @@ Documentation drift remains a defect and must be corrected in the same tranche t
 
 1. root `README.md`;
 2. this file;
-3. `docs/tranches/H0-bootstrap.md`;
+3. `docs/development/WORKFLOW.md`;
 4. actual remote branch and HEAD;
 5. the H1 tranche document once created.
 
 ## NEXT EXACT ACTION
 
-H0 is validated but not merged.
+Once the H0 baseline is aligned across `develop`, `deploy/succumbrae` and `main`, H1 starts from a feature branch based on `develop`.
 
-Do not merge without Damien's explicit approval. Once approved, merge H0 to `main` and start H1 from the agreed base.
+Do not promote H1 beyond `develop` without Damien's explicit approval.

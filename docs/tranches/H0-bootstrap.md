@@ -93,8 +93,21 @@ H0 is validated.
 
 The repository now has the structural boundaries, shared development configuration, CI and documentation continuity needed to begin H1 without pulling H1 behavior into the bootstrap tranche.
 
+## Promotion
+
+Damien explicitly approved H0 for promotion through the complete branch chain:
+
+```text
+feature/h0-bootstrap
+→ develop
+→ deploy/succumbrae
+→ main
+```
+
+This is the bootstrap exception used to align all long-lived branches on the same validated baseline.
+
+Starting with H1, validated feature work stops at `develop` by default. Promotion toward deployment requires a separate explicit decision.
+
 ## Next exact action
 
-Do not merge or open H1 implicitly.
-
-The next repository action requires Damien's explicit decision: merge the validated H0 branch to `main`, then start H1 from the agreed base.
+After the H0 baseline is aligned across the long-lived branches, any H1 feature branch starts from `develop`.
