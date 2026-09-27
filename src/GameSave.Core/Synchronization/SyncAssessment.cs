@@ -3,7 +3,7 @@ namespace GameSave.Core.Synchronization;
 /// <summary>
 /// Complete deterministic result of comparing one local synchronization state with the central state.
 /// </summary>
-public readonly record struct SyncAssessment(
+public sealed record SyncAssessment(
     SyncDisposition Disposition,
     SyncFindings Findings)
 {
