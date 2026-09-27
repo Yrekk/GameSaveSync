@@ -21,3 +21,5 @@ H0 contains no ADR because the current boundaries come directly from the validat
 - [ADR-0006 — Save payload storage is a separate module with a local H2 backend](ADR-0006-separate-storage-module.md)
 
 - [ADR-0007 — First transport use case is read-only system status](ADR-0007-first-system-status-api.md)
+
+- [ADR-0008 — Machine identity is stable, opaque and independent from mutable host metadata](ADR-0008-stable-machine-identity.md)
