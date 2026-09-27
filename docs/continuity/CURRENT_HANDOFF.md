@@ -59,6 +59,18 @@ See `docs/decisions/ADR-0002-ef-core-sqlite-persistence.md`.
 - save payloads remain files;
 - Core remains SQLite-independent.
 
+### Administrative operation reuse
+
+- database migration/snapshot/recovery logic is implemented once as Server application use cases;
+- desktop/local UI, future Web Admin, startup and possible maintenance CLI are only entry-point adapters;
+- EF migration classes are authored during development and versioned in Git;
+- deployed interfaces may execute already-known migrations but do not dynamically author migration source code;
+- startup automatic migration must call the same coordinator as manual/Admin execution;
+- authoritative DB operations execute on Succumbrae, even when requested remotely;
+- authorization for destructive/admin operations will be defined at the transport/Admin boundary.
+
+See `docs/decisions/ADR-0004-reusable-administrative-use-cases.md`.
+
 ### Metadata database recovery
 
 - keep SQLite-safe known-good metadata snapshots;
@@ -87,7 +99,7 @@ Read `docs/tranches/H2-central-server.md` before implementation.
 The first discussion must resolve:
 
 1. SQLite access style — RESOLVED: EF Core + SQLite provider;
-2. migration/schema versioning;
+2. migration/schema versioning — RESOLVED: versioned EF migrations + reusable execution coordinator;
 3. repository boundary placement;
 4. Server failure policy — RESOLVED: restricted recovery mode + explicit validated snapshot restore;
 5. exact H2 fake/local storage scope;
