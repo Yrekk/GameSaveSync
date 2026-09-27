@@ -17,3 +17,5 @@ That does **not** mean H0 defines the future API surface. There are currently:
 - no storage implementation.
 
 The host exists so later tranches can add real application/API behavior without changing the fundamental server boundary.
+
+The committed Visual Studio launch profile is development-only. It uses a stable localhost HTTP port and does not launch a browser; production/LAN transport and security choices remain outside H0.
