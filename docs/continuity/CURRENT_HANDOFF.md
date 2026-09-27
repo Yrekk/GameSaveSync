@@ -38,6 +38,18 @@ The H2 branch currently contains planning/documentation only.
 
 H2 will turn the existing ASP.NET Core host into the first real central application/persistence boundary.
 
+### Modular application/persistence boundaries
+
+- H2 introduces separate `GameSave.Application` and `GameSave.Persistence` projects;
+- Application owns use cases and repository/capability ports;
+- Persistence owns EF Core/SQLite implementations, entities, mappings and migrations;
+- Server remains a thin ASP.NET Core host/composition root;
+- Contracts remains transport-only;
+- modules are designed to be extractable into reusable libraries/services later when a real second consumer exists;
+- do not prematurely genericize or create microservices without an actual operational/reuse need.
+
+See `docs/decisions/ADR-0005-application-persistence-modules.md`.
+
 ### Persistence access
 
 - EF Core is the default persistence layer;
@@ -100,7 +112,7 @@ The first discussion must resolve:
 
 1. SQLite access style — RESOLVED: EF Core + SQLite provider;
 2. migration/schema versioning — RESOLVED: versioned EF migrations + reusable execution coordinator;
-3. repository boundary placement;
+3. repository boundary placement — RESOLVED: Application ports + Persistence implementations in separate projects;
 4. Server failure policy — RESOLVED: restricted recovery mode + explicit validated snapshot restore;
 5. exact H2 fake/local storage scope;
 6. first real API use case;
