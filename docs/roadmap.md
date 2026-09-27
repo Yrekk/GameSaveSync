@@ -5,8 +5,8 @@ The validated technical solution defines the progression below.
 | Tranche | Purpose | State |
 | --- | --- | --- |
 | H0 | Bootstrap, boundaries, CI and documentation system | Validated |
-| H1 | Generic deterministic domain | Planned |
-| H2 | Minimal central server | Planned |
+| H1 | Generic deterministic domain | Accepted |
+| H2 | Minimal central server, including SQLite metadata persistence boundary | Planned |
 | H3 | Minimal Windows agent | Planned |
 | H4 | Replaceable minimal UI | Planned |
 | H5 | Reliable transactional transfers | Planned |
@@ -18,3 +18,41 @@ The validated technical solution defines the progression below.
 | H11 | Measured optimization | Planned |
 
 A tranche must not silently pull work forward from a later tranche simply because the future design is already known.
+
+## Cross-cutting operational requirement
+
+A later infrastructure/admin tranche must provide structured runtime diagnostics:
+
+- live Admin stream for `Information` through `Critical`;
+- local `Debug`/`Trace` by default;
+- temporary remotely enabled Debug mode with automatic expiry;
+- filters by application/component, machine, game profile, severity, event/category, correlation identifier and time;
+- persistent local rotating logs as the fallback source when live forwarding is unavailable;
+- secret redaction.
+
+This requirement is recorded now but is not part of H1 domain implementation.
+
+## Cross-cutting managed recovery requirement
+
+Optional managed recovery checkpoints are now part of the target architecture for games that need them, especially the first Project Zomboid profile.
+
+They remain parallel to normal synchronization:
+
+- temporary checkpoints are not central versions;
+- recovery is opt-in per profile;
+- initial retention target is current + previous checkpoint;
+- unclean session recovery is user-validated;
+- local data is quarantined before checkpoint restoration;
+- recovery material is removed only after confirmed usability and successful central promotion acknowledgement.
+
+Implementation is intentionally deferred across the Agent/transfer/monitoring/lifecycle/storage/PZ tranches rather than pulled into H1.
+
+See `docs/architecture/recovery-checkpoints.md`.
+
+## Accepted persistence direction
+
+The central server will use SQLite for GameSaveSync configuration and metadata. The active database lives locally on Succumbrae; Custodia receives safe backups rather than hosting the live SQLite file.
+
+H1 defines persistence-independent domain objects only. Schema, migrations and repository implementation begin in H2.
+
+See `docs/decisions/ADR-0001-server-metadata-sqlite.md`.

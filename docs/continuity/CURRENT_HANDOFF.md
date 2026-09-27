@@ -2,73 +2,121 @@
 
 **Date:** 27 September 2026  
 **Repository:** `Yrekk/GameSaveSync`  
+**Working branch:** `feature/h1-domain`  
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Last completed tranche:** H0 — Bootstrap — VALIDATED
+**Current tranche:** H1 — Generic deterministic domain (accepted)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
 ## VALIDATED
 
-- Repository and initial `main` exist.
-- The technical solution is validated.
-- H0 scope is explicitly limited to skeleton/boundaries/infrastructure/documentation.
-- Development continuity follows the proven Claviger model, adapted to GameSaveSync.
-- .NET 10 solution structure is in place.
-- Five production project boundaries and three test project boundaries are in place.
-- Shared build conventions are in place.
-- Agent-side boundaries target Windows.
-- `GameSave.Server` is an ASP.NET Core host without business API behavior.
-- The common Visual Studio launch profile is versioned.
-- CI is green on the final H0 structure.
-- Damien completed local restore, build, test, `git diff --check` and `git status --short` successfully.
-- Expected "no tests available" warnings are accepted for the intentionally empty H0 test projects.
+- H0 bootstrap is validated and promoted through `main`.
+- H1.1 is validated locally and remotely.
+- H1.2 is validated locally and remotely:
+  - deterministic `SyncAssessment`;
+  - underlying `SyncDisposition`;
+  - cumulative `SyncFindings`;
+  - 15/15 Core tests locally;
+  - Release build, diff-check and working tree clean.
 - Branch promotion policy is `feature/* → develop → deploy/succumbrae → main`.
+- Starting with H1, validated feature work stops at `develop` unless Damien explicitly approves deployment promotion.
 
-## BRANCH POLICY
+## ACCEPTED
 
-- Feature branches are created from `develop`.
-- Validated and explicitly accepted feature work merges into `develop`.
-- Starting with H1, `develop` is the default stopping point.
-- Promotion to `deploy/succumbrae` requires an explicit deployment decision.
-- `main` is updated only after the deployment candidate is validated.
-- H0 is explicitly approved as the bootstrap exception to be promoted through the full chain.
+H1.4 consolidation:
 
-## IMPLEMENTED BUT NOT YET VALIDATED
+- `SyncVersion` is now a strictly-positive immutable reference value object;
+- version `0` is no longer valid or used as a sentinel;
+- missing local/central versions are explicit nullable state;
+- initial publication and missing-version truth-table cases are implemented and tested;
+- known local base + missing central is explicit `InconsistentState`;
+- `SyncAssessment` is now a reference result so default struct state cannot masquerade as a valid assessment.
 
-None for H0.
+H1.3 remains validated.
+
+## H1.3 VALIDATED DETAILS
+
+H1.3 on `feature/h1-domain`:
+
+- `ProfileId` stable normalized slug as an immutable reference value object;
+- `DataRootId` stable logical-root slug as an immutable reference value object;
+- `MachinePathOverride` immutable reference object;
+- `GameDataRoot` with default path and per-machine overrides;
+- `RecoveryPolicy` with disabled/managed-checkpoint modes;
+- complete/always-valid `GameProfile`;
+- profile-domain invariant tests;
+- profile-domain README;
+- ADR-0001 accepting central SQLite metadata persistence.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
-Business/domain work starts in H1.
+### Persistence
 
-No H1 domain type or H2 business API behavior is part of H0.
+GameSaveSync will use one central SQLite database for server-side configuration and metadata.
+
+- active DB on Succumbrae local storage;
+- not hosted live on Custodia/SMB;
+- Custodia receives SQLite-safe backups;
+- save payloads remain files, not DB blobs;
+- Core has no SQLite dependency;
+- repository/schema/migration work begins in H2;
+- global `ProfileId` uniqueness is a repository/database invariant.
+
+### Recovery
+
+Managed recovery checkpoints remain parallel to normal synchronization.
+
+- opt-in per profile;
+- initial Project Zomboid direction: approximately 10-minute interval;
+- minimum two rolling checkpoints: current + previous;
+- checkpoint carries source machine and base-version context;
+- local state is quarantined before recovery restoration;
+- cleanup waits for user validation plus successful final central promotion acknowledgement.
+
+See `docs/architecture/recovery-checkpoints.md`.
+
+### Operational diagnostics
+
+Structured runtime diagnostics feed console, local files and a future filterable live Admin stream. Normal remote levels are Information through Critical; Debug/Trace remain local unless temporarily enabled with expiry.
 
 ## TESTS / SMOKE
 
-Remote CI: green.
+H1.1 and H1.2 are green remotely and locally.
 
-Local validation: green.
+H1.3 remote CI and local validation are green: Release build green, 44/44 tests passing, diff-check clean, working tree clean.
 
-No real save, NAS share or synchronization operation has been touched.
+Expected local-test warnings that may be ignored for now:
+
+- `GameSave.Server.Tests`: no tests available;
+- `GameSave.IntegrationTests`: no tests available.
+
+These projects are intentionally empty at the current tranche. Do not add fake tests to silence the warnings.
+
+No filesystem, save, NAS, Windows process, network, SQLite or synchronization transfer behavior has been introduced in Core.
+
+H1.4 remote and local validation are green: Release build green, 51/51 tests passing, diff-check clean and working tree clean. Final feature-branch CI is green.
+
+Final H1 audit confirms the branch is ahead of `develop` with no H2 infrastructure pulled forward.
 
 ## KNOWN RISKS
 
-H0 performs no save-data operation, so the remaining risks are future implementation risks rather than current data-loss risks.
-
-Documentation drift remains a defect and must be corrected in the same tranche that changes the documented architecture.
+- Keep profile configuration generic; no hard-coded Project Zomboid rule may enter Core.
+- Do not let UI drafts become persisted `GameProfile` objects.
+- Core validates ID shape, but only the future repository/database can enforce global profile-ID uniqueness.
+- Recovery configuration must remain separate from actual checkpoint execution/storage.
 
 ## READ FIRST NEXT SESSION
 
 1. root `README.md`;
 2. this file;
-3. `docs/development/WORKFLOW.md`;
-4. actual remote branch and HEAD;
-5. the H1 tranche document once created.
+3. `docs/tranches/H1-domain.md`;
+4. `src/GameSave.Core/Profiles/README.md`;
+5. `src/GameSave.Core/Synchronization/README.md`;
+6. `docs/decisions/ADR-0001-server-metadata-sqlite.md`;
+7. actual remote branch and HEAD.
 
 ## NEXT EXACT ACTION
 
-Once the H0 baseline is aligned across `develop`, `deploy/succumbrae` and `main`, H1 starts from a feature branch based on `develop`.
-
-Do not promote H1 beyond `develop` without Damien's explicit approval.
+H1 is explicitly accepted. Merge `feature/h1-domain` into `develop`, then create the H2 feature branch from the resulting `develop` head. Do not promote to `deploy/succumbrae` or `main`.

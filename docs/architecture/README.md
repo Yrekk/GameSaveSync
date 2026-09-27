@@ -55,3 +55,49 @@ For example, `GameSave.Server` is an ASP.NET Core host because the system is des
 ## Documentation rule
 
 When later architecture becomes non-obvious, document the **reason** near the relevant boundary. Obvious models and DTOs do not receive commentary merely to increase documentation volume.
+
+## Operational diagnostics direction
+
+Runtime diagnostics are a shared structured event stream, not a screen-scrape of process consoles.
+
+The same diagnostic event may be rendered to:
+
+- the local console;
+- rotating local log files;
+- a live Admin diagnostics stream.
+
+The Admin interface should behave like an operations runtime console: filterable by application/component, machine, profile, severity, event/category, correlation identifier and time window.
+
+Normal live forwarding includes `Information`, `Warning`, `Error` and `Critical`. `Debug` and `Trace` remain local by default.
+
+Admin may temporarily enable Debug mode for a selected application or machine. Remote Debug activation must:
+
+- be explicit;
+- have a bounded duration/TTL;
+- automatically return to the normal level;
+- be auditable;
+- never require an application restart when the logging provider supports runtime level changes.
+
+Local persistent logs remain required even when live diagnostics exist, so failures that occur while the server or network is unavailable remain recoverable.
+
+Diagnostics must not expose secrets, authentication material or NAS credentials.
+
+## Managed recovery checkpoints
+
+Some games may need an optional recovery layer in addition to normal synchronization.
+
+Managed recovery checkpoints are temporary recovery candidates created while a configured game is running. They are not validated central versions and they never become authoritative merely because capture succeeded.
+
+Normal synchronization and managed recovery remain separate concerns so games with their own adequate autosave/recovery do not inherit unnecessary behavior.
+
+The detailed contract is documented in [managed recovery checkpoints](recovery-checkpoints.md).
+
+## Central metadata persistence direction
+
+Server-side configuration and metadata will use one central SQLite database on Succumbrae local storage.
+
+The active database must not live on the Custodia SMB share. Custodia remains the file-storage and backup target.
+
+Core remains persistence-agnostic. SQLite mapping and schema/migration work belong to the Server infrastructure beginning in H2.
+
+See [ADR-0001 — Central server metadata uses SQLite](../decisions/ADR-0001-server-metadata-sqlite.md).
