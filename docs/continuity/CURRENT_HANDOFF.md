@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2 — Minimal central server (planning)
+**Current tranche:** H2.1A — Modular persistence foundation (awaiting validation)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -28,9 +28,19 @@ Always verify the actual remote branch and HEAD before modifying the repository.
 
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
-None for H2 application code.
+H2.1A is implemented on the feature branch and awaits Damien's local validation.
 
-The H2 branch currently contains planning/documentation only.
+Implemented:
+
+- `GameSave.Application`, `GameSave.Persistence`, `GameSave.Storage`;
+- focused Application/Persistence/Storage test projects;
+- EF Core + SQLite isolated to Persistence;
+- empty `GameSaveDbContext` foundation;
+- `MachineId` value object in Core;
+- `MachinePathOverride` now requires `MachineId`;
+- module/dependency boundary tests and documentation.
+
+No profile persistence schema, migrations, runtime recovery coordinator, storage backend or HTTP endpoint is implemented yet.
 
 ## DECIDED BUT NOT YET IMPLEMENTED
 
@@ -191,4 +201,13 @@ As soon as H2 adds real Server behavior, the first warning should naturally disa
 
 ## NEXT EXACT ACTION
 
-Explain the current Server/Contracts skeleton and work through the H2 design questions with Damien before implementing H2.1.
+Damien pulls the H2.1A implementation, then runs:
+
+```powershell
+dotnet build GameSaveSync.sln --configuration Release
+dotnet test GameSaveSync.sln --configuration Release --no-build
+git diff --check
+git status --short
+```
+
+After local validation, walk through the new projects/files in Visual Studio before opening the next H2 slice.

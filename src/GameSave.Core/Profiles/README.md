@@ -33,11 +33,11 @@ Each root has:
 
 - a stable logical `DataRootId`;
 - a default path expression;
-- optional per-machine path overrides.
+- optional per-machine path overrides keyed by the stable `MachineId` value object.
 
 Core stores these path strings but does not inspect the filesystem or require the path to exist.
 
-Data-root IDs must be unique within a profile. A single data root cannot define multiple overrides for the same machine.
+Data-root IDs must be unique within a profile. A single data root cannot define multiple overrides for the same machine. Hostname, username and local path changes do not redefine machine identity.
 
 ## Exclusions
 

@@ -25,7 +25,7 @@ public sealed class GameDataRoot
         {
             ArgumentNullException.ThrowIfNull(pathOverride);
 
-            if (!machineIds.Add(pathOverride.MachineId))
+            if (!machineIds.Add(pathOverride.MachineId.Value))
             {
                 throw new ArgumentException(
                     $"Machine '{pathOverride.MachineId}' has more than one path override for data root '{id}'.",

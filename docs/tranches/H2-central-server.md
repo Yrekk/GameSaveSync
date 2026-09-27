@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** PLANNING / READY FOR DESIGN DISCUSSION  
+**Status:** H2.1A IMPLEMENTED / AWAITING VALIDATION  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -57,6 +57,29 @@ A persisted `GameProfile` is already complete and structurally valid.
 Incomplete UI drafts do not belong in the database.
 
 Global `ProfileId` uniqueness is a persistence/database responsibility.
+
+## Active implementation slice — H2.1A modular persistence foundation
+
+H2.1A materializes the accepted module boundaries without pulling later behavior forward.
+
+Implemented scope:
+
+- add `GameSave.Application`, `GameSave.Persistence` and `GameSave.Storage` projects;
+- add matching focused test projects;
+- wire dependency direction so Application stays framework-independent and Server remains the composition root;
+- add EF Core + SQLite to Persistence only;
+- add an intentionally empty `GameSaveDbContext` with no speculative business tables;
+- introduce `MachineId` in Core and replace raw machine-id strings in `MachinePathOverride`;
+- add architecture/domain tests and module documentation.
+
+Explicitly deferred from H2.1A:
+
+- profile persistence schema/repositories;
+- EF migrations containing business tables;
+- runtime migration/snapshot/recovery coordinator;
+- local save-artifact backend;
+- system-status endpoint;
+- full Machine registry.
 
 ## Candidate H2 slices
 
@@ -129,4 +152,4 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-All seven H2 design questions are resolved. Define the concrete H2.1 implementation slice, files/projects, dependency direction and tests before writing code.
+Run local Release build/tests and inspect the new module boundaries with Damien. H2.1A is not validated until that local review succeeds.

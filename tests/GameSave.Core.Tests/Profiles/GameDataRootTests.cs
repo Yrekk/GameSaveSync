@@ -1,3 +1,4 @@
+using GameSave.Core.Machines;
 using GameSave.Core.Profiles;
 
 namespace GameSave.Core.Tests.Profiles;
@@ -11,8 +12,8 @@ public sealed class GameDataRootTests
             new DataRootId("saves"),
             "%USERPROFILE%\\Zomboid",
             [
-                new MachinePathOverride("pc-fixe", "D:\\GameData\\Zomboid"),
-                new MachinePathOverride("laptop", "E:\\PortableData\\Zomboid")
+                new MachinePathOverride(new MachineId("pc-fixe"), "D:\\GameData\\Zomboid"),
+                new MachinePathOverride(new MachineId("laptop"), "E:\\PortableData\\Zomboid")
             ]);
 
         Assert.Equal(2, root.MachineOverrides.Count);
@@ -33,8 +34,8 @@ public sealed class GameDataRootTests
                 new DataRootId("saves"),
                 "%USERPROFILE%\\Zomboid",
                 [
-                    new MachinePathOverride("PC-FIXE", "D:\\GameData\\Zomboid"),
-                    new MachinePathOverride("pc-fixe", "E:\\Other\\Zomboid")
+                    new MachinePathOverride(new MachineId("PC-FIXE"), "D:\\GameData\\Zomboid"),
+                    new MachinePathOverride(new MachineId("pc-fixe"), "E:\\Other\\Zomboid")
                 ]));
     }
 
