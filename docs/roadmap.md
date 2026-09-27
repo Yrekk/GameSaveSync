@@ -5,8 +5,8 @@ The validated technical solution defines the progression below.
 | Tranche | Purpose | State |
 | --- | --- | --- |
 | H0 | Bootstrap, boundaries, CI and documentation system | Validated |
-| H1 | Generic deterministic domain | Accepted |
-| H2 | Minimal central server, including SQLite metadata persistence boundary | Planned |
+| H1 | Generic deterministic domain | Accepted / merged to develop |
+| H2 | Minimal central server, including SQLite metadata persistence boundary | Planning |
 | H3 | Minimal Windows agent | Planned |
 | H4 | Replaceable minimal UI | Planned |
 | H5 | Reliable transactional transfers | Planned |
