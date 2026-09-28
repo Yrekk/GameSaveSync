@@ -31,3 +31,19 @@ EF migration source code is authored during development, reviewed and versioned 
 Migrations are never applied automatically at startup.
 
 The baseline migration intentionally contains no business tables. H2.2 will add schema only when real persistence use cases arrive.
+
+## H2.1C direction
+
+Persistence will implement the read-only metadata-database inspection port owned by `GameSave.Application`.
+
+The implementation will classify the shared lifecycle states `Missing`, `Uninitialized`, `Ready`, `MigrationRequired`, `TooNew`, `Unavailable`, plus the GameSaveSync-specific `Invalid` state.
+
+Inspection must preserve H2.1B safety:
+
+- no missing database creation;
+- no initialization;
+- no migration execution;
+- no restore/repair side effect;
+- no automatic action selection.
+
+The shared lifecycle/readiness rules live in NexusPrincipia. GameSaveSync keeps only its stronger integrity/recovery extensions locally.

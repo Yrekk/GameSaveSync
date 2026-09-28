@@ -2,7 +2,7 @@
 
 Generic and safe game save protection and synchronization for one or more PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A and H2.1B fully validated on `feature/h2-central-server`. Next step: define H2.1C.
+> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A and H2.1B fully validated on `feature/h2-central-server`. H2.1C metadata-database inspection is designed but not implemented; one classification question remains before coding.
 
 ## Purpose
 
