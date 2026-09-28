@@ -2,7 +2,7 @@
 
 Generic and safe game save protection and synchronization for one or more PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A, H2.1B and H2.1C are fully validated and explicitly accepted. H2.1D metadata readiness/capability policy is implemented as a CI-green candidate awaiting shared review, local validation and explicit acceptance.
+> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A, H2.1B, H2.1C and H2.1D are fully validated and explicitly accepted on `feature/h2-central-server`. The next H2 slice must be scoped and reviewed before implementation.
 
 ## Purpose
 
@@ -110,7 +110,20 @@ Still intentionally deferred:
 - full machine registry;
 - Agent behavior and real save transfers.
 
-Current: H2.1D is implemented as a read-only readiness/capability candidate. Perform shared review and local validation before acceptance.
+### H2.1D — validated
+
+H2.1D established the provider-neutral metadata readiness/capability policy:
+
+- operational modes `Normal`, `Maintenance`, `RestrictedRecovery`, `OutOfService`;
+- abstract recovery availability `Unknown / Available / Unavailable`;
+- `MetadataAuthorityAvailable` kept separate from future whole-system synchronization availability;
+- `SafeCapabilities` kept distinct from authorization, implementation availability and operation-specific preconditions;
+- fail-closed handling of unresolved classification;
+- `OutOfService` keeps status/diagnostics/retry available while exposing that no currently known safe maintenance/recovery path exists;
+- no initialization, migration, snapshot, restore or other mutation is executed by readiness evaluation;
+- final validation: Release build 0 warnings / 0 errors, 104 executed tests passed, with the two expected no-test notices for Server.Tests and IntegrationTests.
+
+Current: H2.1D is accepted. Before further code, define and accept the scope of the next H2 slice.
 ## Repository structure
 
 ```text
