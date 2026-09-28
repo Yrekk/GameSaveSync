@@ -18,27 +18,46 @@ public sealed class EvaluateMetadataDatabaseReadiness
     public MetadataDatabaseReadiness Execute(
         MetadataDatabaseInspection inspection,
         MetadataRecoveryAvailability recoveryAvailability =
-            MetadataRecoveryAvailability.Unknown)
+            MetadataRecoveryAvailability.Unknown,
+        MetadataDatabaseClassificationResolution? classificationResolution = null)
     {
         ArgumentNullException.ThrowIfNull(inspection);
 
-        if (inspection.RequiresAdministratorClassification)
+        if (classificationResolution is not null
+            && !string.Equals(
+                classificationResolution.InspectionRevision,
+                inspection.Context.Revision,
+                StringComparison.Ordinal))
         {
-            return Build(
-                MetadataDatabaseOperationalMode.Maintenance,
-                requiresAdministratorClassification: true,
-                [MetadataDatabaseCapability.ResolveClassification],
-                [
+            throw new ArgumentException(
+                "Classification resolution belongs to a different inspection revision.",
+                nameof(classificationResolution));
+        }
+
+        if (classificationResolution?.RequiresAdministratorClassification == true
+            || classificationResolution is null
+                && inspection.RequiresAdministratorClassification)
+        {
+            var findings = classificationResolution?.Findings.Count > 0
+                ? classificationResolution.Findings
+                : [
                     new InspectionFinding(
                         MetadataDatabaseReadinessFindingCodes.ClassificationRequired,
                         new Dictionary<string, object?>
                         {
                             ["candidate_count"] = inspection.CandidateStates.Count,
                         }),
-                ]);
+                ];
+
+            return Build(
+                MetadataDatabaseOperationalMode.Maintenance,
+                requiresAdministratorClassification: true,
+                [MetadataDatabaseCapability.ResolveClassification],
+                findings);
         }
 
-        var state = inspection.CandidateStates[0];
+        var state = classificationResolution?.EffectiveState
+            ?? inspection.CandidateStates[0];
 
         return state switch
         {
