@@ -1,3 +1,4 @@
+using GameSave.Application.MetadataDatabase;
 using GameSave.Persistence.Database;
 using GameSave.Storage;
 using GameSave.Storage.Local;
@@ -10,6 +11,8 @@ var configuredControlStorePath =
     builder.Configuration["GameSave:ControlStore:Path"];
 var configuredStoragePath =
     builder.Configuration["GameSave:Storage:RootPath"];
+var configuredSnapshotPath =
+    builder.Configuration["GameSave:MetadataSnapshots:Path"];
 
 var metadataDatabaseSettings =
     MetadataDatabaseSettings.FromConfiguredPath(
@@ -23,11 +26,24 @@ var storageSettings =
     LocalSaveArtifactStorageSettings.FromConfiguredPath(
         configuredStoragePath,
         builder.Environment.ContentRootPath);
+var snapshotSettings =
+    MetadataDatabaseSnapshotSettings.FromConfiguredPath(
+        configuredSnapshotPath,
+        builder.Environment.ContentRootPath);
 
 builder.Services.AddGameSavePersistence(
     metadataDatabaseSettings,
-    controlStoreSettings);
+    controlStoreSettings,
+    snapshotSettings);
 builder.Services.AddGameSaveStorage(storageSettings);
+
+builder.Services.AddScoped<InspectMetadataDatabase>();
+builder.Services.AddScoped<ResolveMetadataDatabaseClassification>();
+builder.Services.AddScoped<InspectAndResolveMetadataDatabase>();
+builder.Services.AddScoped<InitializeMetadataDatabase>();
+builder.Services.AddScoped<ApplyPendingMetadataDatabaseMigrations>();
+builder.Services.AddScoped<CreateRollingMetadataDatabaseSnapshot>();
+builder.Services.AddScoped<RestoreMetadataDatabaseSnapshot>();
 
 var app = builder.Build();
 
