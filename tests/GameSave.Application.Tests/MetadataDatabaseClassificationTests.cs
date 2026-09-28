@@ -135,6 +135,50 @@ public sealed class MetadataDatabaseClassificationTests
     }
 
     [Fact]
+    public async Task Authorize_StateOutsideCandidates_IsRejected()
+    {
+        var inspection = CreateAmbiguousInspection("revision:one");
+        var store = FakeStore.Ready();
+        var useCase = CreateAuthorizeUseCase(inspection, store);
+
+        var result = await useCase.ExecuteAsync(
+            new AuthorizeMetadataDatabaseClassificationRequest(
+                inspection.Context.Revision,
+                MetadataDatabaseState.Ready,
+                "admin:damien",
+                "Damien Ferrari"));
+
+        Assert.Equal(
+            AuthorizeMetadataDatabaseClassificationStatus.SelectedStateNotCandidate,
+            result.Status);
+        Assert.Empty(store.Writes);
+    }
+
+    [Fact]
+    public async Task Authorize_ControlStoreFailure_DoesNotReportRecorded()
+    {
+        var inspection = CreateAmbiguousInspection("revision:one");
+        var store = new FakeStore
+        {
+            WriteStatus =
+                MetadataDatabaseClassificationStoreStatus.Unavailable,
+        };
+        var useCase = CreateAuthorizeUseCase(inspection, store);
+
+        var result = await useCase.ExecuteAsync(
+            new AuthorizeMetadataDatabaseClassificationRequest(
+                inspection.Context.Revision,
+                MetadataDatabaseState.Uninitialized,
+                "admin:damien",
+                "Damien Ferrari"));
+
+        Assert.Equal(
+            AuthorizeMetadataDatabaseClassificationStatus.StoreUnavailable,
+            result.Status);
+        Assert.Null(result.Classification);
+    }
+
+    [Fact]
     public async Task Authorize_OverrideWithoutRationale_IsRejected()
     {
         var inspection = CreateAmbiguousInspection("revision:one");
