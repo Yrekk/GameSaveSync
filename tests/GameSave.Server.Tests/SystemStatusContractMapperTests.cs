@@ -2,6 +2,7 @@ using GameSave.Application.MetadataDatabase;
 using GameSave.Application.Storage;
 using GameSave.Application.SystemStatus;
 using GameSave.Server.SystemStatus;
+using Xunit;
 
 namespace GameSave.Server.Tests;
 
