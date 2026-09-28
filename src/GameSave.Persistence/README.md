@@ -48,3 +48,20 @@ Inspection preserves H2.1B safety:
 - no automatic action selection.
 
 The shared lifecycle/readiness and inspection/classification rules live in NexusPrincipia.
+
+
+## H2.1E classification control plane candidate
+
+Persistence now implements the Application classification-store port with a small XML control-plane file separate from the active SQLite metadata database.
+
+The XML file:
+
+- is configured with its own explicit path;
+- keeps complete authorized-classification history;
+- is formatted for human incident/debug reading;
+- stores stable identifiers plus human-readable audit label snapshots;
+- treats a missing file as an empty history;
+- treats malformed/unreadable content as fail-closed state and never silently overwrites it;
+- writes through a temporary file in the same directory and replaces the target atomically.
+
+SQLite inspection also produces an opaque revision from classification-relevant evidence: canonical resource identity, inspection facts, complete EF migration evidence, observed table schema and policy version. Ordinary row-content changes do not intentionally invalidate a classification when schema/authority evidence is unchanged.
