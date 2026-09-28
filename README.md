@@ -2,7 +2,7 @@
 
 Generic and safe game save protection and synchronization for one or more PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A, H2.1B, H2.1C and H2.1D are fully validated and explicitly accepted on `feature/h2-central-server`. The next H2 slice must be scoped and reviewed before implementation.
+> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A–H2.1D are fully validated and explicitly accepted. H2.1E durable authorized classification is implemented as a CI-green candidate awaiting shared review, local validation and explicit acceptance.
 
 ## Purpose
 
@@ -123,7 +123,23 @@ H2.1D established the provider-neutral metadata readiness/capability policy:
 - no initialization, migration, snapshot, restore or other mutation is executed by readiness evaluation;
 - final validation: Release build 0 warnings / 0 errors, 104 executed tests passed, with the two expected no-test notices for Server.Tests and IntegrationTests.
 
-Current: H2.1D is accepted. Before further code, define and accept the scope of the next H2 slice.
+### H2.1E — candidate
+
+H2.1E adds durable authorized classification for ambiguous metadata inspections:
+
+- inspection context now carries stable resource identity, human-readable label, policy version and opaque revision;
+- revision fingerprints classification-relevant SQLite/EF evidence rather than arbitrary business-row contents;
+- deterministic single-state classifications bypass the control store;
+- ambiguous decisions are persisted outside the inspected DB in a human-readable XML control-plane file;
+- complete decision history is retained;
+- actor/resource stable identifiers are stored with human-readable label snapshots;
+- overriding the inspector suggestion requires a rationale;
+- decision recording re-inspects and rejects stale expected revisions;
+- malformed/unavailable control-plane state fails closed without silently overwriting it;
+- H2.1D readiness can consume the resolved effective classification;
+- no database lifecycle mutation is implemented.
+
+Current: H2.1E is a CI-green implementation candidate. Perform shared review and local validation before acceptance.
 ## Repository structure
 
 ```text
