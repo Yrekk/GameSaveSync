@@ -1,122 +1,275 @@
 # Current handoff
 
-**Date:** 27 September 2026  
+**Date:** 28 September 2026  
 **Repository:** `Yrekk/GameSaveSync`  
-**Working branch:** `feature/h1-domain`  
+**Working branch:** `feature/h2-central-server`  
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H1 — Generic deterministic domain (accepted)
+**Current tranche:** H2 — Minimal central server  
+**State:** H2 explicitly accepted; promotion to `develop` authorized
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
-## VALIDATED
+## Current remote reference
 
-- H0 bootstrap is validated and promoted through `main`.
-- H1.1 is validated locally and remotely.
-- H1.2 is validated locally and remotely:
-  - deterministic `SyncAssessment`;
-  - underlying `SyncDisposition`;
-  - cumulative `SyncFindings`;
-  - 15/15 Core tests locally;
-  - Release build, diff-check and working tree clean.
-- Branch promotion policy is `feature/* → develop → deploy/succumbrae → main`.
-- Starting with H1, validated feature work stops at `develop` unless Damien explicitly approves deployment promotion.
+Final H2 implementation candidate:
 
-## ACCEPTED
+```text
+f0c8c1ca956abb3e9932965271e4ea1fb5667121
+```
 
-H1.4 consolidation:
+CI:
 
-- `SyncVersion` is now a strictly-positive immutable reference value object;
-- version `0` is no longer valid or used as a sentinel;
-- missing local/central versions are explicit nullable state;
-- initial publication and missing-version truth-table cases are implemented and tested;
-- known local base + missing central is explicit `InconsistentState`;
-- `SyncAssessment` is now a reference result so default struct state cannot masquerade as a valid assessment.
+```text
+run 36424017414 — SUCCESS
+Release build: 0 warnings / 0 errors
 
-H1.3 remains validated.
+GameSave.Core.Tests        : 57 passed
+GameSave.Application.Tests : 39 passed
+GameSave.Persistence.Tests : 35 passed
+GameSave.Storage.Tests     : 7 passed
+GameSave.Server.Tests      : 1 passed
+GameSave.IntegrationTests  : 1 passed
+TOTAL                      : 140 passed
+```
 
-## H1.3 VALIDATED DETAILS
+The old "no tests available" warnings for Server.Tests and IntegrationTests are no longer expected: both projects now contain real executable tests.
 
-H1.3 on `feature/h1-domain`:
+## H2 result
 
-- `ProfileId` stable normalized slug as an immutable reference value object;
-- `DataRootId` stable logical-root slug as an immutable reference value object;
-- `MachinePathOverride` immutable reference object;
-- `GameDataRoot` with default path and per-machine overrides;
-- `RecoveryPolicy` with disabled/managed-checkpoint modes;
-- complete/always-valid `GameProfile`;
-- profile-domain invariant tests;
-- profile-domain README;
-- ADR-0001 accepting central SQLite metadata persistence.
+H2 turns the ASP.NET host into the first real central GameSaveSync authority boundary while keeping later Agent/transfer/Custodia work out of scope.
 
-## DECIDED BUT NOT YET IMPLEMENTED
+### Metadata database foundation
 
-### Persistence
+Implemented:
 
-GameSaveSync will use one central SQLite database for server-side configuration and metadata.
+- explicit configured SQLite metadata path;
+- normal operational access cannot silently create a missing DB;
+- explicit initialization semantics remain distinct from migration and restore;
+- versioned EF migrations;
+- read-only database inspection;
+- observed facts separated from semantic classification;
+- durable Admin classification outside the inspected DB;
+- human-readable XML control-plane history;
+- fresh inspection revision check before durable human decisions;
+- metadata readiness modes: `Normal / Maintenance / RestrictedRecovery / OutOfService`;
+- fail-closed behavior without equating readiness failure to Server process death.
 
-- active DB on Succumbrae local storage;
-- not hosted live on Custodia/SMB;
-- Custodia receives SQLite-safe backups;
-- save payloads remain files, not DB blobs;
-- Core has no SQLite dependency;
-- repository/schema/migration work begins in H2;
-- global `ProfileId` uniqueness is a repository/database invariant.
+### GameProfile persistence
 
-### Recovery
+Implemented:
 
-Managed recovery checkpoints remain parallel to normal synchronization.
+- complete valid `GameProfile` persistence behind an Application repository port;
+- migration `20260928123000_AddGameProfiles`;
+- global `ProfileId` persistence key;
+- human-readable `DisplayName` duplicated beside the serialized aggregate for diagnostics/listing;
+- complete aggregate stored as a versioned JSON persistence document;
+- Persistence DTO/mapping remains outside Core;
+- repository round-trip and update tests.
 
-- opt-in per profile;
-- initial Project Zomboid direction: approximately 10-minute interval;
-- minimum two rolling checkpoints: current + previous;
-- checkpoint carries source machine and base-version context;
-- local state is quarantined before recovery restoration;
-- cleanup waits for user validation plus successful final central promotion acknowledgement.
+The JSON aggregate is intentionally not split into speculative relational tables because H2 has no use case that needs SQL queries over every nested profile field yet.
 
-See `docs/architecture/recovery-checkpoints.md`.
+### Metadata snapshots and administrative operations
 
-### Operational diagnostics
+Implemented Application use cases:
 
-Structured runtime diagnostics feed console, local files and a future filterable live Admin stream. Normal remote levels are Information through Critical; Debug/Trace remain local unless temporarily enabled with expiry.
+- `InitializeMetadataDatabase`;
+- `ApplyPendingMetadataDatabaseMigrations`;
+- `CreateRollingMetadataDatabaseSnapshot`;
+- `RestoreMetadataDatabaseSnapshot`.
 
-## TESTS / SMOKE
+Implemented Persistence infrastructure:
 
-H1.1 and H1.2 are green remotely and locally.
+- SQLite-safe backup through `BackupDatabase`;
+- validated snapshot candidates;
+- rolling retention = 2;
+- mandatory pre-migration snapshot;
+- explicit snapshot id for restore;
+- no automatic "restore newest";
+- active broken DB quarantined during restore;
+- post-operation reinspection;
+- no automatic startup initialization/migration/restore.
 
-H1.3 remote CI and local validation are green: Release build green, 44/44 tests passing, diff-check clean, working tree clean.
+Important Windows/SQLite detail:
 
-Expected local-test warnings that may be ignored for now:
+- snapshot source/destination/validation connections intentionally avoid pooling where file replacement/rotation is involved;
+- restore clears only the active metadata connection pool, never `ClearAllPools()`.
 
-- `GameSave.Server.Tests`: no tests available;
-- `GameSave.IntegrationTests`: no tests available.
+### Save artifact Storage boundary
 
-These projects are intentionally empty at the current tranche. Do not add fake tests to silence the warnings.
+Implemented:
 
-No filesystem, save, NAS, Windows process, network, SQLite or synchronization transfer behavior has been introduced in Core.
+- `IGameSaveArtifactStorage` Application port;
+- local filesystem backend in `GameSave.Storage`;
+- artifact identity includes profile + logical artifact + data root + relative path;
+- basic write/read/existence/status behavior;
+- atomic temp-file write before final replace;
+- path traversal rejected (`..`, absolute paths, etc.);
+- Storage remains separate from EF/SQLite Persistence;
+- no H5 reliable publication/version protocol yet;
+- no H8 Custodia/NAS backend yet.
 
-H1.4 remote and local validation are green: Release build green, 51/51 tests passing, diff-check clean and working tree clean. Final feature-branch CI is green.
+Storage composition does not create/touch the root path at Server startup. A broken storage target must remain diagnosable through system status instead of crashing the process before diagnostics are available.
 
-Final H1 audit confirms the branch is ahead of `develop` with no H2 infrastructure pulled forward.
+### First real transport boundary
 
-## KNOWN RISKS
+Implemented:
 
-- Keep profile configuration generic; no hard-coded Project Zomboid rule may enter Core.
-- Do not let UI drafts become persisted `GameProfile` objects.
-- Core validates ID shape, but only the future repository/database can enforce global profile-ID uniqueness.
-- Recovery configuration must remain separate from actual checkpoint execution/storage.
+```text
+GET /api/system/status
+```
 
-## READ FIRST NEXT SESSION
+Flow:
 
-1. root `README.md`;
-2. this file;
-3. `docs/tranches/H1-domain.md`;
-4. `src/GameSave.Core/Profiles/README.md`;
-5. `src/GameSave.Core/Synchronization/README.md`;
-6. `docs/decisions/ADR-0001-server-metadata-sqlite.md`;
-7. actual remote branch and HEAD.
+```text
+HTTP
+→ GameSave.Server adapter
+→ GetSystemStatus
+→ metadata inspect + authorized classification
+→ metadata readiness
+→ recovery snapshot availability
+→ storage readiness
+→ GameSave.Contracts DTO
+```
+
+The response exposes:
+
+- overall operational mode;
+- synchronization availability;
+- effective metadata state;
+- metadata operational mode;
+- Admin-classification requirement;
+- migration pending signal;
+- snapshot recovery availability;
+- Storage status;
+- structured finding codes.
+
+Process liveness remains distinct from operational readiness.
+
+A real integration test boots the ASP.NET application with isolated temporary paths and calls `GET /api/system/status`.
+
+## Explicitly still deferred after H2
+
+H2 does **not** implement:
+
+- Windows Agent behavior;
+- machine enrollment/registry workflow;
+- process detection;
+- save-folder monitoring;
+- Windows lifecycle handling;
+- transactional transfer/version publication;
+- conflict transfer protocol;
+- real Custodia storage;
+- Project Zomboid-specific profile behavior;
+- Web/Admin UI;
+- transport authentication/authorization for destructive administrative operations;
+- managed game-save recovery checkpoints.
+
+These belong to later tranches.
+
+## Shared development workflow
+
+NexusPrincipia was updated during H2.
+
+Current shared rule:
+
+- one functional tranche = one dedicated development session;
+- internal technical checkpoints are allowed and encouraged;
+- checkpoints are not mini-tranches and do not each require acceptance/local validation/document closure;
+- pause implementation only for real architectural/product/safety decisions;
+- continuous CI/testing during the tranche;
+- final review focuses on tricky/important code instead of exhaustive questionnaires;
+- explicit local validation + human acceptance close the functional tranche;
+- next functional tranche starts in a new session.
+
+Authoritative reference:
+
+`NexusPrincipia/docs/development/ai-development-operating-model.md`
+
+## Final H2 review — files worth opening
+
+Do not review every changed file line-by-line.
+
+The useful technical review is concentrated here:
+
+### 1. Versioned aggregate persistence
+
+```text
+src/GameSave.Persistence/Profiles/GameProfileDocument.cs
+src/GameSave.Persistence/Profiles/EfGameProfileRepository.cs
+```
+
+Topics:
+
+- why Persistence owns the serialization DTO;
+- why the stored aggregate has a schema version;
+- why `ProfileId` / `DisplayName` are duplicated outside the payload;
+- why nested profile fields were not prematurely normalized into multiple SQL tables.
+
+### 2. SQLite snapshot / restore
+
+```text
+src/GameSave.Persistence/Database/SqliteMetadataDatabaseSnapshotStore.cs
+```
+
+Topics:
+
+- `BackupDatabase` instead of copying a live SQLite file blindly;
+- validation before restore;
+- explicit snapshot selection;
+- broken active DB quarantine;
+- targeted pool handling;
+- why snapshot connections avoid pooling on Windows.
+
+### 3. Storage path safety
+
+```text
+src/GameSave.Application/Storage/SaveArtifactKey.cs
+src/GameSave.Storage/Local/LocalGameSaveArtifactStorage.cs
+```
+
+Topics:
+
+- provider-neutral artifact key;
+- rejection of absolute/traversal paths;
+- second containment check after `Path.GetFullPath`;
+- atomic temp write.
+
+### 4. Whole-system readiness
+
+```text
+src/GameSave.Application/SystemStatus/GetSystemStatus.cs
+src/GameSave.Server/Program.cs
+src/GameSave.Server/SystemStatus/SystemStatusContractMapper.cs
+```
+
+Topics:
+
+- metadata authority alone is not enough for synchronization availability;
+- recovery availability participates in metadata readiness;
+- Storage participates in global readiness;
+- HTTP adapter maps to transport DTO and owns no business policy;
+- Server startup still performs no implicit DB lifecycle mutation.
+
+## H2 FINAL ACCEPTANCE
+
+Damien explicitly accepted H2 on 28 September 2026 after:
+
+- remote CI green: 140/140 tests, Release 0 warnings / 0 errors;
+- matching local validation: 140/140 tests, 0 warnings / 0 errors;
+- manual `GET /api/system/status` smoke test with expected Maintenance/Missing/Storage Ready result;
+- targeted code review of the tricky persistence, snapshot, storage-safety and readiness mechanisms.
+
+No structural change was requested after the review.
+
+Promotion of H2 to `develop` is explicitly authorized.
 
 ## NEXT EXACT ACTION
 
-H1 is explicitly accepted. Merge `feature/h1-domain` into `develop`, then create the H2 feature branch from the resulting `develop` head. Do not promote to `deploy/succumbrae` or `main`.
+Merge `feature/h2-central-server` into `develop`, verify the merged HEAD and CI, then prepare H3 planning.
+
+H3 is the minimal Windows Agent tranche. Before implementation, present the concise H3 scope, what remains deliberately deferred to H4+ and the principal checkpoints (targeting H3.1 / H3.2 / H3.3 only, unless a genuinely separate architectural unit justifies otherwise).
+
+No promotion to `deploy/succumbrae` or `main` is authorized.
+

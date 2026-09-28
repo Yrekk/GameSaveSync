@@ -1,3 +1,5 @@
+using GameSave.Core.Machines;
+
 namespace GameSave.Core.Profiles;
 
 /// <summary>
@@ -19,7 +21,7 @@ public sealed class GameDataRoot
         DefaultPath = defaultPath;
 
         var overrides = machineOverrides?.ToArray() ?? [];
-        var machineIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var machineIds = new HashSet<MachineId>();
 
         foreach (var pathOverride in overrides)
         {

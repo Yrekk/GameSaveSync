@@ -12,6 +12,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\GameSave.Application\GameSave.Application.csproj" />
     <ProjectReference Include="..\..\src\GameSave.Server\GameSave.Server.csproj" />
   </ItemGroup>
 </Project>

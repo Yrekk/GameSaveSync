@@ -1,27 +1,22 @@
+using GameSave.Core.Machines;
+
 namespace GameSave.Core.Profiles;
 
 /// <summary>
-/// Overrides one data-root path for a specific machine.
+/// Overrides one data-root path for a specific logical GameSaveSync machine.
 /// </summary>
 public sealed record MachinePathOverride
 {
-    public MachinePathOverride(string machineId, string path)
+    public MachinePathOverride(MachineId machineId, string path)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(machineId);
+        ArgumentNullException.ThrowIfNull(machineId);
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-
-        if (!string.Equals(machineId, machineId.Trim(), StringComparison.Ordinal))
-        {
-            throw new ArgumentException(
-                "Machine id must not contain leading or trailing whitespace.",
-                nameof(machineId));
-        }
 
         MachineId = machineId;
         Path = path;
     }
 
-    public string MachineId { get; }
+    public MachineId MachineId { get; }
 
     public string Path { get; }
 }

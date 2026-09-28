@@ -3,7 +3,9 @@
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GameSave.Core\GameSave.Core.csproj" />
+    <ProjectReference Include="..\GameSave.Application\GameSave.Application.csproj" />
     <ProjectReference Include="..\GameSave.Contracts\GameSave.Contracts.csproj" />
+    <ProjectReference Include="..\GameSave.Persistence\GameSave.Persistence.csproj" />
+    <ProjectReference Include="..\GameSave.Storage\GameSave.Storage.csproj" />
   </ItemGroup>
 </Project>

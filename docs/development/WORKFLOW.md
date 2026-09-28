@@ -1,23 +1,18 @@
 # Development workflow
 
-**Status:** active project rule
+**Status:** active GameSaveSync project rule
 
-## Sources of truth
+The shared development operating model is maintained centrally in NexusPrincipia:
 
-When information conflicts:
+- [AI-assisted development operating model](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/ai-development-operating-model.md)
+- [Project bootstrap](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/project-bootstrap.md)
+- [Session continuity](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/session-continuity.md)
+- [Documentation conventions](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/documentation-conventions.md)
+- [C# / .NET conventions](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/languages/csharp-dotnet.md)
 
-1. current code on the working branch;
-2. Damien's latest explicit decision;
-3. current handoff;
-4. current project documentation;
-5. validated technical solution;
-6. project master prompt;
-7. adapted collaboration conventions;
-8. historical conversations.
+This file contains only **GameSaveSync-specific additions**.
 
-A significant contradiction is reported rather than silently reconciled.
-
-## Start of a session
+## Start of a GameSaveSync session
 
 Before substantial work:
 
@@ -27,11 +22,11 @@ Before substantial work:
 4. verify the actual remote branch and HEAD;
 5. inspect the files relevant to the next action.
 
-If Damien says he pushed changes, re-read the remote HEAD before continuing.
+The validated technical solution and the dedicated GameSaveSync master prompt remain project-specific sources of truth.
 
 ## Branching policy
 
-The repository uses the following promotion path:
+GameSaveSync uses:
 
 ```text
 feature/*
@@ -43,96 +38,51 @@ deploy/succumbrae
 main
 ```
 
-Responsibilities:
+- `feature/*` contains the active tranche/focused change.
+- `develop` receives work that Damien has explicitly accepted.
+- `deploy/succumbrae` is the deployment candidate.
+- `main` represents the stable validated deployment state.
 
-- `feature/*` contains work for an active tranche or focused change. New feature branches start from `develop`.
-- `develop` is the integration branch for work that has been validated and explicitly accepted.
-- `deploy/succumbrae` is the deployment-candidate branch for the Succumbrae environment.
-- `main` represents the stable state whose deployment has been validated.
+Starting with H1, the normal stopping point is `develop`.
 
-Promotion is deliberate:
+No promotion to `deploy/succumbrae` or `main` occurs without Damien's explicit approval.
 
-- a feature does not bypass `develop`;
-- `develop` is not promoted to `deploy/succumbrae` without an explicit deployment decision;
-- `main` is updated only after the deployment candidate has been validated;
-- no direct feature-to-`main` merge is part of the normal workflow.
+## GameSaveSync tranche tracking
 
-H0 is the bootstrap exception explicitly approved for promotion through the complete chain so all long-lived branches start from the same validated baseline.
-
-Starting with H1, the default stopping point is `develop`. Promotion beyond `develop` requires Damien's explicit approval.
-
-## Feature workflow
-
-```text
-feature branch from develop
-→ code + tests + documentation
-→ remote branch update
-→ Damien pulls locally
-→ brief explaining responsibilities and changes
-→ targeted/full tests as relevant
-→ smoke tests when relevant
-→ corrections on the feature branch
-→ explicit tranche acceptance
-→ merge into develop
-→ stop unless deployment promotion is explicitly approved
-```
-
-## Tranches
-
-Each significant tranche has one living tracking document recording:
+Each significant tranche has a living document under `docs/tranches/` recording:
 
 - objective and status;
-- chosen technical approach;
-- sub-slices when useful;
-- decisions;
-- relevant commits;
+- scope and explicit deferrals;
+- technical decisions;
+- commits;
 - tests and smoke tests;
 - known limits;
 - next exact action.
 
-Do not grow the scope silently. Useful non-blocking ideas go to the roadmap/backlog.
+Useful ideas outside the current scope go to the roadmap/backlog.
 
-## Documentation standard
+## Validation
 
-Documentation is part of the Definition of Done.
+Typical .NET validation:
 
-Comment and document **why** when it is useful:
+```powershell
+dotnet build GameSaveSync.sln --configuration Release
+dotnet test GameSaveSync.sln --configuration Release --no-build
+git diff --check
+git status --short
+```
 
-- architectural responsibility;
-- invariant;
-- non-obvious contract;
-- ordering/safety reason;
-- important side effect;
-- deliberate trade-off.
+Additional targeted or smoke tests are added when the tranche requires them.
 
-Do not comment what names and types already make obvious.
+CI success alone does not accept a tranche. Damien's local/explicit validation remains the final tranche gate.
 
-A simple DTO or model needs no essay. Explain its representation only when the choice matters, for example because of compatibility, serialization, security, immutability or a deliberate separation between domain and transport types.
+## Project-specific Definition of Done
 
-Meaningful subsystem folders receive a concise README explaining what belongs there and what does not. Trivial folders do not receive artificial documentation.
+A GameSaveSync tranche is accepted only when:
 
-## Handoff
-
-`docs/continuity/CURRENT_HANDOFF.md` is the single current recovery entry point.
-
-It separates:
-
-- **VALIDATED**;
-- **IMPLEMENTED BUT NOT YET VALIDATED**;
-- **DECIDED BUT NOT YET IMPLEMENTED**.
-
-The handoff explains state; Git proves what code exists.
-
-## Definition of Done
-
-A tranche is validated only when:
-
-- implementation matches its agreed scope;
-- relevant automated checks are green;
+- implementation matches the accepted scope;
+- relevant checks are green;
 - required smoke tests are green;
-- documentation is current;
-- tranche tracking is current;
-- current handoff is current;
+- tranche documentation is current;
+- `CURRENT_HANDOFF.md` is current;
 - Damien explicitly accepts the tranche.
-
-Passing CI alone is not acceptance.
