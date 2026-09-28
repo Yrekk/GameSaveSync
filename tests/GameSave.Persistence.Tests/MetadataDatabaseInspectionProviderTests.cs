@@ -169,6 +169,57 @@ public sealed class MetadataDatabaseInspectionProviderTests
         Assert.Equal(first.Facts, second.Facts);
     }
 
+    [Fact]
+    public async Task ReopenRevision_IsDeterministic()
+    {
+        using var fixture = CreateFixture();
+        await fixture.ApplyBaselineMigrationAsync();
+
+        var first = await CreateProvider(fixture).InspectAsync();
+        var second = await CreateProvider(fixture).InspectAsync();
+
+        Assert.Equal(first.Context.Revision, second.Context.Revision);
+        Assert.Equal(
+            $"metadata-database:{Path.GetFullPath(fixture.Settings.DatabasePath)}",
+            first.Context.ResourceIdentity);
+        Assert.Equal(
+            MetadataDatabaseClassificationPolicy.CurrentVersion,
+            first.Context.ClassificationPolicyVersion);
+    }
+
+    [Fact]
+    public async Task SchemaChange_ChangesInspectionRevision()
+    {
+        using var fixture = CreateFixture();
+        await fixture.CreateEmptyDatabaseAsync();
+
+        var before = await CreateProvider(fixture).InspectAsync();
+
+        await fixture.ExecuteSqlAsync(
+            "CREATE TABLE ExternalData (Id INTEGER PRIMARY KEY);");
+
+        var after = await CreateProvider(fixture).InspectAsync();
+
+        Assert.NotEqual(before.Context.Revision, after.Context.Revision);
+    }
+
+    [Fact]
+    public async Task DataChangeWithoutSchemaChange_DoesNotChangeInspectionRevision()
+    {
+        using var fixture = CreateFixture();
+        await fixture.ExecuteSqlAsync(
+            "CREATE TABLE ExternalData (Id INTEGER PRIMARY KEY, Name TEXT);");
+
+        var before = await CreateProvider(fixture).InspectAsync();
+
+        await fixture.ExecuteSqlAsync(
+            "INSERT INTO ExternalData (Name) VALUES ('example');");
+
+        var after = await CreateProvider(fixture).InspectAsync();
+
+        Assert.Equal(before.Context.Revision, after.Context.Revision);
+    }
+
     private static SqliteMetadataDatabaseInspectionProvider CreateProvider(
         TestDatabaseFixture fixture)
     {
