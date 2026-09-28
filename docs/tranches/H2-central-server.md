@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1D ACCEPTED — H2.1E AUTHORIZED CLASSIFICATION CONTROL-PLANE SCOPED / IMPLEMENTATION STARTING  
+**Status:** H2.1D ACCEPTED — H2.1E IMPLEMENTED CANDIDATE — CI GREEN — AWAITING REVIEW / LOCAL VALIDATION / ACCEPTANCE  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -582,6 +582,55 @@ control store unavailable/invalid
 
 The H2.1E Application use case assumes its caller has already passed the future authorization boundary; it records the supplied actor identity for audit.
 
+### H2.1E implementation candidate
+
+Implemented in Application:
+
+- `MetadataDatabaseInspectionContext`;
+- `AuthorizedMetadataDatabaseClassification`;
+- classification-store port/read status;
+- deterministic / authorized / unresolved resolution;
+- fresh-revision authorization use case;
+- classification findings for stale/store failure;
+- H2.1D readiness integration through effective classification.
+
+Implemented in Persistence:
+
+- classification-relevant SQLite/EF revision fingerprint;
+- explicit `MetadataDatabaseControlStoreSettings`;
+- human-readable `XmlMetadataDatabaseClassificationStore`;
+- complete history;
+- atomic temp-file replacement;
+- strict malformed/unavailable fail-closed handling;
+- DI registration and Server development configuration.
+
+NexusPrincipia was updated with:
+
+- fresh-inspection revision checking before durable human decisions;
+- shared stable-identifier + human-readable-label snapshot audit rule.
+
+Final code candidate before candidate documentation:
+
+```text
+61d852f6e1a3ac8d58a37511ec5e5fe23d8b3559
+```
+
+CI:
+
+```text
+run 36418626966 — SUCCESS
+Release build: 0 warnings / 0 errors
+GameSave.Core.Tests        : 57 passed
+GameSave.Application.Tests : 34 passed
+GameSave.Persistence.Tests : 31 passed
+GameSave.Storage.Tests     : 1 passed
+TOTAL                      : 123 passed
+```
+
+`GameSave.Server.Tests` and `GameSave.IntegrationTests` still intentionally have no executable tests.
+
+The candidate remains unaccepted until shared pedagogical review and Damien local validation.
+
 ## Candidate H2 slices
 
 These are planning candidates, not implementation commitments. They must be confirmed during the H2 design discussion.
@@ -653,13 +702,7 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Implement H2.1E exactly as scoped above:
-
-1. extend inspection with resource identity/revision/policy context;
-2. add Application decision/resolution contracts and use cases;
-3. add external XML control-store Persistence implementation with atomic writes;
-4. cover freshness, rationale, compatibility, history and fail-closed behavior;
-5. run CI and mandatory pedagogical review before acceptance.
+Perform the mandatory H2.1E pedagogical review with Damien, apply any structural correction, then run Damien local validation before explicit acceptance.
 
 Do not implement lifecycle mutations, snapshots, HTTP/Admin UI or business persistence in H2.1E.
 
