@@ -76,9 +76,19 @@ Validated H2.1B rules:
 - initialize, migrate and restore are distinct decisions;
 - EF infrastructure remains internal to Persistence.
 
+Validated H2.1C rules:
+
+- metadata DB inspection is read-only and reusable through Application;
+- observed facts are not rewritten to match a semantic classification;
+- SQLite integrity (for example `PRAGMA quick_check`) is distinct from GameSaveSync schema/history coherence;
+- ambiguous observations expose constrained candidate states plus a suggestion rather than an inspector-owned decision;
+- findings are stable machine-readable `code + details` values rendered into human prose only by adapters;
+- proven states such as `Ready` remain deterministic; `Invalid` is not a generic rejection button;
+- durable future Admin classifications belong to trusted control-plane state outside an ambiguous/rejected inspected resource.
+
 Custodia is intended to receive safe backups later.
 
-GameSaveSync follows the shared [NexusPrincipia database lifecycle/readiness reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md).
+GameSaveSync follows the shared [NexusPrincipia database lifecycle/readiness reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md), [inspection/classification authority reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/inspection-classification-authority.md) and [structured inspection findings reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/structured-inspection-findings.md).
 
 GameSaveSync-specific extensions are:
 
