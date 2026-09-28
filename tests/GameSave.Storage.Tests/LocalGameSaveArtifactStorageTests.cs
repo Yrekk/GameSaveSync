@@ -37,6 +37,17 @@ public sealed class LocalGameSaveArtifactStorageTests
     }
 
     [Fact]
+    public async Task CheckStatus_MissingLeafUnderExistingAncestor_IsReadyWithoutCreatingIt()
+    {
+        using var fixture = new StorageFixture();
+
+        var status = await fixture.CreateStorage().CheckStatusAsync();
+
+        Assert.Equal(SaveStorageStatus.Ready, status);
+        Assert.False(Directory.Exists(fixture.RootPath));
+    }
+
+    [Fact]
     public async Task CheckStatus_ReportsConfiguredExistingRootReady()
     {
         using var fixture = new StorageFixture();

@@ -13,11 +13,9 @@ public static class StorageServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(settings);
 
-        // Storage root creation is infrastructure bootstrap, not save publication.
-        // Creating it here lets read-only system status check a stable configured root
-        // without turning a GET status request into a filesystem mutation.
-        Directory.CreateDirectory(settings.RootPath);
-
+        // Do not touch the filesystem during composition. A broken/missing storage
+        // target must remain observable through system status instead of crashing
+        // the whole Server before diagnostics are available.
         services.AddSingleton(settings);
         services.AddSingleton<IGameSaveArtifactStorage, LocalGameSaveArtifactStorage>();
 

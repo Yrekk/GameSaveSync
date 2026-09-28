@@ -88,11 +88,28 @@ internal sealed class LocalGameSaveArtifactStorage(
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var ready = Directory.Exists(_settings.RootPath)
-            && !File.Exists(_settings.RootPath);
+        if (File.Exists(_settings.RootPath))
+        {
+            return Task.FromResult(SaveStorageStatus.Unavailable);
+        }
+
+        if (Directory.Exists(_settings.RootPath))
+        {
+            return Task.FromResult(SaveStorageStatus.Ready);
+        }
+
+        // A missing leaf directory is acceptable: the first artifact write may
+        // create it. Status stays read-only, so walk to an existing ancestor
+        // rather than probing permissions by creating/deleting a file.
+        var current = Directory.GetParent(_settings.RootPath);
+
+        while (current is not null && !current.Exists)
+        {
+            current = current.Parent;
+        }
 
         return Task.FromResult(
-            ready
+            current is not null
                 ? SaveStorageStatus.Ready
                 : SaveStorageStatus.Unavailable);
     }
