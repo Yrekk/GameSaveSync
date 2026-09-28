@@ -4,6 +4,8 @@ This folder contains the pure domain definition of a synchronizable game profile
 
 A `GameProfile` is always structurally valid. UI drafts, incomplete forms and partially entered configuration are not `GameProfile` instances and must stay outside the domain until validation succeeds.
 
+A profile is not tied to exactly one computer. It may be used by **1 to N logical machines**. A one-machine profile still benefits from central protection/versioned storage; additional machines add synchronization.
+
 ## Stable identity
 
 `ProfileId` is a normalized lowercase slug such as:
