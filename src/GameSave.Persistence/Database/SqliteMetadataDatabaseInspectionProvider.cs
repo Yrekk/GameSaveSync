@@ -90,6 +90,7 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
         {
             return BuildInvalid(
                 targetMigration,
+                integrityValid: false,
                 $"SQLite opened the file path but could not interpret it as a coherent database: error {exception.SqliteErrorCode}.");
         }
         catch (IOException)
@@ -111,6 +112,7 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
             {
                 return BuildInvalid(
                     targetMigration,
+                    integrityValid: false,
                     "SQLite integrity checking reported corruption or structural inconsistency.");
             }
 
@@ -154,7 +156,8 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
         {
             return BuildInvalid(
                 targetMigration,
-                $"The SQLite database or GameSaveSync migration history could not be read coherently: error {exception.SqliteErrorCode}.");
+                integrityValid: true,
+                $"The GameSaveSync schema or migration history could not be read coherently: error {exception.SqliteErrorCode}.");
         }
     }
 
@@ -269,6 +272,7 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
 
     private static MetadataDatabaseInspection BuildInvalid(
         string? targetMigration,
+        bool integrityValid,
         string reason)
     {
         return new MetadataDatabaseInspection(
@@ -276,7 +280,7 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
                 FileExists: true,
                 PathOccupiedByNonFile: false,
                 Accessible: true,
-                IntegrityValid: false,
+                IntegrityValid: integrityValid,
                 HasMigrationHistoryTable: null,
                 AppliedMigrationCount: null,
                 UserTableCount: null,

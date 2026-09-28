@@ -39,6 +39,9 @@ public sealed class MetadataDatabaseInspectionProviderTests
         Assert.True(inspection.RequiresAdministratorClassification);
         Assert.Equal(0, inspection.Facts.UserTableCount);
         Assert.Equal(0, inspection.Facts.AppliedMigrationCount);
+
+        var tableNames = await fixture.ReadTableNamesAsync();
+        Assert.Empty(tableNames);
     }
 
     [Fact]
@@ -91,6 +94,23 @@ public sealed class MetadataDatabaseInspectionProviderTests
 
         Assert.Equal(MetadataDatabaseState.TooNew, inspection.SuggestedState);
         Assert.Contains(MetadataDatabaseState.Invalid, inspection.CandidateStates);
+    }
+
+    [Fact]
+    public async Task IncoherentMigrationHistory_IsInvalidWithoutRewritingIntegrityFact()
+    {
+        using var fixture = CreateFixture();
+        await fixture.ExecuteSqlAsync(
+            """
+            CREATE TABLE "__EFMigrationsHistory" (
+                WrongColumn TEXT NOT NULL
+            );
+            """);
+
+        var inspection = await CreateProvider(fixture).InspectAsync();
+
+        Assert.Equal(MetadataDatabaseState.Invalid, inspection.SuggestedState);
+        Assert.True(inspection.Facts.IntegrityValid);
     }
 
     [Fact]
@@ -200,6 +220,36 @@ public sealed class MetadataDatabaseInspectionProviderTests
             await using var command = connection.CreateCommand();
             command.CommandText = sql;
             await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task<IReadOnlyList<string>> ReadTableNamesAsync()
+        {
+            await using var connection = new SqliteConnection(
+                TestConnectionString(
+                    MetadataDatabaseConnectionStrings
+                        .ForOperationalUse(Settings)));
+
+            await connection.OpenAsync();
+
+            await using var command = connection.CreateCommand();
+            command.CommandText =
+                """
+                SELECT name
+                FROM sqlite_master
+                WHERE type = 'table'
+                  AND name NOT LIKE 'sqlite_%'
+                ORDER BY name;
+                """;
+
+            await using var reader = await command.ExecuteReaderAsync();
+            var names = new List<string>();
+
+            while (await reader.ReadAsync())
+            {
+                names.Add(reader.GetString(0));
+            }
+
+            return names;
         }
 
         public async Task ApplyBaselineMigrationAsync()

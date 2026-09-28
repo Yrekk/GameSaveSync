@@ -152,7 +152,7 @@ GameSaveSync adds:
 Invalid
 ```
 
-`Invalid` means the database is reachable but fails SQLite integrity or GameSaveSync consistency checks. It is an observation, not a restore decision.
+`Invalid` means the database is not accepted as usable GameSaveSync metadata authority. The inspector suggests it for SQLite/GameSaveSync inconsistency; an authorized Admin may also select it from a fact-compatible candidate set to reject an otherwise technically compatible database. It is a classification, not a restore/delete/overwrite decision.
 
 ### Application boundary
 
