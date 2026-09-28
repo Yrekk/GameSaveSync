@@ -24,7 +24,7 @@ The inspection use case must not initialize, migrate, restore, bind or repair th
 
 Shared lifecycle/readiness and inspection/classification rules live in NexusPrincipia. GameSaveSync keeps only project-specific state semantics and safety policy.
 
-## Active H2.1D metadata readiness policy
+## Validated H2.1D metadata readiness policy
 
 Application now derives a provider-neutral metadata readiness view from H2.1C inspection results.
 
@@ -39,4 +39,4 @@ The readiness vocabulary is:
 
 `SafeCapabilities` means only "not ruled out by metadata readiness". It does not bypass later authorization, implementation availability or operation-specific validation.
 
-H2.1D remains read-only and does not implement initialization, migration, snapshot discovery/restore or classification persistence.
+H2.1D is validated and remains read-only. It does not implement initialization, migration, snapshot discovery/restore or classification persistence. `OutOfService` preserves status/diagnostic/retry capability while exposing that no currently known safe maintenance/recovery path exists.
