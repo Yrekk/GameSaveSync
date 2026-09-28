@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1C — Metadata database inspection (implementation candidate committed; awaiting CI/shared review/explicit acceptance)
+**Current tranche:** H2.1C — Metadata database inspection (fully validated and explicitly accepted; next H2 slice not yet scoped)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -100,6 +100,46 @@ The shared review is now completed and produced structural corrections:
 
 Damien completed the post-review local validation successfully and explicitly accepted H2.1B on 28 September 2026.
 
+
+## VALIDATED H2.1C
+
+### H2.1C — Read-only metadata database inspection
+
+H2.1C is fully validated and explicitly accepted by Damien on 28 September 2026.
+
+Final code HEAD before documentation closure:
+
+```text
+d7898c5f2c9d8e96dd23940d3490dbdac65f083c
+```
+
+Final CI:
+
+- run `36407964589` — SUCCESS;
+- Release build: 0 warnings, 0 errors;
+- Core: 57 tests passed;
+- Application: 7 tests passed;
+- Persistence: 24 tests passed;
+- Storage: 1 test passed;
+- total executed: 89 passed, 0 failed;
+- Server.Tests and IntegrationTests retain the two expected no-test notices.
+
+Validated behavior:
+
+- inspection is strictly read-only and never creates a missing DB;
+- Application owns provider-neutral states, facts, findings, candidates, suggestion and the reusable inspection use case;
+- Persistence owns SQLite/EF observation and database-specific classification;
+- `Missing / Uninitialized / Ready / MigrationRequired / TooNew / Unavailable / Invalid` follow the shared Nexus lifecycle vocabulary;
+- ambiguous evidence exposes only fact-compatible candidates and a non-authoritative suggestion;
+- deterministic evidence such as proven `Ready` exposes a single state;
+- structured findings use stable Nexus-compatible `code + details`, including immutable transport-safe primitive collections;
+- SQLite integrity remains a factual observation separate from GameSaveSync schema/history coherence;
+- classification performs no initialize/migrate/restore/repair/overwrite side effect.
+
+Shared review completed with Damien and covered file responsibilities, execution flow, provider/classifier separation, facts-vs-classification invariants, failure diagnosis and H2.1C explicit deferrals.
+
+NexusPrincipia is the source of truth for durable authorized classification: if a later Admin choice must survive restart, that decision is persisted in trusted control-plane state outside the ambiguous/rejected resource and invalidated/reviewed when material facts change.
+
 ## VALIDATED POST-REVIEW HARDENING
 
 The post-H2.1A MachineId hardening is validated locally and remotely.
@@ -114,7 +154,7 @@ Validated changes:
 - the CI-only missing namespace import in `GameDataRoot.cs` was corrected;
 - latest CI for commit `1e9514a` is green.
 
-## DECIDED BUT NOT YET IMPLEMENTED
+## DECIDED ARCHITECTURE / REMAINING H2 DIRECTION
 
 ### H2 central server
 
@@ -252,7 +292,7 @@ Do not silently answer these in code.
 - no business endpoint;
 - no controller;
 - no transport DTO;
-- no business persistence implementation yet (only the validated empty Persistence foundation exists);
+- no business persistence schema/repositories yet; the validated Persistence foundation now includes metadata DB bootstrap/migrations plus H2.1C read-only inspection;
 - no storage backend implementation yet.
 
 `GameSave.Contracts` is still intentionally empty of DTOs until a real boundary requires one.
@@ -296,7 +336,7 @@ GameSaveSync keeps only project-specific workflow rules locally.
 7. `src/GameSave.Server/Program.cs`;
 8. actual remote branch and HEAD.
 
-## H2.1C CLASSIFICATION AUTHORITY — RESOLVED
+## H2.1C CLASSIFICATION AUTHORITY — VALIDATED
 
 H2.1C follows the shared Nexus inspection/classification rule: facts → compatible candidates → reasoned suggestion → authorized choice later → separate operation.
 
@@ -312,4 +352,14 @@ GameSaveSync behavior:
 
 ## NEXT EXACT ACTION
 
-Wait for CI on the H2.1C implementation candidate, then perform the mandatory shared code/architecture review. Correct any structural issue before explicit H2.1C acceptance.
+H2.1C is closed. Do not start another implementation slice from assumptions.
+
+Next session:
+
+1. verify remote branch/HEAD;
+2. read root README, this handoff and `docs/tranches/H2-central-server.md`;
+3. choose and explicitly scope the next H2 slice with Damien;
+4. perform the architecture/cadrage discussion before code;
+5. preserve the accepted Nexus inspection/classification contracts.
+
+No promotion to `deploy/succumbrae` or `main` has been authorized by H2.1C acceptance.
