@@ -96,9 +96,20 @@ Validated H2.1D rules:
 - `OutOfService` is a live diagnostic state, not process death;
 - no readiness evaluation performs initialization, migration, restore or any other mutation.
 
+H2.1E candidate rules:
+
+- durable human classification is trusted control-plane state outside the inspected SQLite resource;
+- deterministic one-candidate classifications never require or write control-plane decisions;
+- ambiguous classifications are reusable only for the same resource identity, inspection revision, policy version and compatible candidate set;
+- recording a decision re-inspects first and rejects stale expected revisions;
+- the control plane preserves complete history and human-readable label snapshots beside stable identifiers;
+- labels are diagnostic only and never become identity/authorization keys;
+- malformed/unavailable control-plane state fails closed for ambiguous classification but does not invalidate an otherwise deterministic inspection;
+- the XML persistence format is infrastructure-only and does not leak into Application.
+
 Custodia is intended to receive safe backups later.
 
-GameSaveSync follows the shared [NexusPrincipia database lifecycle/readiness reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md), [inspection/classification authority reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/inspection-classification-authority.md) and [structured inspection findings reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/structured-inspection-findings.md).
+GameSaveSync follows the shared [NexusPrincipia database lifecycle/readiness reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md), [inspection/classification authority reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/inspection-classification-authority.md) and [structured inspection findings reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/structured-inspection-findings.md) and [audit identifiers/human-readable labels reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/audit-identifiers-and-labels.md).
 
 GameSaveSync-specific extensions are:
 
