@@ -40,3 +40,22 @@ The readiness vocabulary is:
 `SafeCapabilities` means only "not ruled out by metadata readiness". It does not bypass later authorization, implementation availability or operation-specific validation.
 
 H2.1D is validated and remains read-only. It does not implement initialization, migration, snapshot discovery/restore or classification persistence. `OutOfService` preserves status/diagnostic/retry capability while exposing that no currently known safe maintenance/recovery path exists.
+
+
+## H2.1E durable authorized classification candidate
+
+Application owns the durable decision contract, not the XML representation.
+
+H2.1E adds:
+
+- inspection resource identity/revision/policy context;
+- `AuthorizedMetadataDatabaseClassification` audit records;
+- `IMetadataDatabaseClassificationStore` as the control-plane persistence port;
+- deterministic vs authorized vs unresolved classification resolution;
+- fresh-revision validation before recording a human decision;
+- actor reference + human-readable actor-label snapshot;
+- mandatory rationale when the selected state overrides the suggestion.
+
+Deterministic inspections never require the control store. Ambiguous inspections fail closed if durable classification history is unavailable or invalid.
+
+The readiness evaluator may consume a compatible classification resolution, but classification still performs no initialize/migrate/restore operation.
