@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1B FULLY VALIDATED — H2.1C IMPLEMENTED CANDIDATE — AWAITING CI / SHARED REVIEW / ACCEPTANCE  
+**Status:** H2.1C FULLY VALIDATED AND EXPLICITLY ACCEPTED — NEXT H2 SLICE NOT YET SCOPED  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -113,7 +113,7 @@ Startup may later inspect and report migration state, but applying a migration r
 
 The eventual manual action will be implemented only with its snapshot/validation/recovery safety flow.
 
-## Proposed implementation slice — H2.1C metadata database inspection
+## Validated implementation slice — H2.1C metadata database inspection
 
 H2.1C applies the shared NexusPrincipia database lifecycle/readiness model without implementing administrative mutation yet.
 
@@ -158,18 +158,21 @@ Invalid
 
 ### Application boundary
 
-Expected Application concepts:
+Implemented Application concepts:
 
-- structured `MetadataDatabaseState` vocabulary;
-- structured `MetadataDatabaseStatus` result;
-- one read-only inspection port/provider implemented by Persistence;
-- one reusable inspection use case callable later by startup, system-status, Admin, CLI or IA/tool adapters.
+- `MetadataDatabaseState` — semantic lifecycle vocabulary;
+- `MetadataDatabaseInspectionFacts` — immutable technical observations;
+- `MetadataDatabaseInspection` — facts + findings + candidate states + suggestion;
+- `InspectionFinding` — Nexus-compatible machine-readable `code + details`;
+- `MetadataDatabaseFindingCodes` — canonical shared database finding identifiers;
+- `IMetadataDatabaseInspectionProvider` — read-only infrastructure port;
+- `InspectMetadataDatabase` — reusable Application use case for future startup/system-status/Admin/CLI/IA adapters.
 
-Application must not depend on EF Core, SQLite types or PRAGMA details.
+Application does not depend on EF Core, SQLite types or PRAGMA details.
 
 ### Persistence responsibility
 
-The Persistence implementation may inspect:
+The validated Persistence implementation inspects:
 
 - whether the configured DB exists;
 - whether it can be opened/read;
@@ -237,6 +240,41 @@ For an existing valid SQLite database with no applied GameSaveSync migration:
 The Admin may override the suggestion only with another fact-compatible candidate. The choice does not mutate the database. Later action availability derives from observed facts + authorized classification + policy, and an existing `Invalid` file must never be silently overwritten.
 
 This is now a shared NexusPrincipia architecture rule.
+
+### H2.1C validation and review
+
+H2.1C is explicitly accepted by Damien on 28 September 2026 after CI, local validation and shared pedagogical review.
+
+Final code HEAD before documentation closure:
+
+```text
+d7898c5f2c9d8e96dd23940d3490dbdac65f083c
+```
+
+Final CI for that code HEAD:
+
+```text
+run 36407964589 — SUCCESS
+Release build: 0 warnings / 0 errors
+GameSave.Core.Tests        : 57 passed
+GameSave.Application.Tests : 7 passed
+GameSave.Persistence.Tests : 24 passed
+GameSave.Storage.Tests     : 1 passed
+TOTAL                      : 89 passed
+```
+
+`GameSave.Server.Tests` and `GameSave.IntegrationTests` still intentionally contain no executable tests, so their two no-test notices remain expected.
+
+Review outcomes incorporated before acceptance:
+
+- `InspectionFinding.details` is aligned with the Nexus transport contract, including primitive collections copied into read-only storage;
+- proven `Ready` remains deterministic and does not expose `Invalid` as a generic rejection choice;
+- SQLite integrity facts are preserved independently from GameSaveSync schema/history coherence;
+- provider responsibilities (I/O and observed facts) remain separate from classifier responsibilities (semantic candidates/findings/suggestion);
+- CI success is not treated as acceptance; local validation and explicit Damien approval completed the tranche.
+
+H2.1C remains inspection-only. Durable `AuthorizedClassification` persistence is a later capability and, per Nexus, must live outside an ambiguous/rejected inspected resource.
+
 ## Candidate H2 slices
 
 These are planning candidates, not implementation commitments. They must be confirmed during the H2 design discussion.
@@ -308,18 +346,15 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Validate CI for the H2.1C implementation candidate, then perform the mandatory shared code/architecture review before explicit acceptance.
+H2.1C is closed and accepted.
 
-The former blocking classification question is resolved:
+Before writing more code:
 
-```text
-existing valid empty SQLite file
-+ no GameSaveSync EF migration history
-→ Uninitialized ?
+1. verify the remote branch/HEAD and read this tranche + `CURRENT_HANDOFF.md`;
+2. choose and explicitly scope the next H2 slice;
+3. review its architecture and boundaries with Damien;
+4. only then implement it.
 
-existing SQLite file with unrelated/user tables
-+ no GameSaveSync EF migration history
-→ Invalid ?
-```
+Do not silently pull initialization, migration execution, snapshot/restore, runtime recovery mode, system-status transport or business persistence into the next slice without an explicit scope decision.
 
-The resolution is implemented as candidate-state inspection rather than automatic classification.
+No promotion to `deploy/succumbrae` or `main` is authorized by this closure.
