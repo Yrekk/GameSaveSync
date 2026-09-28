@@ -94,7 +94,7 @@ GameSaveSync-specific extensions are:
 
 - observed database state remains separate from operational mode and available actions;
 - the shared state baseline is `Missing`, `Uninitialized`, `Ready`, `MigrationRequired`, `TooNew`, `Unavailable`;
-- GameSaveSync adds `Invalid` for a reachable database that fails SQLite/application consistency checks;
+- GameSaveSync adds `Invalid` for proven inconsistency/corruption and as an authorized alternative only inside genuinely ambiguous fact-compatible candidate sets;
 - unsafe states fail closed for synchronization authority;
 - snapshot/recovery actions are explicit and never selected automatically;
 - restricted recovery remains separate from the observed database state.
