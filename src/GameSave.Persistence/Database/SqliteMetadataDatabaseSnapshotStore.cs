@@ -33,9 +33,16 @@ internal sealed class SqliteMetadataDatabaseSnapshotStore(
         var id = BuildId(kind, now);
         var path = SnapshotPath(id);
 
-        await using var source = new SqliteConnection(
+        var sourceConnectionString = new SqliteConnectionStringBuilder(
             MetadataDatabaseConnectionStrings.ForOperationalUse(
-                _databaseSettings));
+                _databaseSettings))
+        {
+            // Snapshot capture is a bounded one-off operation. Do not leave the
+            // authoritative database file pinned in a pool after BackupDatabase.
+            Pooling = false,
+        }.ToString();
+
+        await using var source = new SqliteConnection(sourceConnectionString);
         await using var destination = new SqliteConnection(
             new SqliteConnectionStringBuilder
             {
