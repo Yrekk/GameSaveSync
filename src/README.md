@@ -2,7 +2,7 @@
 
 The source tree is organized by architectural responsibility.
 
-H0 created the initial project boundaries. H1 introduced the pure domain. H2.1A split application orchestration, metadata persistence and save-payload storage into explicit modules. H2.1B then established the first real SQLite/bootstrap/migration foundation without introducing business tables.
+H0 created the initial project boundaries. H1 introduced the pure domain. H2.1A split application orchestration, metadata persistence and save-payload storage into explicit modules. H2.1B established the first real SQLite/bootstrap/migration foundation, and H2.1C added validated read-only metadata database inspection without introducing business tables or mutation workflows.
 
 ## Current boundaries
 
@@ -57,6 +57,16 @@ Validated H2.1B:
 - no automatic startup migration;
 - initialization, migration and restore kept as separate administrative decisions;
 - reusable future administrative orchestration assigned to Application.
+
+Validated H2.1C:
+
+- provider-neutral inspection contract in Application;
+- SQLite/EF inspection implementation in Persistence;
+- immutable observed facts separated from semantic classification;
+- Nexus-compatible structured findings and lifecycle state vocabulary;
+- fact-compatible candidate states plus non-authoritative suggestion;
+- deterministic states remain deterministic;
+- inspection remains read-only with no lifecycle mutation.
 
 Still deferred:
 
