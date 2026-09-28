@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1D — Metadata readiness and capability policy (implementation candidate CI green; awaiting review/local validation/explicit acceptance)
+**Current tranche:** H2.1D — Metadata readiness and capability policy (fully validated and explicitly accepted; next H2 slice not yet scoped)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -350,7 +350,7 @@ GameSaveSync behavior:
 - inspection explanations use stable `code + details` findings, never authoritative free-form prose;
 - existing invalid resources are never silently overwritten.
 
-## H2.1D — ACCEPTED SCOPE, IMPLEMENTATION STARTING
+## VALIDATED H2.1D
 
 H2.1D adds provider-neutral readiness/capability policy on top of H2.1C inspection.
 
@@ -367,7 +367,7 @@ Snapshot/recovery discovery remains out of scope. H2.1D may model recovery avail
 
 No mutation is permitted in this slice.
 
-## H2.1D IMPLEMENTATION CANDIDATE
+## H2.1D FINAL VALIDATION
 
 Implemented in Application only:
 
@@ -378,7 +378,13 @@ Implemented in Application only:
 - structured readiness findings for classification required, unknown recovery and unavailable recovery;
 - pure evaluator with no infrastructure mutation.
 
-CI run `36412100144` is green:
+Final accepted candidate HEAD before documentation closure:
+
+```text
+7bd07e055111589c466ccba80b714f13f91cf2d6
+```
+
+CI run `36412299755` is green:
 
 - Release build: 0 warnings / 0 errors;
 - Core: 57;
@@ -388,8 +394,18 @@ CI run `36412100144` is green:
 - total: 104 passed;
 - Server/Integration retain the two expected no-test notices.
 
+Damien completed the matching local validation successfully and explicitly accepted H2.1D on 28 September 2026 after the pedagogical review.
+
 ## NEXT EXACT ACTION
 
-Perform the mandatory H2.1D pedagogical review with Damien, apply any structural correction, then run Damien local validation before explicit acceptance.
+H2.1D is closed. Do not start another implementation slice from assumptions.
 
-No promotion to `deploy/succumbrae` or `main` is authorized.
+Next session:
+
+1. verify remote branch/HEAD;
+2. read root README, this handoff and `docs/tranches/H2-central-server.md`;
+3. choose and explicitly scope the next H2 slice with Damien;
+4. perform architecture/cadrage before code;
+5. preserve the accepted inspection → classification → readiness → safe-capability separation.
+
+No promotion to `deploy/succumbrae` or `main` has been authorized by H2.1D acceptance.
