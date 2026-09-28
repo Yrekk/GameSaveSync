@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1C ACCEPTED — H2.1D IMPLEMENTED CANDIDATE — CI GREEN — AWAITING REVIEW / LOCAL VALIDATION / ACCEPTANCE  
+**Status:** H2.1D FULLY VALIDATED AND EXPLICITLY ACCEPTED — NEXT H2 SLICE NOT YET SCOPED  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -275,7 +275,7 @@ Review outcomes incorporated before acceptance:
 
 H2.1C remains inspection-only. Durable `AuthorizedClassification` persistence is a later capability and, per Nexus, must live outside an ambiguous/rejected inspected resource.
 
-## Active implementation slice — H2.1D metadata readiness and capability policy
+## Validated implementation slice — H2.1D metadata readiness and capability policy
 
 H2.1D turns the validated H2.1C inspection result into a deterministic, fail-closed operational/readiness view without executing any administrative mutation.
 
@@ -374,23 +374,20 @@ H2.1D exposes readiness-safe capabilities only. Final executable/authorized capa
 
 H2.1D is policy/readiness only. Classification, capability availability and operation execution remain distinct layers.
 
-### H2.1D implementation candidate
+### H2.1D validation and review
 
-Implemented in `GameSave.Application`:
+H2.1D is explicitly accepted by Damien on 28 September 2026 after CI, shared pedagogical review and successful local validation.
 
-- `MetadataDatabaseOperationalMode`;
-- `MetadataRecoveryAvailability`;
-- `MetadataDatabaseCapability`;
-- `MetadataDatabaseReadiness`;
-- `MetadataDatabaseReadinessFindingCodes`;
-- `EvaluateMetadataDatabaseReadiness`.
-
-The evaluator is pure Application policy: it consumes H2.1C inspection + abstract recovery availability and performs no infrastructure call or mutation.
-
-CI candidate validation:
+Final accepted code/documentation candidate before closure:
 
 ```text
-run 36412100144 — SUCCESS
+7bd07e055111589c466ccba80b714f13f91cf2d6
+```
+
+Validation:
+
+```text
+CI run 36412299755 — SUCCESS
 Release build: 0 warnings / 0 errors
 GameSave.Core.Tests        : 57 passed
 GameSave.Application.Tests : 22 passed
@@ -399,9 +396,22 @@ GameSave.Storage.Tests     : 1 passed
 TOTAL                      : 104 passed
 ```
 
-`GameSave.Server.Tests` and `GameSave.IntegrationTests` still intentionally have no executable tests.
+`GameSave.Server.Tests` and `GameSave.IntegrationTests` still intentionally have no executable tests, so their two no-test notices remain expected.
 
-Candidate remains unaccepted until shared pedagogical review + Damien local validation.
+Damien also completed the same local Release build/test/diff/status validation successfully before acceptance.
+
+Review outcomes confirmed:
+
+- metadata readiness is not whole-system readiness;
+- `MetadataAuthorityAvailable` remains narrower than future synchronization availability;
+- `SafeCapabilities` expresses what metadata state does not rule out, not what a user is authorized to execute;
+- unresolved classification permits only classification resolution plus diagnostics, never implicit init/restore;
+- `Missing` remains `Maintenance` when explicit initialization is still a safe path;
+- unsafe metadata with unknown/available recovery remains `RestrictedRecovery`;
+- unsafe metadata with recovery known unavailable becomes `OutOfService`;
+- `OutOfService` keeps the process alive for status/diagnostics/retry and is not equivalent to process death.
+
+H2.1D remains policy-only and performs no metadata mutation.
 
 ## Candidate H2 slices
 
@@ -474,13 +484,15 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Implement H2.1D exactly as scoped above:
+H2.1D is closed and accepted.
 
-1. add provider-neutral readiness/mode/capability models in `GameSave.Application`;
-2. derive readiness from H2.1C inspection without mutation;
-3. cover the state/recovery matrix with focused Application tests;
-4. run CI and perform the mandatory pedagogical review before acceptance.
+Before writing more code:
 
-Do not implement classification persistence, database mutations, snapshots, HTTP transport or business persistence in H2.1D.
+1. verify the remote branch/HEAD and read this tranche + `CURRENT_HANDOFF.md`;
+2. choose and explicitly scope the next H2 slice;
+3. review its architecture and boundaries with Damien;
+4. only then implement it.
 
-No promotion to `deploy/succumbrae` or `main` is authorized.
+Do not silently pull classification persistence, database mutations, snapshots, HTTP transport, Storage implementation or business persistence into the next slice without an explicit scope decision.
+
+No promotion to `deploy/succumbrae` or `main` is authorized by this closure.
