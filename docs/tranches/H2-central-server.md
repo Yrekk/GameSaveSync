@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1D FULLY VALIDATED AND EXPLICITLY ACCEPTED — NEXT H2 SLICE NOT YET SCOPED  
+**Status:** H2.1D ACCEPTED — H2.1E AUTHORIZED CLASSIFICATION CONTROL-PLANE SCOPED / IMPLEMENTATION STARTING  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -413,6 +413,175 @@ Review outcomes confirmed:
 
 H2.1D remains policy-only and performs no metadata mutation.
 
+## Active implementation slice — H2.1E durable authorized classification
+
+H2.1E persists the rare human classification decisions required by ambiguous H2.1C inspections, without trusting or mutating the inspected metadata database.
+
+### Objective
+
+Make an authorized ambiguous classification survive restart only while the reviewed inspection context remains compatible.
+
+Conceptually:
+
+```text
+inspection
+→ ambiguous candidate set
+→ actor selects one compatible state
+→ fresh reinspection verifies ExpectedRevision
+→ durable AuthorizedClassification written outside inspected DB
+→ later resolver may reuse it only for the same compatible context
+```
+
+### Trusted control-plane persistence
+
+The durable decision is stored outside `gamesave-metadata.db`.
+
+GameSaveSync uses a small local XML control-plane document, intended to remain readable during manual incident/debug work:
+
+```text
+data/
+├── gamesave-metadata.db
+└── control/
+    └── gamesave-control.xml
+```
+
+The configured control-store path is explicit and independent from the metadata DB path.
+
+Persistence owns XML serialization and atomic file replacement. Application owns the decision contract and never depends on XML types.
+
+The control store is not a second application database and does not contain business metadata.
+
+### Human-readable audit rule
+
+H2.1E follows the shared Nexus rule:
+
+- stable identifiers remain authoritative;
+- human-readable labels may be persisted alongside them as audit/debug snapshots;
+- labels never become keys, join identities or authorization sources.
+
+An authorized classification records at least:
+
+```text
+DecisionId
+ResourceIdentity
+ResourceLabel
+InspectionRevision
+ClassificationPolicyVersion
+CandidateStates
+SuggestedState
+SelectedState
+ActorReference
+ActorLabel
+DecidedAtUtc
+Rationale?
+```
+
+`ActorReference` and `ActorLabel` are both required in H2.1E.
+
+The actor label is a historical snapshot. A future rename does not rewrite old decisions.
+
+### Full history
+
+The XML control store keeps the complete decision history.
+
+A stale decision remains useful for audit but never silently restores authority.
+
+The latest compatible decision for the same resource/revision/policy may be reused.
+
+### Override rationale
+
+If:
+
+```text
+SelectedState != SuggestedState
+```
+
+then a non-empty `Rationale` is mandatory.
+
+If the actor accepts the suggestion, rationale remains optional.
+
+### Inspection identity and revision
+
+The H2.1C inspection gains provider-neutral control-plane context:
+
+- stable resource identity;
+- human-readable resource label;
+- opaque deterministic inspection revision;
+- classification-policy version.
+
+For SQLite, the revision is derived from evidence relevant to classification, including:
+
+- canonical configured resource identity;
+- inspection facts;
+- complete observed EF migration history;
+- relevant observed SQLite schema evidence;
+- current classification-policy version.
+
+It is not a blind hash of all future business-row contents.
+
+### Fresh-decision rule / TOCTOU protection
+
+An adapter submits:
+
+```text
+ExpectedInspectionRevision
+SelectedState
+ActorReference
+ActorLabel
+Rationale?
+```
+
+Before persisting the decision, Application re-inspects the metadata resource.
+
+If the current revision differs from `ExpectedInspectionRevision`, the decision is rejected as stale and the fresh inspection is returned/reported.
+
+A durable human decision is never written against an inspection screen that is no longer current.
+
+This rule is also recorded in NexusPrincipia.
+
+### Reuse rules
+
+A persisted decision may be reused only when:
+
+- resource identity matches;
+- inspection revision matches;
+- classification-policy version matches;
+- candidate-state set remains compatible;
+- selected state is still a current candidate.
+
+Deterministic single-candidate classifications are never persisted merely for convenience.
+
+### Control-store failure posture
+
+A missing control XML means no recorded classifications yet and is a valid empty store.
+
+Malformed/unreadable control-plane state must not be silently overwritten.
+
+For deterministic inspections, metadata classification does not depend on the store.
+
+For ambiguous inspections where a durable decision is required:
+
+```text
+control store unavailable/invalid
+→ fail closed
+→ no effective selected state
+→ status/diagnostics remain possible
+→ no Server process crash solely because classification history is unavailable
+```
+
+### Explicitly not in H2.1E
+
+- Admin/Web/CLI UI;
+- authentication/authorization implementation;
+- database initialization;
+- migration execution;
+- snapshot discovery/creation/restore;
+- HTTP transport;
+- profile/business persistence;
+- Storage backend.
+
+The H2.1E Application use case assumes its caller has already passed the future authorization boundary; it records the supplied actor identity for audit.
+
 ## Candidate H2 slices
 
 These are planning candidates, not implementation commitments. They must be confirmed during the H2 design discussion.
@@ -484,15 +653,14 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-H2.1D is closed and accepted.
+Implement H2.1E exactly as scoped above:
 
-Before writing more code:
+1. extend inspection with resource identity/revision/policy context;
+2. add Application decision/resolution contracts and use cases;
+3. add external XML control-store Persistence implementation with atomic writes;
+4. cover freshness, rationale, compatibility, history and fail-closed behavior;
+5. run CI and mandatory pedagogical review before acceptance.
 
-1. verify the remote branch/HEAD and read this tranche + `CURRENT_HANDOFF.md`;
-2. choose and explicitly scope the next H2 slice;
-3. review its architecture and boundaries with Damien;
-4. only then implement it.
+Do not implement lifecycle mutations, snapshots, HTTP/Admin UI or business persistence in H2.1E.
 
-Do not silently pull classification persistence, database mutations, snapshots, HTTP transport, Storage implementation or business persistence into the next slice without an explicit scope decision.
-
-No promotion to `deploy/succumbrae` or `main` is authorized by this closure.
+No promotion to `deploy/succumbrae` or `main` is authorized.
