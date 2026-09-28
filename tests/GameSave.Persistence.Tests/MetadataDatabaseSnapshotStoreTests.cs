@@ -1,5 +1,6 @@
 using GameSave.Application.MetadataDatabase;
 using GameSave.Persistence.Database;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameSave.Persistence.Tests;
@@ -108,7 +109,12 @@ public sealed class MetadataDatabaseSnapshotStoreTests
 
         public void Dispose()
         {
-            SqliteConnection.ClearAllPools();
+            using (var poolMarker = new SqliteConnection(
+                MetadataDatabaseConnectionStrings.ForOperationalUse(
+                    _databaseSettings)))
+            {
+                SqliteConnection.ClearPool(poolMarker);
+            }
 
             if (Directory.Exists(_root))
             {

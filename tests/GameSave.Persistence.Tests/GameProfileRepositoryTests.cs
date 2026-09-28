@@ -1,3 +1,4 @@
+using GameSave.Application.Profiles;
 using GameSave.Core.Machines;
 using GameSave.Core.Profiles;
 using GameSave.Persistence.Database;

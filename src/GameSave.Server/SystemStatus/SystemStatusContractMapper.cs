@@ -6,7 +6,7 @@ namespace GameSave.Server.SystemStatus;
 internal static class SystemStatusContractMapper
 {
     public static SystemStatusResponse ToResponse(
-        Application.SystemStatus.SystemStatus status)
+        GameSave.Application.SystemStatus.SystemStatus status)
     {
         ArgumentNullException.ThrowIfNull(status);
 

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using GameSave.Contracts.SystemStatus;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace GameSave.IntegrationTests;
