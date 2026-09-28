@@ -145,7 +145,15 @@ internal sealed class SqliteMetadataDatabaseSnapshotStore(
 
         try
         {
-            SqliteConnection.ClearAllPools();
+            // Clear only the pool for the active metadata connection string.
+            // A process-global ClearAllPools would interfere with unrelated
+            // SQLite users and was explicitly rejected in the persistence foundation.
+            using (var poolMarker = new SqliteConnection(
+                MetadataDatabaseConnectionStrings.ForOperationalUse(
+                    _databaseSettings)))
+            {
+                SqliteConnection.ClearPool(poolMarker);
+            }
 
             if (File.Exists(activePath))
             {

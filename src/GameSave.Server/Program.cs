@@ -1,4 +1,6 @@
 using GameSave.Application.MetadataDatabase;
+using GameSave.Application.SystemStatus;
+using GameSave.Server.SystemStatus;
 using GameSave.Persistence.Database;
 using GameSave.Storage;
 using GameSave.Storage.Local;
@@ -44,9 +46,20 @@ builder.Services.AddScoped<InitializeMetadataDatabase>();
 builder.Services.AddScoped<ApplyPendingMetadataDatabaseMigrations>();
 builder.Services.AddScoped<CreateRollingMetadataDatabaseSnapshot>();
 builder.Services.AddScoped<RestoreMetadataDatabaseSnapshot>();
+builder.Services.AddScoped<GetSystemStatus>();
 
 var app = builder.Build();
 
 // Startup composes persistence but never opens, creates or migrates the metadata
 // database implicitly. Migration execution is an explicit administrative operation.
+app.MapGet(
+    "/api/system/status",
+    async (GetSystemStatus getStatus, CancellationToken cancellationToken) =>
+    {
+        var status = await getStatus.ExecuteAsync(cancellationToken);
+        return Results.Ok(SystemStatusContractMapper.ToResponse(status));
+    });
+
 app.Run();
+
+public partial class Program;
