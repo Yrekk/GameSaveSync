@@ -1,8 +1,8 @@
 namespace GameSave.Application.MetadataDatabase;
 
 /// <summary>
-/// Policy-level capabilities allowed by the current metadata readiness state.
-/// A capability being allowed does not imply that its operation is already implemented.
+/// Capabilities not ruled out by the current metadata readiness state.
+/// Authorization, implementation availability and operation-specific preconditions remain downstream concerns.
 /// </summary>
 public enum MetadataDatabaseCapability
 {
