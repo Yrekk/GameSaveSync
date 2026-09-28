@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.ObjectModel;
 
 namespace GameSave.Application.Inspection;
@@ -19,24 +20,20 @@ public sealed class InspectionFinding
                 nameof(code));
         }
 
-        var copiedDetails = details is null
-            ? new Dictionary<string, object?>()
-            : new Dictionary<string, object?>(details);
+        var copiedDetails = new Dictionary<string, object?>();
 
-        foreach (var (key, value) in copiedDetails)
+        if (details is not null)
         {
-            if (string.IsNullOrWhiteSpace(key))
+            foreach (var (key, value) in details)
             {
-                throw new ArgumentException(
-                    "Inspection finding detail keys must not be empty.",
-                    nameof(details));
-            }
+                if (string.IsNullOrWhiteSpace(key))
+                {
+                    throw new ArgumentException(
+                        "Inspection finding detail keys must not be empty.",
+                        nameof(details));
+                }
 
-            if (!IsTransportSafeValue(value))
-            {
-                throw new ArgumentException(
-                    $"Inspection finding detail '{key}' has an unsupported value type.",
-                    nameof(details));
+                copiedDetails[key] = CopyTransportSafeValue(key, value, details);
             }
         }
 
@@ -48,7 +45,39 @@ public sealed class InspectionFinding
 
     public IReadOnlyDictionary<string, object?> Details { get; }
 
-    private static bool IsTransportSafeValue(object? value)
+    private static object? CopyTransportSafeValue(
+        string key,
+        object? value,
+        IReadOnlyDictionary<string, object?> details)
+    {
+        if (IsTransportSafeScalar(value))
+        {
+            return value;
+        }
+
+        if (value is IList values)
+        {
+            var copiedValues = new object?[values.Count];
+
+            for (var index = 0; index < values.Count; index++)
+            {
+                var item = values[index];
+
+                if (!IsTransportSafeScalar(item))
+                {
+                    throw UnsupportedDetailValue(key, details);
+                }
+
+                copiedValues[index] = item;
+            }
+
+            return Array.AsReadOnly(copiedValues);
+        }
+
+        throw UnsupportedDetailValue(key, details);
+    }
+
+    private static bool IsTransportSafeScalar(object? value)
     {
         return value is null
             or string
@@ -64,5 +93,14 @@ public sealed class InspectionFinding
             or float
             or double
             or decimal;
+    }
+
+    private static ArgumentException UnsupportedDetailValue(
+        string key,
+        IReadOnlyDictionary<string, object?> details)
+    {
+        return new ArgumentException(
+            $"Inspection finding detail '{key}' has an unsupported value type.",
+            nameof(details));
     }
 }
