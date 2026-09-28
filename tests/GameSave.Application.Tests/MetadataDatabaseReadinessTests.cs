@@ -225,6 +225,11 @@ public sealed class MetadataDatabaseReadinessTests
         MetadataDatabaseState suggestedState)
     {
         return new MetadataDatabaseInspection(
+            new MetadataDatabaseInspectionContext(
+                "metadata:test",
+                "Test metadata database",
+                "revision:test",
+                MetadataDatabaseClassificationPolicy.CurrentVersion),
             new MetadataDatabaseInspectionFacts(
                 FileExists: true,
                 PathOccupiedByNonFile: false,
