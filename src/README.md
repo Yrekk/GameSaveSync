@@ -2,7 +2,7 @@
 
 The source tree is organized by architectural responsibility.
 
-H0 created the initial project boundaries. H1 introduced the pure domain. H2.1A split application orchestration, metadata persistence and save-payload storage into explicit modules. H2.1B established the first real SQLite/bootstrap/migration foundation, and H2.1C added validated read-only metadata database inspection without introducing business tables or mutation workflows.
+H0 created the initial project boundaries. H1 introduced the pure domain. H2.1A split application orchestration, metadata persistence and save-payload storage into explicit modules. H2.1B established the first real SQLite/bootstrap/migration foundation, H2.1C added validated read-only metadata database inspection, and H2.1D added validated fail-closed metadata readiness/safe-capability policy without introducing mutation workflows.
 
 ## Current boundaries
 
@@ -67,6 +67,16 @@ Validated H2.1C:
 - fact-compatible candidate states plus non-authoritative suggestion;
 - deterministic states remain deterministic;
 - inspection remains read-only with no lifecycle mutation.
+
+Validated H2.1D:
+
+- provider-neutral metadata operational modes in Application;
+- abstract recovery availability separated from snapshot infrastructure;
+- metadata authority separated from future whole-system synchronization readiness;
+- readiness-safe capabilities separated from authorization and implementation availability;
+- unresolved classification remains fail-closed;
+- `OutOfService` preserves diagnostics/retry without pretending recovery is available;
+- readiness evaluation remains read-only.
 
 Still deferred:
 
