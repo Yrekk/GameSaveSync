@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1D — Metadata readiness and capability policy (scope accepted; implementation starting)
+**Current tranche:** H2.1D — Metadata readiness and capability policy (implementation candidate CI green; awaiting review/local validation/explicit acceptance)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -367,8 +367,29 @@ Snapshot/recovery discovery remains out of scope. H2.1D may model recovery avail
 
 No mutation is permitted in this slice.
 
+## H2.1D IMPLEMENTATION CANDIDATE
+
+Implemented in Application only:
+
+- operational modes `Normal / Maintenance / RestrictedRecovery / OutOfService`;
+- abstract recovery availability `Unknown / Available / Unavailable`;
+- readiness-safe capabilities kept distinct from authorization and implementation availability;
+- `MetadataAuthorityAvailable` kept narrower than future whole-system synchronization availability;
+- structured readiness findings for classification required, unknown recovery and unavailable recovery;
+- pure evaluator with no infrastructure mutation.
+
+CI run `36412100144` is green:
+
+- Release build: 0 warnings / 0 errors;
+- Core: 57;
+- Application: 22;
+- Persistence: 24;
+- Storage: 1;
+- total: 104 passed;
+- Server/Integration retain the two expected no-test notices.
+
 ## NEXT EXACT ACTION
 
-Implement and test the H2.1D Application-owned readiness policy, then run CI and perform the mandatory pedagogical review before explicit acceptance.
+Perform the mandatory H2.1D pedagogical review with Damien, apply any structural correction, then run Damien local validation before explicit acceptance.
 
 No promotion to `deploy/succumbrae` or `main` is authorized.
