@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1E — Durable authorized metadata classification (scope accepted; implementation starting)
+**Current tranche:** H2.1E — Durable authorized metadata classification (implementation candidate CI green; awaiting review/local validation/explicit acceptance)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -415,9 +415,42 @@ Accepted decisions:
 - stale history remains audit-only;
 - shared fresh-revision and human-label rules are centralized in NexusPrincipia.
 
+## H2.1E IMPLEMENTATION CANDIDATE
+
+Implemented:
+
+- inspection resource identity + human-readable resource label + opaque revision + policy version;
+- durable `AuthorizedMetadataDatabaseClassification` audit record;
+- full-history classification-store port;
+- deterministic/authorized/unresolved resolver;
+- fresh reinspection before decision write;
+- selected-state candidate enforcement;
+- rationale mandatory when overriding suggestion;
+- actor stable reference + human-readable label snapshot;
+- SQLite/EF classification-evidence fingerprint;
+- external human-readable XML control store with atomic replacement;
+- malformed/unavailable store fail-closed behavior;
+- H2.1D readiness consumes compatible effective classification.
+
+Code candidate:
+
+```text
+61d852f6e1a3ac8d58a37511ec5e5fe23d8b3559
+```
+
+CI run `36418626966` is green:
+
+- Release build: 0 warnings / 0 errors;
+- Core: 57;
+- Application: 34;
+- Persistence: 31;
+- Storage: 1;
+- total: 123 passed;
+- Server/Integration retain the two expected no-test notices.
+
 ## NEXT EXACT ACTION
 
-Implement the H2.1E Application contracts/use cases, SQLite inspection revision context and XML Persistence adapter, then validate the full decision/reuse/failure matrix.
+Perform the mandatory H2.1E pedagogical review, correct any structural issue, then run Damien local validation before explicit acceptance.
 
 No lifecycle mutation, snapshot implementation, HTTP/Admin UI or business persistence is part of H2.1E.
 
