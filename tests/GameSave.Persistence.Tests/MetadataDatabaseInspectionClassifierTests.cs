@@ -110,6 +110,11 @@ public sealed class MetadataDatabaseInspectionClassifierTests
             knownMigrations.LastOrDefault());
 
         return MetadataDatabaseInspectionClassifier.ClassifyAccessibleDatabase(
+            new MetadataDatabaseInspectionContext(
+                "metadata:test",
+                "Test metadata database",
+                "revision:test",
+                MetadataDatabaseClassificationPolicy.CurrentVersion),
             facts,
             knownMigrations,
             appliedMigrations);
