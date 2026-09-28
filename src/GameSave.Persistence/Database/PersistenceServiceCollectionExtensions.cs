@@ -1,4 +1,6 @@
 using GameSave.Application.MetadataDatabase;
+using GameSave.Application.Profiles;
+using GameSave.Persistence.Profiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,6 +28,7 @@ public static class PersistenceServiceCollectionExtensions
         services.AddSingleton<
             IMetadataDatabaseClassificationStore,
             XmlMetadataDatabaseClassificationStore>();
+        services.AddScoped<IGameProfileRepository, EfGameProfileRepository>();
         services.AddDbContext<GameSaveDbContext>(
             options => options.UseSqlite(
                 MetadataDatabaseConnectionStrings.ForOperationalUse(settings)));

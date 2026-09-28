@@ -14,6 +14,26 @@ partial class GameSaveDbContextModelSnapshot : ModelSnapshot
     {
 #pragma warning disable 612, 618
         modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
+
+        modelBuilder.Entity("GameSave.Persistence.Profiles.GameProfileRecord", b =>
+        {
+            b.Property<string>("ProfileId")
+                .HasMaxLength(128)
+                .HasColumnType("TEXT");
+
+            b.Property<string>("DisplayName")
+                .IsRequired()
+                .HasMaxLength(256)
+                .HasColumnType("TEXT");
+
+            b.Property<string>("PayloadJson")
+                .IsRequired()
+                .HasColumnType("TEXT");
+
+            b.HasKey("ProfileId");
+
+            b.ToTable("GameProfiles");
+        });
 #pragma warning restore 612, 618
     }
 }
