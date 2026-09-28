@@ -8,6 +8,8 @@ Start with:
 - [NexusPrincipia shared Dev + AI operating model](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/ai-development-operating-model.md)
 - [NexusPrincipia entrypoints & reusable operations](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/entrypoints-and-reusable-operations.md)
 - [NexusPrincipia database lifecycle & readiness](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md)
+- [NexusPrincipia inspection/classification authority](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/inspection-classification-authority.md)
+- [NexusPrincipia structured inspection findings](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/structured-inspection-findings.md)
 - [NexusPrincipia C# / .NET conventions](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/languages/csharp-dotnet.md)
 
 Generic rules are no longer duplicated in this repository.
