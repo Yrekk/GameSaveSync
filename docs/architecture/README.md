@@ -1,61 +1,84 @@
 # Architecture
 
-H0 defines **boundaries, not business rules**.
+GameSaveSync uses a central-server architecture with explicit application, persistence and storage boundaries.
 
 ## Components
 
 ```text
 Windows PC(s)
-  GameSave.Agent
   GameSave.Agent.UI
-        |
-        | HTTP/API boundary
-        v
+        ↓
+  GameSave.Agent
+        │ HTTP/API
+        ▼
 GameSave.Server on Succumbrae
-        |
-        v
-Custodia
+        │
+        ├── GameSave.Application
+        │      ↓
+        │   GameSave.Core
+        │
+        ├── GameSave.Persistence
+        │      └── EF Core / SQLite metadata
+        │
+        └── GameSave.Storage
+               └── save payloads / artifacts
+
+Future durable storage target: Custodia
 ```
 
-The validated technical solution establishes a central-server architecture with NAS-backed storage.
-
-H0 materializes the server as an ASP.NET Core host because the network/API boundary is already known. It does not define business routes, controllers or synchronization behavior.
+A synchronizable profile supports **1 to N machines**. One-machine use is valid for central backup/resilience; multi-machine use adds synchronization between PCs.
 
 ## Project boundaries
 
-| Project | Reserved responsibility | H0 rule |
-| --- | --- | --- |
-| GameSave.Core | Pure domain | No infrastructure dependency |
-| GameSave.Contracts | Shared boundary contracts | No DTO until a real contract needs one |
-| GameSave.Server | Central ASP.NET Core HTTP host | Host exists; no business API yet |
-| GameSave.Agent | Windows-side engine | No monitoring or transfer behavior yet |
-| GameSave.Agent.UI | Replaceable local UI | No business logic and no UI framework selected yet |
+| Project | Responsibility |
+| --- | --- |
+| GameSave.Core | Pure domain rules, value objects and deterministic synchronization policy |
+| GameSave.Application | Use cases and required capability/repository ports |
+| GameSave.Persistence | EF Core/SQLite metadata persistence and database-specific infrastructure |
+| GameSave.Storage | Save-payload and file-artifact storage implementations |
+| GameSave.Contracts | Real transport/shared boundary contracts only |
+| GameSave.Server | ASP.NET Core host, transport adapter and composition root |
+| GameSave.Agent | Windows-side synchronization engine when implemented |
+| GameSave.Agent.UI | Replaceable local UI adapter |
 
 ## Dependency direction
 
 ```text
-Core       Contracts
-  ^           ^
-  |           |
-  +--- Server |
-  +--- Agent -+
-         ^
-         |
-      Agent.UI
+UI / transport / infrastructure
+            ↓
+       Application
+            ↓
+          Core
 ```
 
-These references establish the places where later code can live without implementing that code prematurely.
+Persistence and Storage implement capabilities required by Application. Server wires concrete implementations but does not own domain, persistence or administrative business logic.
 
-## Architecture versus application behavior
+## Entrypoint rule
 
-H0 may materialize a technical boundary when that boundary is already decided.
+`Program.cs` is a composition/bootstrap boundary.
 
-For example, `GameSave.Server` is an ASP.NET Core host because the system is designed around a central HTTP/API server. H0 still avoids deciding endpoint names, controller organization or DTO shapes before real application contracts exist.
+If an operation may be requested by Admin, a maintenance CLI or a future IA/tool, its implementation belongs to a reusable `GameSave.Application` use case/service.
 
-## Documentation rule
+Startup may inspect state but must not silently choose between legitimate administrative actions such as initialize, migrate, restore or recovery mode.
 
-When later architecture becomes non-obvious, document the **reason** near the relevant boundary. Obvious models and DTOs do not receive commentary merely to increase documentation volume.
+See the shared [NexusPrincipia entrypoint rule](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/entrypoints-and-reusable-operations.md).
 
+## Central metadata persistence
+
+The active metadata database is SQLite on Succumbrae local storage, never on the Custodia SMB share.
+
+Validated H2.1B rules:
+
+- operational access requires an existing database;
+- initial creation is a distinct explicit administrative capability;
+- schema changes use versioned EF migrations;
+- startup never applies migrations automatically;
+- initialize, migrate and restore are distinct decisions;
+- EF infrastructure remains internal to Persistence.
+
+Custodia is intended to receive safe backups later.
+
+See ADR-0001 through ADR-0005 for the accepted persistence/application decisions.
 ## Operational diagnostics direction
 
 GameSaveSync follows the shared NexusPrincipia Debug & Observability reference:

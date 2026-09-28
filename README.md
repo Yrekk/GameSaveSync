@@ -2,11 +2,13 @@
 
 Generic and safe game save synchronization between multiple PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A central-server foundation fully validated on `feature/h2-central-server`. Next step: define H2.1B.
+> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A and H2.1B fully validated on `feature/h2-central-server`. Next step: define H2.1C.
 
 ## Purpose
 
-GameSaveSync is intended to synchronize local game data between several PCs through a central server and versioned storage.
+GameSaveSync is intended to protect and synchronize local game data for one or more PCs through a central server and versioned storage.
+
+A profile supports **1 to N machines**: with one PC, the central copy already protects against local disk loss; with several PCs, the same model also synchronizes between machines.
 
 Project Zomboid will be the first real profile used to validate the system, but the repository is deliberately structured around generic synchronization components rather than one game.
 
@@ -68,28 +70,34 @@ H1 was explicitly accepted and merged into `develop`.
 
 H2 turns the existing server host into the first real central-authority boundary without pulling Agent, Windows lifecycle, real Custodia storage or save-transfer behavior forward.
 
-H2.1A is fully validated and has established:
+### H2.1A — validated
 
-- `GameSave.Application`;
-- `GameSave.Persistence`;
-- `GameSave.Storage`;
-- matching focused test projects;
-- EF Core + SQLite isolated inside Persistence;
-- an intentionally empty `GameSaveDbContext` with no speculative business tables;
-- Server as a thin composition root;
-- the hardened GUID-backed `MachineId` identity model.
+H2.1A established the Application/Persistence/Storage module boundaries, focused test projects, EF Core + SQLite isolation inside Persistence, the thin Server composition root and the hardened GUID-backed `MachineId`.
+
+### H2.1B — validated
+
+H2.1B established:
+
+- explicit validated metadata DB path configuration;
+- operational SQLite access that cannot create a missing DB;
+- distinct explicit initialization semantics for first-time database creation;
+- a versioned empty EF migration baseline;
+- internal `GameSaveDbContext`, design-time factory and low-level SQLite connection builders;
+- no automatic database migration at startup;
+- initialization, migration and restore as distinct administrative operations;
+- reusable future administrative orchestration owned by `GameSave.Application`, not `Program.cs` or transport adapters;
+- isolated SQLite test pooling with no process-global cleanup side effect.
 
 Still intentionally deferred:
 
-- business/profile persistence schema and repositories;
+- profile/business persistence schema and repositories;
 - runtime migration/snapshot/recovery coordinator;
 - local save-artifact backend;
 - first system-status endpoint;
 - full machine registry;
 - Agent behavior and real save transfers.
 
-The next implementation slice is H2.1B, which must be defined before coding.
-
+Next: define H2.1C before implementation.
 ## Repository structure
 
 ```text

@@ -4,4 +4,13 @@ Each significant tranche has one living tracking document.
 
 The document records scope, state, relevant decisions, validation and the next exact action. Long tranches update the same file instead of creating a new document for every micro-change.
 
-Current tranche: [`H0-bootstrap.md`](H0-bootstrap.md).
+## Current work
+
+- H0 — validated.
+- H1 — accepted and merged to `develop`.
+- H2 — active on `feature/h2-central-server`.
+  - H2.1A — validated.
+  - H2.1B — validated.
+  - Next: define H2.1C.
+
+Current H2 tracking document: [`H2-central-server.md`](H2-central-server.md).

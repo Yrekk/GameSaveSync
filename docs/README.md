@@ -19,6 +19,7 @@ Cross-project conventions are maintained in [NexusPrincipia](https://github.com/
 - project bootstrap rules;
 - documentation conventions;
 - handoff conventions;
+- entrypoints and reusable administrative operations;
 - C# / .NET and Python conventions;
 - Debug & Observability reference.
 
