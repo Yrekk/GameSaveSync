@@ -127,6 +127,7 @@ internal static class MetadataDatabaseInspectionClassifier
         }
 
         return new MetadataDatabaseInspection(
+            context,
             facts,
             [MetadataDatabaseState.Invalid],
             MetadataDatabaseState.Invalid,
