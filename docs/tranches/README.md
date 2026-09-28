@@ -12,6 +12,7 @@ The document records scope, state, relevant decisions, validation and the next e
   - H2.1A — validated.
   - H2.1B — validated.
   - H2.1C — validated and explicitly accepted.
+  - H2.1D — validated and explicitly accepted.
   - Next: scope the next H2 slice before implementation.
 
 Current H2 tracking document: [`H2-central-server.md`](H2-central-server.md).
