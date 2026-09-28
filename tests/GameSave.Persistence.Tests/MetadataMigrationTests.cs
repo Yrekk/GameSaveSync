@@ -1,4 +1,5 @@
 using GameSave.Persistence.Database;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameSave.Persistence.Tests;
@@ -103,6 +104,10 @@ public sealed class MetadataMigrationTests
 
         public void Dispose()
         {
+            // Microsoft.Data.Sqlite pools connections by default. Clear the test
+            // pools before deleting the temporary database on Windows.
+            SqliteConnection.ClearAllPools();
+
             if (Directory.Exists(rootPath))
             {
                 Directory.Delete(rootPath, recursive: true);
