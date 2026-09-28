@@ -42,6 +42,10 @@ internal sealed class SqliteMetadataDatabaseSnapshotStore(
                 DataSource = path,
                 Mode = SqliteOpenMode.ReadWriteCreate,
                 ForeignKeys = true,
+                // Snapshot files are short-lived operational artifacts. Pooling
+                // would keep them locked on Windows after backup/validation and
+                // interfere with rotation or explicit restore cleanup.
+                Pooling = false,
             }.ToString());
 
         await source.OpenAsync(cancellationToken);
