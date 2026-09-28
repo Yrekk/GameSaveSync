@@ -183,6 +183,15 @@ public sealed class MetadataDatabaseReadinessTests
             MetadataDatabaseCapability.DiscoverRecoveryCandidates,
             readiness.SafeCapabilities);
         Assert.Contains(
+            MetadataDatabaseCapability.ViewStatus,
+            readiness.SafeCapabilities);
+        Assert.Contains(
+            MetadataDatabaseCapability.ViewDiagnostics,
+            readiness.SafeCapabilities);
+        Assert.Contains(
+            MetadataDatabaseCapability.RetryInspection,
+            readiness.SafeCapabilities);
+        Assert.Contains(
             readiness.Findings,
             finding =>
                 finding.Code ==
