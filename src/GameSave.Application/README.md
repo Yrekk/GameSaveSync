@@ -23,3 +23,20 @@ The result deliberately has no authoritative selected `State` property and no pr
 The inspection use case must not initialize, migrate, restore, bind or repair the database as a side effect.
 
 Shared lifecycle/readiness and inspection/classification rules live in NexusPrincipia. GameSaveSync keeps only project-specific state semantics and safety policy.
+
+## Active H2.1D metadata readiness policy
+
+Application now derives a provider-neutral metadata readiness view from H2.1C inspection results.
+
+The readiness vocabulary is:
+
+- `Normal`;
+- `Maintenance`;
+- `RestrictedRecovery`;
+- `OutOfService`.
+
+`MetadataAuthorityAvailable` is deliberately narrower than future system-wide synchronization availability. Storage and other readiness dimensions will still participate in `GetSystemStatus`.
+
+`SafeCapabilities` means only "not ruled out by metadata readiness". It does not bypass later authorization, implementation availability or operation-specific validation.
+
+H2.1D remains read-only and does not implement initialization, migration, snapshot discovery/restore or classification persistence.
