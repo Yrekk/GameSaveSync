@@ -107,6 +107,11 @@ internal sealed class XmlMetadataDatabaseClassificationStore
 
         if (!File.Exists(path))
         {
+            if (Directory.Exists(path))
+            {
+                return Unavailable();
+            }
+
             return new ReadDocumentResult(
                 MetadataDatabaseClassificationStoreStatus.Ready,
                 CreateEmptyDocument(),
