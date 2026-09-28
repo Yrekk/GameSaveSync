@@ -2,7 +2,7 @@
 
 Generic and safe game save protection and synchronization for one or more PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A–H2.1D are fully validated and explicitly accepted. H2.1E durable authorized classification is implemented as a CI-green candidate awaiting shared review, local validation and explicit acceptance.
+> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2 Minimal central server is fully validated and explicitly accepted, with promotion to `develop` authorized.
 
 ## Purpose
 
@@ -66,7 +66,7 @@ H1 contains the pure deterministic synchronization and game-profile domain:
 
 H1 was explicitly accepted and merged into `develop`.
 
-## Current H2 state
+## Accepted H2 state
 
 H2 turns the existing server host into the first real central-authority boundary without pulling Agent, Windows lifecycle, real Custodia storage or save-transfer behavior forward.
 
@@ -123,7 +123,7 @@ H2.1D established the provider-neutral metadata readiness/capability policy:
 - no initialization, migration, snapshot, restore or other mutation is executed by readiness evaluation;
 - final validation: Release build 0 warnings / 0 errors, 104 executed tests passed, with the two expected no-test notices for Server.Tests and IntegrationTests.
 
-### H2.1E — candidate
+### H2.1E — validated
 
 H2.1E adds durable authorized classification for ambiguous metadata inspections:
 
@@ -139,7 +139,7 @@ H2.1E adds durable authorized classification for ambiguous metadata inspections:
 - H2.1D readiness can consume the resolved effective classification;
 - no database lifecycle mutation is implemented.
 
-Current: H2.1E is a CI-green implementation candidate. Perform shared review and local validation before acceptance.
+H2.1E was validated as part of the completed H2 tranche. Final H2 validation: Release build 0 warnings / 0 errors, 140 tests passed, local validation and HTTP smoke test passed, targeted code review completed, and Damien explicitly accepted H2 on 28 September 2026.
 ## Repository structure
 
 ```text
