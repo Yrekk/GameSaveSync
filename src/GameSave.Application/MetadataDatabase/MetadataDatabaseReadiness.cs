@@ -10,7 +10,7 @@ public sealed class MetadataDatabaseReadiness
 {
     internal MetadataDatabaseReadiness(
         MetadataDatabaseOperationalMode mode,
-        bool synchronizationAuthorityAvailable,
+        bool metadataAuthorityAvailable,
         bool requiresAdministratorClassification,
         IEnumerable<MetadataDatabaseCapability> allowedCapabilities,
         IEnumerable<InspectionFinding> findings)
@@ -20,12 +20,12 @@ public sealed class MetadataDatabaseReadiness
 
         var capabilities = allowedCapabilities.Distinct().ToArray();
 
-        if (synchronizationAuthorityAvailable
+        if (metadataAuthorityAvailable
             != (mode == MetadataDatabaseOperationalMode.Normal))
         {
             throw new ArgumentException(
-                "Synchronization authority is available only in Normal mode.",
-                nameof(synchronizationAuthorityAvailable));
+                "Metadata authority is available only in Normal mode.",
+                nameof(metadataAuthorityAvailable));
         }
 
         if (requiresAdministratorClassification
@@ -37,20 +37,20 @@ public sealed class MetadataDatabaseReadiness
         }
 
         Mode = mode;
-        SynchronizationAuthorityAvailable = synchronizationAuthorityAvailable;
+        MetadataAuthorityAvailable = metadataAuthorityAvailable;
         RequiresAdministratorClassification =
             requiresAdministratorClassification;
-        AllowedCapabilities = Array.AsReadOnly(capabilities);
+        SafeCapabilities = Array.AsReadOnly(capabilities);
         Findings = Array.AsReadOnly(findings.ToArray());
     }
 
     public MetadataDatabaseOperationalMode Mode { get; }
 
-    public bool SynchronizationAuthorityAvailable { get; }
+    public bool MetadataAuthorityAvailable { get; }
 
     public bool RequiresAdministratorClassification { get; }
 
-    public IReadOnlyList<MetadataDatabaseCapability> AllowedCapabilities { get; }
+    public IReadOnlyList<MetadataDatabaseCapability> SafeCapabilities { get; }
 
     public IReadOnlyList<InspectionFinding> Findings { get; }
 }
