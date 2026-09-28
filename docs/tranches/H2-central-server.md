@@ -58,7 +58,7 @@ Incomplete UI drafts do not belong in the database.
 
 Global `ProfileId` uniqueness is a persistence/database responsibility.
 
-## Active implementation slice — H2.1A modular persistence foundation
+## Validated implementation slice — H2.1A modular persistence foundation
 
 H2.1A materializes the accepted module boundaries without pulling later behavior forward.
 
@@ -81,7 +81,7 @@ Explicitly deferred from H2.1A:
 - system-status endpoint;
 - full Machine registry.
 
-## Active implementation slice — H2.1B metadata database bootstrap
+## Validated implementation slice — H2.1B metadata database bootstrap
 
 H2.1B builds the first real SQLite/migration plumbing without introducing business tables or automatic migration execution.
 
