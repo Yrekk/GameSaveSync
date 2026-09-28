@@ -46,6 +46,40 @@ public sealed class MetadataDatabaseInspectionTests
         Assert.Equal("code", exception.ParamName);
     }
 
+    [Fact]
+    public void Finding_AcceptsAndCopiesPrimitiveCollections()
+    {
+        var identifiers = new List<string> { "001_Initial", "002_Profile" };
+        var finding = new InspectionFinding(
+            "database.test",
+            new Dictionary<string, object?>
+            {
+                ["identifiers"] = identifiers,
+            });
+
+        identifiers[0] = "mutated";
+
+        var stored = Assert.IsAssignableFrom<IReadOnlyList<object?>>(
+            finding.Details["identifiers"]);
+        Assert.Equal(
+            new object?[] { "001_Initial", "002_Profile" },
+            stored);
+    }
+
+    [Fact]
+    public void Finding_RejectsNestedOrUnsupportedCollectionValues()
+    {
+        var exception = Assert.Throws<ArgumentException>(
+            () => new InspectionFinding(
+                "database.test",
+                new Dictionary<string, object?>
+                {
+                    ["invalid"] = new object?[] { new[] { "nested" } },
+                }));
+
+        Assert.Equal("details", exception.ParamName);
+    }
+
     private static MetadataDatabaseInspectionFacts CreateFacts()
     {
         return new MetadataDatabaseInspectionFacts(
