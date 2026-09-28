@@ -77,8 +77,15 @@ public sealed class MetadataMigrationTests
     private static DbContextOptions<GameSaveDbContext> BuildOptions(
         string connectionString)
     {
+        // Temporary SQLite test databases disable pooling locally so their
+        // cleanup cannot disturb unrelated SQLite tests running in parallel.
+        var testConnectionString = new SqliteConnectionStringBuilder(connectionString)
+        {
+            Pooling = false,
+        }.ToString();
+
         return new DbContextOptionsBuilder<GameSaveDbContext>()
-            .UseSqlite(connectionString)
+            .UseSqlite(testConnectionString)
             .Options;
     }
 
@@ -104,10 +111,6 @@ public sealed class MetadataMigrationTests
 
         public void Dispose()
         {
-            // Microsoft.Data.Sqlite pools connections by default. Clear the test
-            // pools before deleting the temporary database on Windows.
-            SqliteConnection.ClearAllPools();
-
             if (Directory.Exists(rootPath))
             {
                 Directory.Delete(rootPath, recursive: true);
