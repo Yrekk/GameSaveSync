@@ -10,6 +10,7 @@ public sealed class MetadataDatabaseInspectionTests
     {
         var exception = Assert.Throws<ArgumentException>(
             () => new MetadataDatabaseInspection(
+                CreateContext(),
                 CreateFacts(),
                 [MetadataDatabaseState.Uninitialized],
                 MetadataDatabaseState.Invalid,
@@ -22,6 +23,7 @@ public sealed class MetadataDatabaseInspectionTests
     public void Constructor_DeduplicatesCandidateStates()
     {
         var inspection = new MetadataDatabaseInspection(
+            CreateContext(),
             CreateFacts(),
             [
                 MetadataDatabaseState.Uninitialized,
@@ -78,6 +80,15 @@ public sealed class MetadataDatabaseInspectionTests
                 }));
 
         Assert.Equal("details", exception.ParamName);
+    }
+
+    private static MetadataDatabaseInspectionContext CreateContext()
+    {
+        return new MetadataDatabaseInspectionContext(
+            "metadata:test",
+            "Test metadata database",
+            "revision:test",
+            MetadataDatabaseClassificationPolicy.CurrentVersion);
     }
 
     private static MetadataDatabaseInspectionFacts CreateFacts()
