@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1D ACCEPTED — H2.1E IMPLEMENTED CANDIDATE — CI GREEN — AWAITING REVIEW / LOCAL VALIDATION / ACCEPTANCE  
+**Status:** ACCEPTED — FINAL CI GREEN — LOCAL VALIDATION + SMOKE + TARGETED CODE REVIEW COMPLETE  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -700,10 +700,42 @@ For each accepted H2 slice:
 - documentation/handoff current;
 - local validation by Damien before tranche acceptance.
 
-## Next exact action
+## Final H2 acceptance
 
-Perform the mandatory H2.1E pedagogical review with Damien, apply any structural correction, then run Damien local validation before explicit acceptance.
+H2 was explicitly accepted by Damien on 28 September 2026.
 
-Do not implement lifecycle mutations, snapshots, HTTP/Admin UI or business persistence in H2.1E.
+Final implementation candidate before closure documentation:
 
-No promotion to `deploy/succumbrae` or `main` is authorized.
+```text
+f0c8c1ca956abb3e9932965271e4ea1fb5667121
+```
+
+Final CI:
+
+```text
+run 36424017414 — SUCCESS
+Release build: 0 warnings / 0 errors
+Core        57
+Application 39
+Persistence 35
+Storage      7
+Server       1
+Integration  1
+TOTAL      140
+```
+
+Local validation matched the CI: 140/140 tests, 0 warnings, 0 errors.
+
+Manual HTTP smoke test of `GET /api/system/status` returned the expected fresh-install state:
+
+- mode `Maintenance`;
+- synchronization unavailable;
+- metadata `Missing`;
+- recovery unavailable;
+- storage `Ready`;
+- finding `database.resource.missing`.
+
+Targeted review covered versioned GameProfile persistence, SQLite backup/restore safety, storage path defense-in-depth and whole-system readiness aggregation. No structural correction was required after review.
+
+Promotion to `develop` is explicitly authorized. No promotion to `deploy/succumbrae` or `main` is authorized.
+
