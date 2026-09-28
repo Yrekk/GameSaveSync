@@ -100,6 +100,31 @@ public sealed class MetadataDatabaseClassificationResolution
         ArgumentNullException.ThrowIfNull(inspection);
         ArgumentNullException.ThrowIfNull(classification);
 
+        var sameCandidates = classification.CandidateStates
+            .OrderBy(state => state)
+            .SequenceEqual(
+                inspection.CandidateStates.OrderBy(state => state));
+
+        if (!inspection.RequiresAdministratorClassification
+            || !string.Equals(
+                classification.ResourceIdentity,
+                inspection.Context.ResourceIdentity,
+                StringComparison.Ordinal)
+            || !string.Equals(
+                classification.InspectionRevision,
+                inspection.Context.Revision,
+                StringComparison.Ordinal)
+            || classification.ClassificationPolicyVersion
+                != inspection.Context.ClassificationPolicyVersion
+            || classification.SuggestedState != inspection.SuggestedState
+            || !inspection.CandidateStates.Contains(classification.SelectedState)
+            || !sameCandidates)
+        {
+            throw new ArgumentException(
+                "Authorized classification is incompatible with the inspection context.",
+                nameof(classification));
+        }
+
         return new MetadataDatabaseClassificationResolution(
             inspection.Context.Revision,
             MetadataDatabaseClassificationAuthority.Authorized,
