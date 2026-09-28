@@ -292,7 +292,7 @@ Do not silently answer these in code.
 - no business endpoint;
 - no controller;
 - no transport DTO;
-- no business persistence schema/repositories yet; the validated Persistence foundation now includes metadata DB bootstrap/migrations plus H2.1C read-only inspection;
+- no business persistence schema/repositories yet; the validated foundation includes metadata DB bootstrap/migrations, H2.1C read-only inspection and H2.1D Application-owned readiness/safe-capability policy;
 - no storage backend implementation yet.
 
 `GameSave.Contracts` is still intentionally empty of DTOs until a real boundary requires one.
