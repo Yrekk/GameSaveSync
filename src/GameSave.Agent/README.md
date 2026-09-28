@@ -6,4 +6,4 @@ Reserved for the Windows-side agent engine.
 
 The agent may depend on Core and Contracts. UI concerns do not belong here, and the agent must not bypass the central-server architecture.
 
-H0 contains no watcher, transfer, process-monitoring or Windows lifecycle behavior.
+Process monitoring, filesystem watching, transfer execution and Windows lifecycle behavior are not implemented yet; they arrive in later tranches.

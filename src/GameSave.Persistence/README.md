@@ -10,15 +10,19 @@ It implements ports defined by `GameSave.Application` when real application use 
 
 It does not own HTTP endpoints, UI behavior, save-payload file storage or domain rules.
 
+EF infrastructure such as `GameSaveDbContext`, its design-time factory and low-level connection builders remains internal so Server/adapters cannot bypass Application boundaries accidentally.
+
 ## H2.1B database bootstrap
 
 The metadata database location is resolved explicitly from configuration.
 
 Operational connections use SQLite `ReadWrite` mode so a missing database cannot be silently created by normal runtime inspection/use.
 
-A separate explicitly named initialization connection uses `ReadWriteCreate`. It exists only for a future human-authorized initial database creation. Migrating an existing database must use existing-database semantics and must never implicitly initialize a missing database.
+A separate explicitly named initialization connection uses `ReadWriteCreate`. It exists only for a future human-authorized initial database creation.
 
-Server startup configures the DbContext but does not open, create or migrate the database.
+Migrating an existing database must use existing-database semantics and must never implicitly initialize a missing database.
+
+Server startup configures Persistence but does not open, create or migrate the database.
 
 ## Migration policy
 
@@ -26,4 +30,4 @@ EF migration source code is authored during development, reviewed and versioned 
 
 Migrations are never applied automatically at startup.
 
-The initial baseline migration intentionally contains no business tables. H2.2 will add schema only when real persistence use cases arrive.
+The baseline migration intentionally contains no business tables. H2.2 will add schema only when real persistence use cases arrive.

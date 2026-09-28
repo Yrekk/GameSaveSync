@@ -4,4 +4,6 @@ Reserved for the replaceable local Windows UI boundary.
 
 ## Boundary
 
-Synchronization business rules do not belong in this project. H0 does not choose a desktop framework yet; it only reserves the boundary.
+Synchronization business rules do not belong in this project.
+
+No desktop framework is selected yet. The UI will remain an adapter over application/agent capabilities rather than an owner of synchronization logic.

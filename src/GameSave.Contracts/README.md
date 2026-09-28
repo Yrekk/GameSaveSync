@@ -1,9 +1,9 @@
 # GameSave.Contracts
 
-Reserved for contracts shared across application boundaries.
+Reserved for contracts shared across real application/transport boundaries.
 
 ## Boundary
 
-This project is not a dumping ground for every model used by more than one project. A type belongs here when a real application boundary needs a shared contract.
+This project is not a dumping ground for every model used by more than one project. A type belongs here only when an actual cross-process or API boundary requires a shared contract.
 
-H0 contains no DTO. DTO/model choices are documented later only when the choice itself is non-obvious or architecturally relevant.
+No transport DTO exists yet. The accepted first real transport use case is the future read-only system-status API; its contracts will be introduced only with that implementation.
