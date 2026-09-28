@@ -44,7 +44,7 @@ public sealed class XmlMetadataDatabaseClassificationStoreTests
             "Old development fixture; never adopt.",
             persisted.Rationale);
 
-        Assert.Contains("<GameSaveControl version="1">", xml);
+        Assert.Contains("<GameSaveControl version=\"1\">", xml);
         Assert.Contains("<Label>Damien Ferrari</Label>", xml);
         Assert.Contains(
             "<Label>GameSaveSync metadata database</Label>",
