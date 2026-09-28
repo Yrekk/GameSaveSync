@@ -263,6 +263,8 @@ git pull
 
 git branch --show-current
 git rev-parse HEAD
+git merge-base --is-ancestor f0c8c1ca956abb3e9932965271e4ea1fb5667121 HEAD
+$LASTEXITCODE
 git status --short
 
 dotnet restore GameSaveSync.sln
@@ -277,7 +279,8 @@ Expected:
 
 ```text
 branch = feature/h2-central-server
-HEAD   = f0c8c1ca956abb3e9932965271e4ea1fb5667121
+$LASTEXITCODE = 0
+(the implementation candidate f0c8c1ca... is included in the current HEAD; later documentation-only commits are allowed)
 
 57 Core
 39 Application
