@@ -6,452 +6,318 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1E — Durable authorized metadata classification (implementation candidate CI green; awaiting review/local validation/explicit acceptance)
+**Current tranche:** H2 — Minimal central server  
+**State:** implementation complete and remote CI green; awaiting final local validation, targeted code review and Damien's explicit H2 acceptance
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
-## VALIDATED
+## Current remote reference
 
-- H0 bootstrap is validated and stable.
-- H1 Generic deterministic domain is fully validated, explicitly accepted by Damien and merged into `develop`.
-- H1 final local validation: Release build green, 51/51 tests passing, diff-check clean, working tree clean.
-- H1 includes:
-  - explicit synchronization/no-version semantics;
-  - deterministic `SyncAssessment` + cumulative findings;
-  - integrity/conflict vocabulary;
-  - complete always-valid generic `GameProfile`;
-  - logical data roots and per-machine overrides;
-  - optional managed-recovery configuration;
-  - ADR-0001 accepting central SQLite metadata persistence.
-- Branch promotion remains `feature/* → develop → deploy/succumbrae → main`.
-- H1 stopped at `develop`; no deployment/main promotion was authorized.
-
-## VALIDATED H2 WORK
-
-H2.1A is validated.
-
-Remote CI is green: Release build 0 warnings/0 errors; 62 executed tests passed (59 Core + 1 Application + 1 Persistence + 1 Storage), with only the two expected no-test notices for Server.Tests and IntegrationTests.
-
-Damien also completed local validation successfully: 62 tests passed, 0 failed, with the same two expected warnings.
-
-Validated H2.1A scope:
-
-- `GameSave.Application`, `GameSave.Persistence`, `GameSave.Storage`;
-- focused Application/Persistence/Storage test projects;
-- EF Core + SQLite isolated to Persistence;
-- empty `GameSaveDbContext` foundation;
-- `MachineId` value object in Core (original H2.1A representation superseded by the approved GUID hardening below);
-- `MachinePathOverride` now requires `MachineId`;
-- module/dependency boundary tests and documentation.
-
-No profile persistence schema, migrations, runtime recovery coordinator, storage backend or HTTP endpoint is implemented yet.
-
-## VALIDATED H2.1B
-
-### H2.1B — Metadata database bootstrap & manual migration foundation
-
-Implemented on `feature/h2-central-server`.
-
-Remote validation is green after the shared review corrections:
-
-- Release build: 0 warnings, 0 errors;
-- Core tests: 57 passed;
-- Application tests: 1 passed;
-- Persistence tests: 9 passed;
-- Storage tests: 1 passed;
-- total executed tests: 68 passed, 0 failed;
-- Server.Tests and IntegrationTests still have the two expected no-test notices.
-
-H2.1B adds:
-
-- explicit metadata database path resolution relative to a known base path;
-- Persistence DI registration for `GameSaveDbContext`;
-- operational SQLite connection mode = `ReadWrite`, preventing silent creation of a missing database;
-- explicit initialization connection mode = `ReadWriteCreate`, reserved only for future human-authorized first-time database creation;
-- versioned empty EF baseline migration `20260928000000_InitialMetadataDatabase`;
-- design-time DbContext factory for migration authoring;
-- development-only metadata DB path configuration;
-- migration tests proving pending/applied state and reopen behavior;
-- test proving normal operational access does not create a missing DB;
-- Server composition wiring without opening, creating or migrating the DB.
-
-Migration execution is deliberately NOT implemented yet.
-
-GameSaveSync now has an explicit invariant: startup may inspect migration state later, but it never applies schema/data migrations automatically.
-
-Commits:
-
-- `cfb41d2` — H2.1B implementation;
-- `9c795a4` — Windows SQLite test-pool cleanup fix.
-
-Damien's initial local H2.1B validation was green before the shared review.
-
-The shared review is now completed and produced structural corrections:
-
-- test SQLite pooling is disabled locally instead of clearing all process pools;
-- maintenance/creation connection helper is internal to Persistence;
-- `GameSaveDbContext` and its design-time factory are internal to Persistence;
-- an architecture test protects that EF infrastructure is not public;
-- the baseline migration id was anchored safely before future generated migration ids;
-- local Server metadata data is ignored by Git;
-- initialization is explicitly separated from migration and restore;
-- ADR-0004 was aligned with ADR-0005: reusable administrative use cases live in `GameSave.Application`, not in Server;
-- startup remains observation/composition only and never decides among init/migrate/restore/recovery actions.
-
-Damien completed the post-review local validation successfully and explicitly accepted H2.1B on 28 September 2026.
-
-
-## VALIDATED H2.1C
-
-### H2.1C — Read-only metadata database inspection
-
-H2.1C is fully validated and explicitly accepted by Damien on 28 September 2026.
-
-Final code HEAD before documentation closure:
+Final H2 implementation candidate:
 
 ```text
-d7898c5f2c9d8e96dd23940d3490dbdac65f083c
+f0c8c1ca956abb3e9932965271e4ea1fb5667121
 ```
 
-Final CI:
-
-- run `36407964589` — SUCCESS;
-- Release build: 0 warnings, 0 errors;
-- Core: 57 tests passed;
-- Application: 7 tests passed;
-- Persistence: 24 tests passed;
-- Storage: 1 test passed;
-- total executed: 89 passed, 0 failed;
-- Server.Tests and IntegrationTests retain the two expected no-test notices.
-
-Validated behavior:
-
-- inspection is strictly read-only and never creates a missing DB;
-- Application owns provider-neutral states, facts, findings, candidates, suggestion and the reusable inspection use case;
-- Persistence owns SQLite/EF observation and database-specific classification;
-- `Missing / Uninitialized / Ready / MigrationRequired / TooNew / Unavailable / Invalid` follow the shared Nexus lifecycle vocabulary;
-- ambiguous evidence exposes only fact-compatible candidates and a non-authoritative suggestion;
-- deterministic evidence such as proven `Ready` exposes a single state;
-- structured findings use stable Nexus-compatible `code + details`, including immutable transport-safe primitive collections;
-- SQLite integrity remains a factual observation separate from GameSaveSync schema/history coherence;
-- classification performs no initialize/migrate/restore/repair/overwrite side effect.
-
-Shared review completed with Damien and covered file responsibilities, execution flow, provider/classifier separation, facts-vs-classification invariants, failure diagnosis and H2.1C explicit deferrals.
-
-NexusPrincipia is the source of truth for durable authorized classification: if a later Admin choice must survive restart, that decision is persisted in trusted control-plane state outside the ambiguous/rejected resource and invalidated/reviewed when material facts change.
-
-## VALIDATED POST-REVIEW HARDENING
-
-The post-H2.1A MachineId hardening is validated locally and remotely.
-
-Validated changes:
-
-- `MachineId.Value` is now `Guid`, rejecting `Guid.Empty`;
-- `GameDataRoot` compares MachineId value objects directly;
-- obsolete case-insensitive string identity semantics are removed;
-- future generation remains deferred to Application/Server enrollment using UUID v7;
-- SQLite and Agent do not generate authoritative MachineId values;
-- the CI-only missing namespace import in `GameDataRoot.cs` was corrected;
-- latest CI for commit `1e9514a` is green.
-
-## DECIDED ARCHITECTURE / REMAINING H2 DIRECTION
-
-### H2 central server
-
-H2 will turn the existing ASP.NET Core host into the first real central application/persistence boundary.
-
-### Modular application/persistence boundaries
-
-- H2 introduces separate `GameSave.Application` and `GameSave.Persistence` projects;
-- Application owns use cases and repository/capability ports;
-- Persistence owns EF Core/SQLite implementations, entities, mappings and migrations;
-- Server remains a thin ASP.NET Core host/composition root;
-- Contracts remains transport-only;
-- modules are designed to be extractable into reusable libraries/services later when a real second consumer exists;
-- do not prematurely genericize or create microservices without an actual operational/reuse need.
-
-See `docs/decisions/ADR-0005-application-persistence-modules.md`.
-
-### Save payload storage boundary
-
-- H2 introduces a separate `GameSave.Storage` project;
-- Application owns GameSaveSync-specific storage ports;
-- Storage provides the concrete local-filesystem backend in H2;
-- Persistence remains metadata/EF/SQLite only;
-- the storage port is not a generic filesystem API;
-- H2 proves basic artifact store/read/existence behavior only;
-- H5/H8 retain transactional transfers/version publication and real Custodia integration;
-- Storage remains extractable/reusable later without premature microservice deployment.
-
-See `docs/decisions/ADR-0006-separate-storage-module.md`.
-
-### First transport use case
-
-- first Application/network use case is `GetSystemStatus`;
-- initial endpoint is read-only `GET /api/system/status`;
-- it reports operational mode/readiness, including database/migration and storage health relevant to H2;
-- synchronization authority availability is explicit;
-- process liveness is a separate concept and must not be confused with readiness;
-- desktop/local UI and future Web Admin will reuse the same Application use case;
-- Contracts now has a real transport reason, but must not expose EF entities or Core models directly.
-
-See `docs/decisions/ADR-0007-first-system-status-api.md`.
-
-### Machine identity
-
-- post-H2.1A review found that string MachineId semantics could diverge between value equality and case-insensitive duplicate checks;
-- approved correction changes MachineId to a non-empty `Guid` value object;
-- future new identities are generated as UUID v7 by the authoritative Application/Server enrollment workflow, not by Core, Agent or SQLite;
-- Persistence stores the assigned GUID; no database IDENTITY/autoincrement substitutes for MachineId;
-- H2 introduces a stable opaque `MachineId` value object;
-- MachineId identifies a logical GameSaveSync machine, not hostname, username or a specific Agent installation;
-- a new PC always receives a new MachineId;
-- a reformatted/reinstalled machine may retain its existing MachineId only through a future explicit/authorized rebind flow;
-- hostname, username, workgroup and path data remain mutable metadata;
-- username may later be persisted because it can affect per-machine paths, but it never defines identity;
-- H2 does not create a full machine registry/table yet; path overrides may persist opaque MachineId values until H3 adds the real registry consumer.
-
-See `docs/decisions/ADR-0008-stable-machine-identity.md`.
-
-### Persistence access
-
-- EF Core is the default persistence layer;
-- SQLite is the initial provider;
-- Core remains independent from EF Core and SQLite;
-- persistence entities/mappings live in `GameSave.Persistence`;
-- targeted raw SQL is allowed only when explicitly justified and isolated;
-- no lazy loading;
-- provider/database changes remain explicit migration projects, not assumed automatic.
-
-See `docs/decisions/ADR-0002-ef-core-sqlite-persistence.md`.
-
-### SQLite
-
-- one central SQLite database for GameSaveSync metadata/configuration;
-- active DB local to Succumbrae;
-- not hosted live on Custodia/SMB;
-- safe backup to Custodia later;
-- save payloads remain files;
-- Core remains SQLite-independent.
-
-### Administrative operation reuse
-
-- database initialization/migration/snapshot/recovery logic is implemented once as `GameSave.Application` use cases/services executed by the Server-side application;
-- desktop/local UI, future Web Admin, startup and possible maintenance CLI are only entry-point adapters;
-- EF migration classes are authored during development and versioned in Git;
-- deployed interfaces may execute already-known migrations but do not dynamically author migration source code;
-- startup never applies schema/data migrations automatically; it may inspect/report state only;
-- initialization, migration and restore are distinct explicit operations;
-- explicit administrative execution is requested through reusable `GameSave.Application` services/use cases shared by Admin, maintenance CLI and future IA/tool adapters;
-- authoritative DB operations execute on Succumbrae, even when requested remotely;
-- authorization for destructive/admin operations will be defined at the transport/Admin boundary.
-
-See `docs/decisions/ADR-0004-reusable-administrative-use-cases.md`.
-
-### Metadata database recovery
-
-- keep SQLite-safe known-good metadata snapshots;
-- initial retention direction is at least the two most recent rolling snapshots;
-- create a pre-migration snapshot before data-changing schema migration;
-- database failure enters restricted recovery/minimal mode;
-- normal synchronization authority is disabled in that mode;
-- snapshot restoration requires explicit administrative selection/confirmation;
-- restored metadata must be validated before normal mode resumes;
-- later, when real save-version storage exists, metadata recovery must reconcile against that storage to prevent authority rewind.
-
-See `docs/decisions/ADR-0003-metadata-snapshot-recovery.md`.
-
-### Managed save recovery
-
-Managed recovery checkpoints for game saves remain parallel to normal synchronization and are separate from metadata database snapshots. They are not implemented in H2 unless a later explicitly accepted H2 design requires only metadata needed by future recovery work.
-
-### Operational diagnostics
-
-Structured diagnostics remain a cross-cutting requirement. H2 should avoid designs that make later structured Server diagnostics difficult, but the Admin live stream is not an H2 deliverable.
-
-## OPEN H2 DESIGN QUESTIONS
-
-Read `docs/tranches/H2-central-server.md` before implementation.
-
-The first discussion must resolve:
-
-1. SQLite access style — RESOLVED: EF Core + SQLite provider;
-2. migration/schema versioning — RESOLVED: versioned EF migrations + reusable execution coordinator;
-3. repository boundary placement — RESOLVED: Application ports + Persistence implementations in separate projects;
-4. Server failure policy — RESOLVED: restricted recovery mode + explicit validated snapshot restore;
-5. exact H2 fake/local storage scope — RESOLVED: separate Storage module + minimal local backend;
-6. first real API use case — RESOLVED: read-only GetSystemStatus / `GET /api/system/status`;
-7. minimum machine metadata — RESOLVED: stable opaque MachineId only; mutable host metadata deferred.
-
-Do not silently answer these in code.
-
-## CURRENT SERVER STATE
-
-`GameSave.Server` is still a thin ASP.NET Core host:
-
-- no business endpoint;
-- no controller;
-- no transport DTO;
-- no business persistence schema/repositories yet; the validated foundation includes metadata DB bootstrap/migrations, H2.1C read-only inspection and H2.1D Application-owned readiness/safe-capability policy;
-- no storage backend implementation yet.
-
-`GameSave.Contracts` is still intentionally empty of DTOs until a real boundary requires one.
-
-## EXPECTED TEST WARNINGS
-
-Until H2 adds real Server/Integration behavior, these warnings may still appear and are known:
-
-- `GameSave.Server.Tests`: no tests available;
-- `GameSave.IntegrationTests`: no tests available.
-
-As soon as H2 adds real Server behavior, the first warning should naturally disappear because real Server tests should exist. Do not add fake tests.
-
-## SHARED ENGINEERING REFERENCES
-
-Cross-project development rules are now centralized in NexusPrincipia rather than duplicated here.
-
-Authoritative shared references:
-
-- Dev + AI operating model: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/ai-development-operating-model.md
-- Project bootstrap: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/project-bootstrap.md
-- Session continuity: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/session-continuity.md
-- Documentation conventions: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/documentation-conventions.md
-- C# / .NET conventions: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/languages/csharp-dotnet.md
-- Debug & Observability: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/debug-observability.md
-- Entrypoints & reusable operations: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/entrypoints-and-reusable-operations.md
-- Database lifecycle/readiness: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md
-- Inspection/classification/authorized choice: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/inspection-classification-authority.md
-- Structured inspection findings: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/structured-inspection-findings.md
-
-GameSaveSync keeps only project-specific workflow rules locally.
-
-## READ FIRST NEXT SESSION
-
-1. root `README.md`;
-2. this file;
-3. `docs/tranches/H2-central-server.md`;
-4. `docs/decisions/ADR-0001-server-metadata-sqlite.md`;
-5. `src/GameSave.Server/README.md`;
-6. `src/GameSave.Contracts/README.md`;
-7. `src/GameSave.Server/Program.cs`;
-8. actual remote branch and HEAD.
-
-## H2.1C CLASSIFICATION AUTHORITY — VALIDATED
-
-H2.1C follows the shared Nexus inspection/classification rule: facts → compatible candidates → reasoned suggestion → authorized choice later → separate operation.
-
-GameSaveSync behavior:
-
-- empty valid SQLite with no applied GameSaveSync migration → `Uninitialized | Invalid`, suggest `Uninitialized`;
-- valid SQLite with foreign/user tables and no applied GameSaveSync migration → same candidates, suggest `Invalid`;
-- only genuinely ambiguous observations expose multiple candidates;
-- proven `Ready` / `MigrationRequired` states remain deterministic rather than carrying `Invalid` as a generic rejection option;
-- impossible states are never offered;
-- inspection explanations use stable `code + details` findings, never authoritative free-form prose;
-- existing invalid resources are never silently overwritten.
-
-## VALIDATED H2.1D
-
-H2.1D adds provider-neutral readiness/capability policy on top of H2.1C inspection.
-
-Accepted modes:
-
-- `Normal`;
-- `Maintenance`;
-- `RestrictedRecovery`;
-- `OutOfService`.
-
-`OutOfService` means the Server process remains alive for status/diagnostics while no currently known safe maintenance/recovery path is available. It is not process liveness.
-
-Snapshot/recovery discovery remains out of scope. H2.1D may model recovery availability as `Unknown / Available / Unavailable` so later infrastructure can feed evidence into the policy without changing the mode vocabulary.
-
-No mutation is permitted in this slice.
-
-## H2.1D FINAL VALIDATION
-
-Implemented in Application only:
-
-- operational modes `Normal / Maintenance / RestrictedRecovery / OutOfService`;
-- abstract recovery availability `Unknown / Available / Unavailable`;
-- readiness-safe capabilities kept distinct from authorization and implementation availability;
-- `MetadataAuthorityAvailable` kept narrower than future whole-system synchronization availability;
-- structured readiness findings for classification required, unknown recovery and unavailable recovery;
-- pure evaluator with no infrastructure mutation.
-
-Final accepted candidate HEAD before documentation closure:
+CI:
 
 ```text
-7bd07e055111589c466ccba80b714f13f91cf2d6
+run 36424017414 — SUCCESS
+Release build: 0 warnings / 0 errors
+
+GameSave.Core.Tests        : 57 passed
+GameSave.Application.Tests : 39 passed
+GameSave.Persistence.Tests : 35 passed
+GameSave.Storage.Tests     : 7 passed
+GameSave.Server.Tests      : 1 passed
+GameSave.IntegrationTests  : 1 passed
+TOTAL                      : 140 passed
 ```
 
-CI run `36412299755` is green:
+The old "no tests available" warnings for Server.Tests and IntegrationTests are no longer expected: both projects now contain real executable tests.
 
-- Release build: 0 warnings / 0 errors;
-- Core: 57;
-- Application: 22;
-- Persistence: 24;
-- Storage: 1;
-- total: 104 passed;
-- Server/Integration retain the two expected no-test notices.
+## H2 result
 
-Damien completed the matching local validation successfully and explicitly accepted H2.1D on 28 September 2026 after the pedagogical review.
+H2 turns the ASP.NET host into the first real central GameSaveSync authority boundary while keeping later Agent/transfer/Custodia work out of scope.
 
-## H2.1E — ACCEPTED SCOPE, IMPLEMENTATION STARTING
-
-H2.1E persists ambiguous authorized classifications outside the inspected metadata database.
-
-Accepted decisions:
-
-- control-plane storage = human-readable XML;
-- complete decision history retained;
-- atomic file replacement;
-- missing XML = valid empty history;
-- malformed/unreadable XML = fail closed and never silently overwrite;
-- stable actor/resource identifiers + human-readable label snapshots;
-- actor reference + actor label required;
-- rationale mandatory when selected state differs from inspector suggestion;
-- deterministic single-state classifications are not persisted;
-- expected inspection revision must still match a fresh reinspection before write;
-- stale history remains audit-only;
-- shared fresh-revision and human-label rules are centralized in NexusPrincipia.
-
-## H2.1E IMPLEMENTATION CANDIDATE
+### Metadata database foundation
 
 Implemented:
 
-- inspection resource identity + human-readable resource label + opaque revision + policy version;
-- durable `AuthorizedMetadataDatabaseClassification` audit record;
-- full-history classification-store port;
-- deterministic/authorized/unresolved resolver;
-- fresh reinspection before decision write;
-- selected-state candidate enforcement;
-- rationale mandatory when overriding suggestion;
-- actor stable reference + human-readable label snapshot;
-- SQLite/EF classification-evidence fingerprint;
-- external human-readable XML control store with atomic replacement;
-- malformed/unavailable store fail-closed behavior;
-- H2.1D readiness consumes compatible effective classification.
+- explicit configured SQLite metadata path;
+- normal operational access cannot silently create a missing DB;
+- explicit initialization semantics remain distinct from migration and restore;
+- versioned EF migrations;
+- read-only database inspection;
+- observed facts separated from semantic classification;
+- durable Admin classification outside the inspected DB;
+- human-readable XML control-plane history;
+- fresh inspection revision check before durable human decisions;
+- metadata readiness modes: `Normal / Maintenance / RestrictedRecovery / OutOfService`;
+- fail-closed behavior without equating readiness failure to Server process death.
 
-Code candidate:
+### GameProfile persistence
+
+Implemented:
+
+- complete valid `GameProfile` persistence behind an Application repository port;
+- migration `20260928123000_AddGameProfiles`;
+- global `ProfileId` persistence key;
+- human-readable `DisplayName` duplicated beside the serialized aggregate for diagnostics/listing;
+- complete aggregate stored as a versioned JSON persistence document;
+- Persistence DTO/mapping remains outside Core;
+- repository round-trip and update tests.
+
+The JSON aggregate is intentionally not split into speculative relational tables because H2 has no use case that needs SQL queries over every nested profile field yet.
+
+### Metadata snapshots and administrative operations
+
+Implemented Application use cases:
+
+- `InitializeMetadataDatabase`;
+- `ApplyPendingMetadataDatabaseMigrations`;
+- `CreateRollingMetadataDatabaseSnapshot`;
+- `RestoreMetadataDatabaseSnapshot`.
+
+Implemented Persistence infrastructure:
+
+- SQLite-safe backup through `BackupDatabase`;
+- validated snapshot candidates;
+- rolling retention = 2;
+- mandatory pre-migration snapshot;
+- explicit snapshot id for restore;
+- no automatic "restore newest";
+- active broken DB quarantined during restore;
+- post-operation reinspection;
+- no automatic startup initialization/migration/restore.
+
+Important Windows/SQLite detail:
+
+- snapshot source/destination/validation connections intentionally avoid pooling where file replacement/rotation is involved;
+- restore clears only the active metadata connection pool, never `ClearAllPools()`.
+
+### Save artifact Storage boundary
+
+Implemented:
+
+- `IGameSaveArtifactStorage` Application port;
+- local filesystem backend in `GameSave.Storage`;
+- artifact identity includes profile + logical artifact + data root + relative path;
+- basic write/read/existence/status behavior;
+- atomic temp-file write before final replace;
+- path traversal rejected (`..`, absolute paths, etc.);
+- Storage remains separate from EF/SQLite Persistence;
+- no H5 reliable publication/version protocol yet;
+- no H8 Custodia/NAS backend yet.
+
+Storage composition does not create/touch the root path at Server startup. A broken storage target must remain diagnosable through system status instead of crashing the process before diagnostics are available.
+
+### First real transport boundary
+
+Implemented:
 
 ```text
-61d852f6e1a3ac8d58a37511ec5e5fe23d8b3559
+GET /api/system/status
 ```
 
-CI run `36418626966` is green:
+Flow:
 
-- Release build: 0 warnings / 0 errors;
-- Core: 57;
-- Application: 34;
-- Persistence: 31;
-- Storage: 1;
-- total: 123 passed;
-- Server/Integration retain the two expected no-test notices.
+```text
+HTTP
+→ GameSave.Server adapter
+→ GetSystemStatus
+→ metadata inspect + authorized classification
+→ metadata readiness
+→ recovery snapshot availability
+→ storage readiness
+→ GameSave.Contracts DTO
+```
+
+The response exposes:
+
+- overall operational mode;
+- synchronization availability;
+- effective metadata state;
+- metadata operational mode;
+- Admin-classification requirement;
+- migration pending signal;
+- snapshot recovery availability;
+- Storage status;
+- structured finding codes.
+
+Process liveness remains distinct from operational readiness.
+
+A real integration test boots the ASP.NET application with isolated temporary paths and calls `GET /api/system/status`.
+
+## Explicitly still deferred after H2
+
+H2 does **not** implement:
+
+- Windows Agent behavior;
+- machine enrollment/registry workflow;
+- process detection;
+- save-folder monitoring;
+- Windows lifecycle handling;
+- transactional transfer/version publication;
+- conflict transfer protocol;
+- real Custodia storage;
+- Project Zomboid-specific profile behavior;
+- Web/Admin UI;
+- transport authentication/authorization for destructive administrative operations;
+- managed game-save recovery checkpoints.
+
+These belong to later tranches.
+
+## Shared development workflow
+
+NexusPrincipia was updated during H2.
+
+Current shared rule:
+
+- one functional tranche = one dedicated development session;
+- internal technical checkpoints are allowed and encouraged;
+- checkpoints are not mini-tranches and do not each require acceptance/local validation/document closure;
+- pause implementation only for real architectural/product/safety decisions;
+- continuous CI/testing during the tranche;
+- final review focuses on tricky/important code instead of exhaustive questionnaires;
+- explicit local validation + human acceptance close the functional tranche;
+- next functional tranche starts in a new session.
+
+Authoritative reference:
+
+`NexusPrincipia/docs/development/ai-development-operating-model.md`
+
+## Final H2 review — files worth opening
+
+Do not review every changed file line-by-line.
+
+The useful technical review is concentrated here:
+
+### 1. Versioned aggregate persistence
+
+```text
+src/GameSave.Persistence/Profiles/GameProfileDocument.cs
+src/GameSave.Persistence/Profiles/EfGameProfileRepository.cs
+```
+
+Topics:
+
+- why Persistence owns the serialization DTO;
+- why the stored aggregate has a schema version;
+- why `ProfileId` / `DisplayName` are duplicated outside the payload;
+- why nested profile fields were not prematurely normalized into multiple SQL tables.
+
+### 2. SQLite snapshot / restore
+
+```text
+src/GameSave.Persistence/Database/SqliteMetadataDatabaseSnapshotStore.cs
+```
+
+Topics:
+
+- `BackupDatabase` instead of copying a live SQLite file blindly;
+- validation before restore;
+- explicit snapshot selection;
+- broken active DB quarantine;
+- targeted pool handling;
+- why snapshot connections avoid pooling on Windows.
+
+### 3. Storage path safety
+
+```text
+src/GameSave.Application/Storage/SaveArtifactKey.cs
+src/GameSave.Storage/Local/LocalGameSaveArtifactStorage.cs
+```
+
+Topics:
+
+- provider-neutral artifact key;
+- rejection of absolute/traversal paths;
+- second containment check after `Path.GetFullPath`;
+- atomic temp write.
+
+### 4. Whole-system readiness
+
+```text
+src/GameSave.Application/SystemStatus/GetSystemStatus.cs
+src/GameSave.Server/Program.cs
+src/GameSave.Server/SystemStatus/SystemStatusContractMapper.cs
+```
+
+Topics:
+
+- metadata authority alone is not enough for synchronization availability;
+- recovery availability participates in metadata readiness;
+- Storage participates in global readiness;
+- HTTP adapter maps to transport DTO and owns no business policy;
+- Server startup still performs no implicit DB lifecycle mutation.
 
 ## NEXT EXACT ACTION
 
-Perform the mandatory H2.1E pedagogical review, correct any structural issue, then run Damien local validation before explicit acceptance.
+Damien performs final local validation of H2 candidate `f0c8c1ca956abb3e9932965271e4ea1fb5667121`.
 
-No lifecycle mutation, snapshot implementation, HTTP/Admin UI or business persistence is part of H2.1E.
+Recommended local commands:
 
-No promotion to `deploy/succumbrae` or `main` is authorized.
+```powershell
+git pull
+
+git branch --show-current
+git rev-parse HEAD
+git status --short
+
+dotnet restore GameSaveSync.sln
+dotnet build GameSaveSync.sln --configuration Release --no-restore
+dotnet test GameSaveSync.sln --configuration Release --no-build
+
+git diff --check
+git status --short
+```
+
+Expected:
+
+```text
+branch = feature/h2-central-server
+HEAD   = f0c8c1ca956abb3e9932965271e4ea1fb5667121
+
+57 Core
+39 Application
+35 Persistence
+7 Storage
+1 Server
+1 Integration
+= 140 tests passed
+```
+
+After the automated validation, perform one manual status smoke test:
+
+Terminal 1:
+
+```powershell
+dotnet run --project src/GameSave.Server
+```
+
+Terminal 2:
+
+```powershell
+Invoke-RestMethod http://localhost:5080/api/system/status | ConvertTo-Json -Depth 5
+```
+
+With a fresh local Development data directory and no initialized metadata DB, the expected broad behavior is:
+
+- HTTP 200;
+- overall mode `Maintenance`;
+- synchronization unavailable;
+- metadata state `Missing`;
+- Storage status `Ready`.
+
+Then stop the Server with Ctrl+C.
+
+After Damien confirms local validation, perform the short targeted code review above. Apply any resulting structural correction, revalidate if code changes, then Damien explicitly accepts H2.
+
+Only after H2 acceptance:
+
+- update/finalize H2 documentation;
+- promote H2 to `develop` if Damien explicitly authorizes it;
+- start **H3 in a new dedicated session**.
+
+No promotion to `deploy/succumbrae` or `main` is authorized by H2 completion.
