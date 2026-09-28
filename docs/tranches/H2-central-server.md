@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1B IMPLEMENTED — REMOTE CI GREEN — LOCAL TESTS GREEN — SHARED REVIEW PENDING  
+**Status:** H2.1B REVIEWED — REMOTE CI GREEN — POST-REVIEW LOCAL REVALIDATION PENDING  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -184,25 +184,30 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-H2.1B remote CI is green on commit `9c795a4`:
+The shared H2.1B review is complete.
+
+Review corrections accepted and implemented:
+
+- temporary SQLite test databases disable pooling locally; no global `ClearAllPools()`;
+- SQLite maintenance/creation connection builder is internal to Persistence;
+- `GameSaveDbContext` and its design-time factory are internal;
+- an architecture test protects the EF infrastructure boundary;
+- baseline migration id is `20260928000000_InitialMetadataDatabase`;
+- local Server `data/` is ignored by Git;
+- initialization, migration and restore are distinct administrative operations;
+- startup never chooses or executes these operations automatically;
+- reusable administrative use cases belong to `GameSave.Application`, with Server/Admin/CLI/future IA as adapters.
+
+Latest code CI after review corrections:
 
 - Release build: 0 warnings, 0 errors;
-- Core: 57 tests passed;
-- Application: 1 test passed;
-- Persistence: 8 tests passed;
-- Storage: 1 test passed;
-- total: 67 passed, 0 failed;
-- Server.Tests and IntegrationTests retain their expected no-test notices.
+- Core: 57 passed;
+- Application: 1 passed;
+- Persistence: 9 passed;
+- Storage: 1 passed;
+- total: 68 passed, 0 failed;
+- Server.Tests and IntegrationTests keep their expected no-test notices.
 
-The first H2.1B CI run exposed a Windows-only test cleanup issue: Microsoft.Data.Sqlite pooling kept the temporary database file open after the functional migration assertions succeeded. The fixture now clears SQLite pools before deleting its temporary directory. Product pooling remains unchanged.
+Because review changed code after Damien's first local validation, run the local Release build/tests/diff/status checks again.
 
-Damien reports the local H2.1B tests are green.
-
-Next:
-
-1. Review the H2.1B code and architecture together.
-2. Explicitly verify that `Program.cs` remains a composition/adapter boundary and that any reusable Admin/CLI/future-IA operation belongs to Application services/use cases.
-3. Correct any issue found during review.
-4. Re-run relevant validation if code changes.
-5. Damien explicitly accepts H2.1B.
-6. Only then define H2.1C.
+If green, Damien can explicitly accept H2.1B. Only then define H2.1C.

@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1B — Metadata database bootstrap & manual migration foundation (implemented; remote CI green; Damien local tests green; shared review pending)
+**Current tranche:** H2.1B — Metadata database bootstrap & manual migration foundation (shared review completed; remote CI green; post-review local revalidation pending)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -52,14 +52,14 @@ No profile persistence schema, migrations, runtime recovery coordinator, storage
 
 Implemented on `feature/h2-central-server`.
 
-Remote validation is green:
+Remote validation is green after the shared review corrections:
 
 - Release build: 0 warnings, 0 errors;
 - Core tests: 57 passed;
 - Application tests: 1 passed;
-- Persistence tests: 8 passed;
+- Persistence tests: 9 passed;
 - Storage tests: 1 passed;
-- total executed tests: 67 passed, 0 failed;
+- total executed tests: 68 passed, 0 failed;
 - Server.Tests and IntegrationTests still have the two expected no-test notices.
 
 H2.1B adds:
@@ -84,7 +84,21 @@ Commits:
 - `cfb41d2` — H2.1B implementation;
 - `9c795a4` — Windows SQLite test-pool cleanup fix.
 
-Damien reports the local H2.1B tests are green. The mandatory shared code/architecture review is still required before H2.1B can be accepted.
+Damien's initial local H2.1B validation was green before the shared review.
+
+The shared review is now completed and produced structural corrections:
+
+- test SQLite pooling is disabled locally instead of clearing all process pools;
+- maintenance/creation connection helper is internal to Persistence;
+- `GameSaveDbContext` and its design-time factory are internal to Persistence;
+- an architecture test protects that EF infrastructure is not public;
+- the baseline migration id was anchored safely before future generated migration ids;
+- local Server metadata data is ignored by Git;
+- initialization is explicitly separated from migration and restore;
+- ADR-0004 was aligned with ADR-0005: reusable administrative use cases live in `GameSave.Application`, not in Server;
+- startup remains observation/composition only and never decides among init/migrate/restore/recovery actions.
+
+Because code changed during review, a new local validation by Damien is required before H2.1B acceptance.
 
 ## VALIDATED POST-REVIEW HARDENING
 
@@ -281,18 +295,17 @@ GameSaveSync keeps only project-specific workflow rules locally.
 
 ## NEXT EXACT ACTION
 
-Local H2.1B tests are green according to Damien.
+Run the post-review local validation:
 
-Perform the mandatory H2.1B code/architecture review together before explicit tranche acceptance.
+```powershell
+git pull
 
-The review must explicitly verify the shared entrypoint rule:
-
-```text
-Program.cs / main.py / equivalent
-→ bootstrap + composition + adapters only
-
-reusable Admin / CLI / future IA capability
-→ Application use case / service
+dotnet build GameSaveSync.sln --configuration Release
+dotnet test GameSaveSync.sln --configuration Release --no-build
+git diff --check
+git status --short
 ```
 
-Do not start H2.1C until that review and acceptance are complete.
+If this is green, Damien may explicitly accept H2.1B.
+
+Do not start H2.1C until that acceptance is recorded.
