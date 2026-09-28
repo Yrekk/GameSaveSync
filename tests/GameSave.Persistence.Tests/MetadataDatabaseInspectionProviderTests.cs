@@ -72,7 +72,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
     }
 
     [Fact]
-    public async Task AppliedBaseline_SuggestsReadyAndAllowsAdministrativeInvalidation()
+    public async Task AppliedBaseline_IsDeterministicallyReady()
     {
         using var fixture = CreateFixture();
         await fixture.ApplyBaselineMigrationAsync();
