@@ -16,11 +16,11 @@ public sealed class MetadataDatabaseReadinessTests
         Assert.Equal(
             MetadataDatabaseOperationalMode.Normal,
             readiness.Mode);
-        Assert.True(readiness.SynchronizationAuthorityAvailable);
+        Assert.True(readiness.MetadataAuthorityAvailable);
         Assert.False(readiness.RequiresAdministratorClassification);
         Assert.Contains(
             MetadataDatabaseCapability.UseMetadataAuthority,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
     }
 
     [Fact]
@@ -40,17 +40,17 @@ public sealed class MetadataDatabaseReadinessTests
         Assert.Equal(
             MetadataDatabaseOperationalMode.Maintenance,
             readiness.Mode);
-        Assert.False(readiness.SynchronizationAuthorityAvailable);
+        Assert.False(readiness.MetadataAuthorityAvailable);
         Assert.True(readiness.RequiresAdministratorClassification);
         Assert.Contains(
             MetadataDatabaseCapability.ResolveClassification,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.DoesNotContain(
             MetadataDatabaseCapability.InitializeMetadataDatabase,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.DoesNotContain(
             MetadataDatabaseCapability.RestoreMetadataSnapshot,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.Contains(
             readiness.Findings,
             finding =>
@@ -67,13 +67,13 @@ public sealed class MetadataDatabaseReadinessTests
         Assert.Equal(
             MetadataDatabaseOperationalMode.Maintenance,
             readiness.Mode);
-        Assert.False(readiness.SynchronizationAuthorityAvailable);
+        Assert.False(readiness.MetadataAuthorityAvailable);
         Assert.Contains(
             MetadataDatabaseCapability.InitializeMetadataDatabase,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.Contains(
             MetadataDatabaseCapability.DiscoverRecoveryCandidates,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
     }
 
     [Fact]
@@ -88,10 +88,10 @@ public sealed class MetadataDatabaseReadinessTests
             readiness.Mode);
         Assert.Contains(
             MetadataDatabaseCapability.InitializeMetadataDatabase,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.DoesNotContain(
             MetadataDatabaseCapability.RestoreMetadataSnapshot,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
     }
 
     [Fact]
@@ -106,11 +106,11 @@ public sealed class MetadataDatabaseReadinessTests
             readiness.Mode);
         Assert.Contains(
             MetadataDatabaseCapability.ApplyPendingMigrations,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.DoesNotContain(
             MetadataDatabaseCapability.RestoreMetadataSnapshot,
-            readiness.AllowedCapabilities);
-        Assert.False(readiness.SynchronizationAuthorityAvailable);
+            readiness.SafeCapabilities);
+        Assert.False(readiness.MetadataAuthorityAvailable);
     }
 
     [Theory]
@@ -129,10 +129,10 @@ public sealed class MetadataDatabaseReadinessTests
             readiness.Mode);
         Assert.Contains(
             MetadataDatabaseCapability.DiscoverRecoveryCandidates,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.DoesNotContain(
             MetadataDatabaseCapability.RestoreMetadataSnapshot,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.Contains(
             readiness.Findings,
             finding =>
@@ -157,8 +157,8 @@ public sealed class MetadataDatabaseReadinessTests
             readiness.Mode);
         Assert.Contains(
             MetadataDatabaseCapability.RestoreMetadataSnapshot,
-            readiness.AllowedCapabilities);
-        Assert.False(readiness.SynchronizationAuthorityAvailable);
+            readiness.SafeCapabilities);
+        Assert.False(readiness.MetadataAuthorityAvailable);
     }
 
     [Theory]
@@ -175,13 +175,13 @@ public sealed class MetadataDatabaseReadinessTests
         Assert.Equal(
             MetadataDatabaseOperationalMode.OutOfService,
             readiness.Mode);
-        Assert.False(readiness.SynchronizationAuthorityAvailable);
+        Assert.False(readiness.MetadataAuthorityAvailable);
         Assert.DoesNotContain(
             MetadataDatabaseCapability.RestoreMetadataSnapshot,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.DoesNotContain(
             MetadataDatabaseCapability.DiscoverRecoveryCandidates,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.Contains(
             readiness.Findings,
             finding =>
@@ -201,7 +201,7 @@ public sealed class MetadataDatabaseReadinessTests
             readiness.Mode);
         Assert.Contains(
             MetadataDatabaseCapability.InitializeMetadataDatabase,
-            readiness.AllowedCapabilities);
+            readiness.SafeCapabilities);
         Assert.False(readiness.RequiresAdministratorClassification);
     }
 
