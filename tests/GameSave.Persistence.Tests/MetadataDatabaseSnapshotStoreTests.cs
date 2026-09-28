@@ -85,10 +85,16 @@ public sealed class MetadataDatabaseSnapshotStoreTests
             Directory.CreateDirectory(
                 Path.GetDirectoryName(databaseSettings.DatabasePath)!);
 
-            var options = new DbContextOptionsBuilder<GameSaveDbContext>()
-                .UseSqlite(
+            var initializationConnection =
+                new SqliteConnectionStringBuilder(
                     MetadataDatabaseConnectionStrings.ForExplicitInitialization(
                         databaseSettings))
+                {
+                    Pooling = false,
+                }.ToString();
+
+            var options = new DbContextOptionsBuilder<GameSaveDbContext>()
+                .UseSqlite(initializationConnection)
                 .Options;
 
             await using var context = new GameSaveDbContext(options);

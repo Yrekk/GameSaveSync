@@ -7,8 +7,8 @@ namespace GameSave.Persistence.Tests;
 
 public sealed class MetadataDatabaseInspectionProviderTests
 {
-    private const string InitialMigration =
-        "20260928000000_InitialMetadataDatabase";
+    private const string CurrentMigration =
+        "20260928123000_AddGameProfiles";
 
     [Fact]
     public async Task Missing_DoesNotCreateDatabase()
@@ -72,10 +72,10 @@ public sealed class MetadataDatabaseInspectionProviderTests
     }
 
     [Fact]
-    public async Task AppliedBaseline_IsDeterministicallyReady()
+    public async Task AllKnownMigrationsApplied_IsDeterministicallyReady()
     {
         using var fixture = CreateFixture();
-        await fixture.ApplyBaselineMigrationAsync();
+        await fixture.ApplyKnownMigrationsAsync();
 
         var provider = CreateProvider(fixture);
         var inspection = await provider.InspectAsync();
@@ -85,15 +85,15 @@ public sealed class MetadataDatabaseInspectionProviderTests
             [MetadataDatabaseState.Ready],
             inspection.CandidateStates);
         Assert.False(inspection.RequiresAdministratorClassification);
-        Assert.Equal(InitialMigration, inspection.Facts.CurrentMigration);
-        Assert.Equal(InitialMigration, inspection.Facts.TargetMigration);
+        Assert.Equal(CurrentMigration, inspection.Facts.CurrentMigration);
+        Assert.Equal(CurrentMigration, inspection.Facts.TargetMigration);
     }
 
     [Fact]
     public async Task UnknownAppliedMigration_SuggestsTooNew()
     {
         using var fixture = CreateFixture();
-        await fixture.ApplyBaselineMigrationAsync();
+        await fixture.ApplyKnownMigrationsAsync();
         await fixture.ExecuteSqlAsync(
             """
             INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
@@ -159,7 +159,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
     public async Task ReopenClassification_IsDeterministic()
     {
         using var fixture = CreateFixture();
-        await fixture.ApplyBaselineMigrationAsync();
+        await fixture.ApplyKnownMigrationsAsync();
 
         var first = await CreateProvider(fixture).InspectAsync();
         var second = await CreateProvider(fixture).InspectAsync();
@@ -173,7 +173,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
     public async Task ReopenRevision_IsDeterministic()
     {
         using var fixture = CreateFixture();
-        await fixture.ApplyBaselineMigrationAsync();
+        await fixture.ApplyKnownMigrationsAsync();
 
         var first = await CreateProvider(fixture).InspectAsync();
         var second = await CreateProvider(fixture).InspectAsync();
@@ -316,7 +316,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
             return names;
         }
 
-        public async Task ApplyBaselineMigrationAsync()
+        public async Task ApplyKnownMigrationsAsync()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(Settings.DatabasePath)!);
 
