@@ -2,7 +2,7 @@
 
 Generic and safe game save protection and synchronization for one or more PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A and H2.1B fully validated on `feature/h2-central-server`. H2.1C metadata-database inspection is implemented as a validation candidate and awaits CI/shared review/explicit acceptance.
+> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A, H2.1B and H2.1C are fully validated and explicitly accepted on `feature/h2-central-server`. The next H2 slice must be scoped and reviewed before implementation.
 
 ## Purpose
 
@@ -88,6 +88,19 @@ H2.1B established:
 - reusable future administrative orchestration owned by `GameSave.Application`, not `Program.cs` or transport adapters;
 - isolated SQLite test pooling with no process-global cleanup side effect.
 
+### H2.1C — validated
+
+H2.1C established the reusable read-only metadata database inspection boundary:
+
+- Nexus-compatible lifecycle states: `Missing`, `Uninitialized`, `Ready`, `MigrationRequired`, `TooNew`, `Unavailable`, `Invalid`;
+- immutable observed facts kept separate from semantic classification;
+- structured machine-readable `InspectionFinding { code, details }` evidence;
+- fact-compatible candidate states plus a non-authoritative suggestion;
+- explicit ambiguity requiring later authorized classification rather than silent inspector authority;
+- SQLite/EF inspection isolated in Persistence, with Application remaining infrastructure-independent;
+- no initialization, migration, restore, repair or overwrite side effect during inspection;
+- final validation: Release build 0 warnings / 0 errors, 89 executed tests passed, with only the two expected no-test notices for Server.Tests and IntegrationTests.
+
 Still intentionally deferred:
 
 - profile/business persistence schema and repositories;
@@ -97,7 +110,7 @@ Still intentionally deferred:
 - full machine registry;
 - Agent behavior and real save transfers.
 
-Current: validate and review the H2.1C read-only inspection implementation before acceptance.
+Current: H2.1C is accepted. Before further code, define and accept the scope of the next H2 slice.
 ## Repository structure
 
 ```text
