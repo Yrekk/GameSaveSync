@@ -78,6 +78,17 @@ Validated H2.1B rules:
 
 Custodia is intended to receive safe backups later.
 
+GameSaveSync follows the shared [NexusPrincipia database lifecycle/readiness reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md).
+
+GameSaveSync-specific extensions are:
+
+- observed database state remains separate from operational mode and available actions;
+- the shared state baseline is `Missing`, `Uninitialized`, `Ready`, `MigrationRequired`, `TooNew`, `Unavailable`;
+- GameSaveSync adds `Invalid` for a reachable database that fails SQLite/application consistency checks;
+- unsafe states fail closed for synchronization authority;
+- snapshot/recovery actions are explicit and never selected automatically;
+- restricted recovery remains separate from the observed database state.
+
 See ADR-0001 through ADR-0005 for the accepted persistence/application decisions.
 ## Operational diagnostics direction
 
@@ -98,13 +109,3 @@ Managed recovery checkpoints are temporary recovery candidates created while a c
 Normal synchronization and managed recovery remain separate concerns so games with their own adequate autosave/recovery do not inherit unnecessary behavior.
 
 The detailed contract is documented in [managed recovery checkpoints](recovery-checkpoints.md).
-
-## Central metadata persistence direction
-
-Server-side configuration and metadata will use one central SQLite database on Succumbrae local storage.
-
-The active database must not live on the Custodia SMB share. Custodia remains the file-storage and backup target.
-
-Core remains persistence-agnostic. SQLite mapping and schema/migration work belong to the Server infrastructure beginning in H2.
-
-See [ADR-0001 — Central server metadata uses SQLite](../decisions/ADR-0001-server-metadata-sqlite.md).

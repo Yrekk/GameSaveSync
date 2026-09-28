@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1B FULLY VALIDATED — NEXT: DEFINE H2.1C  
+**Status:** H2.1B FULLY VALIDATED — H2.1C DESIGN FRAMED — IMPLEMENTATION NOT STARTED  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -113,6 +113,122 @@ Startup may later inspect and report migration state, but applying a migration r
 
 The eventual manual action will be implemented only with its snapshot/validation/recovery safety flow.
 
+## Proposed implementation slice — H2.1C metadata database inspection
+
+H2.1C applies the shared NexusPrincipia database lifecycle/readiness model without implementing administrative mutation yet.
+
+Shared reference:
+
+https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md
+
+### Objective
+
+Provide one reusable, read-only application capability that answers:
+
+```text
+What is the current technical state of the GameSaveSync metadata database?
+```
+
+without initializing, migrating, restoring or repairing it.
+
+### GameSaveSync state vocabulary
+
+The shared baseline is adopted:
+
+```text
+Missing
+Uninitialized
+Ready
+MigrationRequired
+TooNew
+Unavailable
+```
+
+GameSaveSync adds:
+
+```text
+Invalid
+```
+
+`Invalid` means the database is reachable but fails SQLite integrity or GameSaveSync consistency checks. It is an observation, not a restore decision.
+
+### Application boundary
+
+Expected Application concepts:
+
+- structured `MetadataDatabaseState` vocabulary;
+- structured `MetadataDatabaseStatus` result;
+- one read-only inspection port/provider implemented by Persistence;
+- one reusable inspection use case callable later by startup, system-status, Admin, CLI or IA/tool adapters.
+
+Application must not depend on EF Core, SQLite types or PRAGMA details.
+
+### Persistence responsibility
+
+The Persistence implementation may inspect:
+
+- whether the configured DB exists;
+- whether it can be opened/read;
+- SQLite integrity/consistency signal appropriate for runtime inspection;
+- applied EF migration history;
+- known pending migrations;
+- whether the DB contains migrations newer than the current binary understands;
+- whether the observed schema/history is internally inconsistent.
+
+The inspection connection must preserve the H2.1B rule: it cannot create a missing database.
+
+### Explicitly not in H2.1C
+
+- database initialization;
+- migration execution;
+- snapshot creation/rotation;
+- snapshot restore;
+- restricted-recovery state machine;
+- Admin/CLI/HTTP action surface;
+- `GET /api/system/status` transport;
+- profile/business persistence schema.
+
+### State / action separation
+
+H2.1C reports state only.
+
+Examples:
+
+```text
+Missing
+≠ initialize automatically
+
+MigrationRequired
+≠ migrate automatically
+
+Invalid
+≠ restore automatically
+```
+
+The later administrative layer will derive which explicit actions may be offered for each state and will continue to require an authorized choice.
+
+### Tests
+
+Tests must cover the state matrix and forbidden side effects, including:
+
+- Missing without DB creation;
+- Uninitialized;
+- Ready;
+- MigrationRequired;
+- TooNew;
+- Unavailable;
+- Invalid;
+- inspection never calling initialization/migration/restore;
+- state classification remaining deterministic on reopen.
+
+### Blocking design question before code
+
+For an existing, valid SQLite file with **no GameSaveSync EF migration history**:
+
+- if the file is otherwise empty, should GameSaveSync classify it as `Uninitialized`;
+- while a file containing unrelated/user tables without GameSaveSync migration history is classified as `Invalid`?
+
+This distinction keeps `Uninitialized` useful without treating an arbitrary SQLite database as safe to initialize over.
 ## Candidate H2 slices
 
 These are planning candidates, not implementation commitments. They must be confirmed during the H2 design discussion.
@@ -184,18 +300,16 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-H2.1B is fully validated.
+Resolve the H2.1C blocking classification question:
 
-Validation state:
+```text
+existing valid empty SQLite file
++ no GameSaveSync EF migration history
+→ Uninitialized ?
 
-- shared code/architecture review completed;
-- structural review corrections applied;
-- latest reviewed code CI green;
-- Release build: 0 warnings, 0 errors;
-- 68 tests passed remotely;
-- Damien completed post-review local validation successfully;
-- Damien explicitly accepted H2.1B.
+existing SQLite file with unrelated/user tables
++ no GameSaveSync EF migration history
+→ Invalid ?
+```
 
-Next: define H2.1C before any implementation.
-
-H2.1C must build on the accepted rules that initialization, migration and restore are distinct administrative operations; startup does not choose or execute them automatically; reusable orchestration belongs to `GameSave.Application`.
+After Damien explicitly validates that distinction, implement H2.1C using the normal tranche cycle.

@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1B — Metadata database bootstrap & manual migration foundation (VALIDATED); next action: define H2.1C
+**Current tranche:** H2.1C — Metadata database inspection (design framed from shared Nexus lifecycle/readiness model; implementation not started)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -279,6 +279,7 @@ Authoritative shared references:
 - C# / .NET conventions: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/languages/csharp-dotnet.md
 - Debug & Observability: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/debug-observability.md
 - Entrypoints & reusable operations: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/entrypoints-and-reusable-operations.md
+- Database lifecycle/readiness: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md
 
 GameSaveSync keeps only project-specific workflow rules locally.
 
@@ -295,15 +296,9 @@ GameSaveSync keeps only project-specific workflow rules locally.
 
 ## NEXT EXACT ACTION
 
-Define H2.1C from the validated H2.1B baseline.
+Resolve the single blocking H2.1C classification question before coding:
 
-Before implementation, use the normal tranche protocol:
+- valid empty SQLite file with no GameSaveSync EF migration history → `Uninitialized`?
+- SQLite file with unrelated/user tables and no GameSaveSync migration history → `Invalid`?
 
-- objective;
-- scope / what will be built;
-- architecture and responsibility placement;
-- critical invariants and failure posture;
-- tests;
-- only the decisions that genuinely block coding.
-
-Do not implement H2.1C until its scope is explicitly accepted.
+The shared lifecycle/readiness model is now centralized in NexusPrincipia. GameSaveSync should keep only its project-specific extensions locally.

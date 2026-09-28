@@ -21,7 +21,8 @@ Cross-project conventions are maintained in [NexusPrincipia](https://github.com/
 - handoff conventions;
 - entrypoints and reusable administrative operations;
 - C# / .NET and Python conventions;
-- Debug & Observability reference.
+- Debug & Observability reference;
+- Database lifecycle, readiness and explicit administrative choice.
 
 GameSaveSync should link to those documents rather than maintain divergent copies.
 

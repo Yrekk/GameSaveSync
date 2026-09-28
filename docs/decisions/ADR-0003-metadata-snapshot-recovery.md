@@ -18,9 +18,25 @@ The recovery model follows the same general resilience direction already used fo
 
 GameSaveSync requires stricter authority rules because restoring older metadata may move central synchronization state backwards relative to Agents or file storage.
 
+## Shared lifecycle/readiness model
+
+GameSaveSync follows the shared NexusPrincipia database lifecycle/readiness model:
+
+https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md
+
+GameSaveSync keeps only project-specific additions here.
+
+Observed database state, operational/recovery mode and the administrative action chosen by an operator are separate concepts.
+
+GameSaveSync extends the shared technical-state vocabulary with `Invalid` for a database that is reachable but fails integrity or application-consistency checks.
+
+`Invalid` does not mean `RestoreRequired`: restoration remains one explicit recovery choice among the actions allowed by policy.
+
 ## Decision
 
 The Server will maintain SQLite-safe metadata snapshots and support a **restricted recovery/minimal mode**.
+
+The recovery mode is not itself a database state. It describes the reduced capability surface allowed after inspection determines that normal synchronization authority is unsafe.
 
 A failure affecting the active metadata database does **not** automatically restore a snapshot and resume synchronization.
 

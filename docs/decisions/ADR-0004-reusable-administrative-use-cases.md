@@ -18,6 +18,22 @@ Operations such as database migration, snapshot creation, snapshot restoration, 
 
 Implementing them separately in each interface would create duplicated behavior and allow the desktop UI, Web Admin and startup path to diverge.
 
+## Shared lifecycle/readiness model
+
+Administrative database operations follow the shared NexusPrincipia reference:
+
+https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md
+
+The application keeps three concerns separate:
+
+```text
+observed database state
+→ operational/readiness capability
+→ explicit action requested by an authorized actor
+```
+
+The current technical state may influence which actions are exposed, but it never silently selects one.
+
 ## Decision
 
 Administrative operations are implemented once as reusable `GameSave.Application` use cases/services executed by the Server-side application.
@@ -134,6 +150,8 @@ The future migration coordinator owns the safety workflow. Startup remains an ob
 
 User interfaces may:
 
+- display observed database state and operational/readiness state;
+- expose only actions valid for the current state/policy;
 - display operation state;
 - request an operation;
 - ask for explicit confirmation;
@@ -141,6 +159,8 @@ User interfaces may:
 
 They may not:
 
+- infer that one observed state has only one legitimate administrative response;
+- expose unsafe mutating actions merely because an implementation exists;
 - directly open or mutate the SQLite database;
 - call EF Core directly;
 - implement snapshot rotation;
