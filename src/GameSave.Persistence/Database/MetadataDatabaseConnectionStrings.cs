@@ -5,7 +5,7 @@ namespace GameSave.Persistence.Database;
 /// <summary>
 /// Builds SQLite connection strings with explicit creation semantics.
 /// </summary>
-public static class MetadataDatabaseConnectionStrings
+internal static class MetadataDatabaseConnectionStrings
 {
     public static string ForOperationalUse(MetadataDatabaseSettings settings)
     {
