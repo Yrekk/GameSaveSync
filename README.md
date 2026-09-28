@@ -2,7 +2,7 @@
 
 Generic and safe game save protection and synchronization for one or more PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A, H2.1B and H2.1C are fully validated and explicitly accepted on `feature/h2-central-server`. The next H2 slice must be scoped and reviewed before implementation.
+> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A, H2.1B and H2.1C are fully validated and explicitly accepted. H2.1D metadata readiness/capability policy is implemented as a CI-green candidate awaiting shared review, local validation and explicit acceptance.
 
 ## Purpose
 
@@ -110,7 +110,7 @@ Still intentionally deferred:
 - full machine registry;
 - Agent behavior and real save transfers.
 
-Current: H2.1C is accepted. Before further code, define and accept the scope of the next H2 slice.
+Current: H2.1D is implemented as a read-only readiness/capability candidate. Perform shared review and local validation before acceptance.
 ## Repository structure
 
 ```text
