@@ -145,6 +145,14 @@ internal sealed class XmlMetadataDatabaseClassificationStore
         {
             return Invalid();
         }
+        catch (ArgumentException)
+        {
+            return Invalid();
+        }
+        catch (OverflowException)
+        {
+            return Invalid();
+        }
         catch (IOException)
         {
             return Unavailable();
@@ -283,7 +291,7 @@ internal sealed class XmlMetadataDatabaseClassificationStore
             NewLineHandling = NewLineHandling.Replace,
         };
 
-        await using var writer = XmlWriter.Create(stream, settings);
+        using var writer = XmlWriter.Create(stream, settings);
         await document.SaveAsync(writer, cancellationToken);
         await writer.FlushAsync();
         await stream.FlushAsync(cancellationToken);
