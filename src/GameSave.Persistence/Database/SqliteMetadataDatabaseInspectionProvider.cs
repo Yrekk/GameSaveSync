@@ -54,18 +54,26 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
             var state = occupiedByNonFile
                 ? MetadataDatabaseState.Unavailable
                 : MetadataDatabaseState.Missing;
+            var facts = new MetadataDatabaseInspectionFacts(
+                FileExists: false,
+                PathOccupiedByNonFile: occupiedByNonFile,
+                Accessible: false,
+                IntegrityValid: null,
+                HasMigrationHistoryTable: null,
+                AppliedMigrationCount: null,
+                UserTableCount: null,
+                CurrentMigration: null,
+                TargetMigration: targetMigration);
+            var context = MetadataDatabaseInspectionContextFactory.Create(
+                _settings,
+                facts,
+                knownMigrations,
+                [],
+                []);
 
             return new MetadataDatabaseInspection(
-                new MetadataDatabaseInspectionFacts(
-                    FileExists: false,
-                    PathOccupiedByNonFile: occupiedByNonFile,
-                    Accessible: false,
-                    IntegrityValid: null,
-                    HasMigrationHistoryTable: null,
-                    AppliedMigrationCount: null,
-                    UserTableCount: null,
-                    CurrentMigration: null,
-                    TargetMigration: targetMigration),
+                context,
+                facts,
                 [state],
                 state,
                 [
@@ -85,12 +93,14 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
         catch (SqliteException exception) when (IsTransientAvailabilityError(exception))
         {
             return BuildUnavailable(
+                knownMigrations,
                 targetMigration,
                 providerErrorCode: exception.SqliteErrorCode);
         }
         catch (SqliteException exception)
         {
             return BuildInvalid(
+                knownMigrations,
                 targetMigration,
                 integrityValid: false,
                 MetadataDatabaseFindingCodes.IntegrityFailed,
@@ -98,11 +108,11 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
         }
         catch (IOException)
         {
-            return BuildUnavailable(targetMigration);
+            return BuildUnavailable(knownMigrations, targetMigration);
         }
         catch (UnauthorizedAccessException)
         {
-            return BuildUnavailable(targetMigration);
+            return BuildUnavailable(knownMigrations, targetMigration);
         }
 
         try
@@ -110,12 +120,18 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
             if (!await CheckIntegrityAsync(connection, cancellationToken))
             {
                 return BuildInvalid(
+                    knownMigrations,
                     targetMigration,
                     integrityValid: false,
                     MetadataDatabaseFindingCodes.IntegrityFailed);
             }
 
-            var tableNames = await ReadTableNamesAsync(connection, cancellationToken);
+            var schemaEvidence = await ReadSchemaEvidenceAsync(
+                connection,
+                cancellationToken);
+            var tableNames = schemaEvidence
+                .Select(entry => entry.Name)
+                .ToArray();
             var hasMigrationHistoryTable = tableNames.Contains(
                 EfMigrationHistoryTable,
                 StringComparer.Ordinal);
@@ -139,8 +155,15 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
                 UserTableCount: userTableCount,
                 CurrentMigration: appliedMigrations.LastOrDefault(),
                 TargetMigration: targetMigration);
+            var context = MetadataDatabaseInspectionContextFactory.Create(
+                _settings,
+                facts,
+                knownMigrations,
+                appliedMigrations,
+                schemaEvidence);
 
             return MetadataDatabaseInspectionClassifier.ClassifyAccessibleDatabase(
+                context,
                 facts,
                 knownMigrations,
                 appliedMigrations);
@@ -148,12 +171,14 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
         catch (SqliteException exception) when (IsTransientAvailabilityError(exception))
         {
             return BuildUnavailable(
+                knownMigrations,
                 targetMigration,
                 providerErrorCode: exception.SqliteErrorCode);
         }
         catch (SqliteException exception)
         {
             return BuildInvalid(
+                knownMigrations,
                 targetMigration,
                 integrityValid: true,
                 MetadataDatabaseFindingCodes.SchemaReadFailed,
@@ -197,14 +222,15 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
         return sawResult;
     }
 
-    private static async Task<IReadOnlyList<string>> ReadTableNamesAsync(
-        SqliteConnection connection,
-        CancellationToken cancellationToken)
+    private static async Task<IReadOnlyList<MetadataDatabaseSchemaEvidence>>
+        ReadSchemaEvidenceAsync(
+            SqliteConnection connection,
+            CancellationToken cancellationToken)
     {
         await using var command = connection.CreateCommand();
         command.CommandText =
             """
-            SELECT name
+            SELECT name, COALESCE(sql, '')
             FROM sqlite_master
             WHERE type = 'table'
               AND name NOT LIKE 'sqlite_%'
@@ -212,14 +238,17 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
             """;
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        var names = new List<string>();
+        var entries = new List<MetadataDatabaseSchemaEvidence>();
 
         while (await reader.ReadAsync(cancellationToken))
         {
-            names.Add(reader.GetString(0));
+            entries.Add(
+                new MetadataDatabaseSchemaEvidence(
+                    reader.GetString(0),
+                    reader.GetString(1)));
         }
 
-        return names;
+        return entries;
     }
 
     private static async Task<IReadOnlyList<string>> ReadAppliedMigrationsAsync(
@@ -250,21 +279,32 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
         return exception.SqliteErrorCode is 5 or 6 or 10 or 14;
     }
 
-    private static MetadataDatabaseInspection BuildUnavailable(
+    private MetadataDatabaseInspection BuildUnavailable(
+        IReadOnlyList<string> knownMigrations,
         string? targetMigration,
         int? providerErrorCode = null)
     {
+        var facts = new MetadataDatabaseInspectionFacts(
+            FileExists: true,
+            PathOccupiedByNonFile: false,
+            Accessible: false,
+            IntegrityValid: null,
+            HasMigrationHistoryTable: null,
+            AppliedMigrationCount: null,
+            UserTableCount: null,
+            CurrentMigration: null,
+            TargetMigration: targetMigration);
+        var context = MetadataDatabaseInspectionContextFactory.Create(
+            _settings,
+            facts,
+            knownMigrations,
+            [],
+            [],
+            providerErrorCode);
+
         return new MetadataDatabaseInspection(
-            new MetadataDatabaseInspectionFacts(
-                FileExists: true,
-                PathOccupiedByNonFile: false,
-                Accessible: false,
-                IntegrityValid: null,
-                HasMigrationHistoryTable: null,
-                AppliedMigrationCount: null,
-                UserTableCount: null,
-                CurrentMigration: null,
-                TargetMigration: targetMigration),
+            context,
+            facts,
             [MetadataDatabaseState.Unavailable],
             MetadataDatabaseState.Unavailable,
             [
@@ -279,23 +319,34 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
             ]);
     }
 
-    private static MetadataDatabaseInspection BuildInvalid(
+    private MetadataDatabaseInspection BuildInvalid(
+        IReadOnlyList<string> knownMigrations,
         string? targetMigration,
         bool integrityValid,
         string findingCode,
         int? providerErrorCode = null)
     {
+        var facts = new MetadataDatabaseInspectionFacts(
+            FileExists: true,
+            PathOccupiedByNonFile: false,
+            Accessible: true,
+            IntegrityValid: integrityValid,
+            HasMigrationHistoryTable: null,
+            AppliedMigrationCount: null,
+            UserTableCount: null,
+            CurrentMigration: null,
+            TargetMigration: targetMigration);
+        var context = MetadataDatabaseInspectionContextFactory.Create(
+            _settings,
+            facts,
+            knownMigrations,
+            [],
+            [],
+            providerErrorCode);
+
         return new MetadataDatabaseInspection(
-            new MetadataDatabaseInspectionFacts(
-                FileExists: true,
-                PathOccupiedByNonFile: false,
-                Accessible: true,
-                IntegrityValid: integrityValid,
-                HasMigrationHistoryTable: null,
-                AppliedMigrationCount: null,
-                UserTableCount: null,
-                CurrentMigration: null,
-                TargetMigration: targetMigration),
+            context,
+            facts,
             [MetadataDatabaseState.Invalid],
             MetadataDatabaseState.Invalid,
             [
