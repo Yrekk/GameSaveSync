@@ -44,7 +44,7 @@ public sealed class MetadataMigrationTests
                 MetadataDatabaseConnectionStrings.ForExplicitInitialization(
                     fixture.Settings));
 
-            await using (var context = new GameSaveDbContext(maintenanceOptions))
+            await using (var context = new GameSaveDbContext(initializationOptions))
             {
                 var pendingBefore = await context.Database.GetPendingMigrationsAsync();
 
