@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1A FULLY VALIDATED  
+**Status:** H2.1B IMPLEMENTATION IN PROGRESS  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -80,6 +80,38 @@ Explicitly deferred from H2.1A:
 - local save-artifact backend;
 - system-status endpoint;
 - full Machine registry.
+
+## Active implementation slice — H2.1B metadata database bootstrap
+
+H2.1B builds the first real SQLite/migration plumbing without introducing business tables or automatic migration execution.
+
+Scope:
+
+- resolve and validate an explicit metadata database path;
+- configure `GameSaveDbContext` through Persistence;
+- keep normal operational SQLite connections in existing-database-only mode so a missing DB is never silently created;
+- provide a separate, explicitly named maintenance connection mode that may create the initial database when a human-authorized migration operation eventually uses it;
+- add a versioned empty EF migration baseline so migration history starts before business schema exists;
+- prove pending/applied migration inspection against a temporary SQLite database;
+- wire the Server composition root to the configured metadata database without opening or migrating it;
+- add a development-only deterministic relative database path resolved from the Server content root.
+
+Explicitly deferred from H2.1B:
+
+- automatic or manual runtime migration command/use case;
+- pre-migration snapshot creation;
+- recovery/minimal-mode coordinator;
+- profile/business tables and repositories;
+- system-status endpoint;
+- save-artifact storage backend.
+
+### Manual migration invariant
+
+GameSaveSync does not apply schema/data migrations automatically at startup.
+
+Startup may later inspect and report migration state, but applying a migration requires an explicit administrative action.
+
+The eventual manual action will be implemented only with its snapshot/validation/recovery safety flow.
 
 ## Candidate H2 slices
 

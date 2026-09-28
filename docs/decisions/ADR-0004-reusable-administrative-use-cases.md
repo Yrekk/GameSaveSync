@@ -77,21 +77,38 @@ Typical operations include:
 - explicitly restore a selected snapshot;
 - revalidate before returning to normal mode.
 
-## Startup reuse
+## Startup behavior
 
-Automatic startup migration must call the same application-level migration coordinator used by administrative entry points.
+Startup may **inspect** database/schema compatibility, but it must not automatically apply schema or data migrations.
 
-Startup is not allowed to contain a second private implementation of migration logic.
-
-This prevents:
+GameSaveSync uses an explicit/manual migration policy:
 
 ```text
-Program.cs migration logic
-!=
-Desktop migration logic
-!=
-Web Admin migration logic
+startup
+→ inspect database state
+→ detect pending migration
+→ report migration required
+→ keep normal authority unavailable when schema is incompatible
 ```
+
+Applying a known migration is a deliberate administrative operation.
+
+The operator initiates it through a supported administrative entry point. The actual operation is still executed by the same reusable application-level migration coordinator.
+
+This prevents both duplicated migration logic and invisible schema mutation during restart/deployment:
+
+```text
+Program.cs
+→ must not call Database.Migrate/MigrateAsync
+
+Desktop / Web Admin / maintenance adapter
+→ requests explicit migration operation
+
+Application coordinator
+→ snapshot + migrate + validate
+```
+
+The future migration coordinator owns the safety workflow. Startup remains an observer/adapter, never the authority that decides to mutate the database.
 
 ## Interface rule
 

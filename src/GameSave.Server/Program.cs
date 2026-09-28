@@ -1,6 +1,19 @@
+using GameSave.Persistence.Database;
+
 var builder = WebApplication.CreateBuilder(args);
+
+var configuredMetadataPath =
+    builder.Configuration["GameSave:MetadataDatabase:Path"];
+
+var metadataDatabaseSettings =
+    MetadataDatabaseSettings.FromConfiguredPath(
+        configuredMetadataPath,
+        builder.Environment.ContentRootPath);
+
+builder.Services.AddGameSavePersistence(metadataDatabaseSettings);
+
 var app = builder.Build();
 
-// H0 establishes ASP.NET Core as the server transport host only.
-// Business endpoints, controllers and synchronization behavior belong to later tranches.
+// Startup composes persistence but never opens, creates or migrates the metadata
+// database implicitly. Migration execution is an explicit administrative operation.
 app.Run();
