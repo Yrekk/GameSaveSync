@@ -86,6 +86,16 @@ Validated H2.1C rules:
 - proven states such as `Ready` remain deterministic; `Invalid` is not a generic rejection button;
 - durable future Admin classifications belong to trusted control-plane state outside an ambiguous/rejected inspected resource.
 
+Validated H2.1D rules:
+
+- metadata readiness is derived in Application from inspection + abstract recovery availability;
+- operational modes are `Normal`, `Maintenance`, `RestrictedRecovery`, `OutOfService`;
+- `MetadataAuthorityAvailable` is narrower than whole-system synchronization availability;
+- `SafeCapabilities` express what metadata readiness does not rule out, not user authorization or implementation availability;
+- unresolved classification fails closed and exposes classification resolution rather than implicit mutation;
+- `OutOfService` is a live diagnostic state, not process death;
+- no readiness evaluation performs initialization, migration, restore or any other mutation.
+
 Custodia is intended to receive safe backups later.
 
 GameSaveSync follows the shared [NexusPrincipia database lifecycle/readiness reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md), [inspection/classification authority reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/inspection-classification-authority.md) and [structured inspection findings reference](https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/structured-inspection-findings.md).
