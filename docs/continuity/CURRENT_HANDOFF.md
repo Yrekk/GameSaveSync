@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1B — Metadata database bootstrap & manual migration foundation (implemented; remote CI green; local validation pending)
+**Current tranche:** H2.1B — Metadata database bootstrap & manual migration foundation (implemented; remote CI green; Damien local tests green; shared review pending)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -84,7 +84,7 @@ Commits:
 - `cfb41d2` — H2.1B implementation;
 - `9c795a4` — Windows SQLite test-pool cleanup fix.
 
-Local validation by Damien is still required before H2.1B can be accepted.
+Damien reports the local H2.1B tests are green. The mandatory shared code/architecture review is still required before H2.1B can be accepted.
 
 ## VALIDATED POST-REVIEW HARDENING
 
@@ -186,7 +186,8 @@ See `docs/decisions/ADR-0002-ef-core-sqlite-persistence.md`.
 - desktop/local UI, future Web Admin, startup and possible maintenance CLI are only entry-point adapters;
 - EF migration classes are authored during development and versioned in Git;
 - deployed interfaces may execute already-known migrations but do not dynamically author migration source code;
-- startup automatic migration must call the same coordinator as manual/Admin execution;
+- startup never applies schema/data migrations automatically; it may inspect/report state only;
+- explicit migration execution is requested through a reusable Application service/use case shared by Admin, maintenance CLI and future IA/tool adapters;
 - authoritative DB operations execute on Succumbrae, even when requested remotely;
 - authorization for destructive/admin operations will be defined at the transport/Admin boundary.
 
@@ -262,6 +263,7 @@ Authoritative shared references:
 - Documentation conventions: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/documentation-conventions.md
 - C# / .NET conventions: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/languages/csharp-dotnet.md
 - Debug & Observability: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/debug-observability.md
+- Entrypoints & reusable operations: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/entrypoints-and-reusable-operations.md
 
 GameSaveSync keeps only project-specific workflow rules locally.
 
@@ -278,15 +280,18 @@ GameSaveSync keeps only project-specific workflow rules locally.
 
 ## NEXT EXACT ACTION
 
-Damien runs the local H2.1B validation:
+Local H2.1B tests are green according to Damien.
 
-```powershell
-dotnet build GameSaveSync.sln --configuration Release
-dotnet test GameSaveSync.sln --configuration Release --no-build
-git diff --check
-git status --short
+Perform the mandatory H2.1B code/architecture review together before explicit tranche acceptance.
+
+The review must explicitly verify the shared entrypoint rule:
+
+```text
+Program.cs / main.py / equivalent
+→ bootstrap + composition + adapters only
+
+reusable Admin / CLI / future IA capability
+→ Application use case / service
 ```
-
-If local validation is green, perform the H2.1B code/architecture review together before explicit tranche acceptance.
 
 Do not start H2.1C until that review and acceptance are complete.

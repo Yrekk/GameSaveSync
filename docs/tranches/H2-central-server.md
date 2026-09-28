@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1B IMPLEMENTED — REMOTE CI GREEN — LOCAL VALIDATION PENDING  
+**Status:** H2.1B IMPLEMENTED — REMOTE CI GREEN — LOCAL TESTS GREEN — SHARED REVIEW PENDING  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -196,10 +196,13 @@ H2.1B remote CI is green on commit `9c795a4`:
 
 The first H2.1B CI run exposed a Windows-only test cleanup issue: Microsoft.Data.Sqlite pooling kept the temporary database file open after the functional migration assertions succeeded. The fixture now clears SQLite pools before deleting its temporary directory. Product pooling remains unchanged.
 
+Damien reports the local H2.1B tests are green.
+
 Next:
 
-1. Damien performs local Release build/tests/diff/status validation.
-2. Review the H2.1B code and architecture together.
+1. Review the H2.1B code and architecture together.
+2. Explicitly verify that `Program.cs` remains a composition/adapter boundary and that any reusable Admin/CLI/future-IA operation belongs to Application services/use cases.
 3. Correct any issue found during review.
-4. Damien explicitly accepts H2.1B.
-5. Only then define H2.1C.
+4. Re-run relevant validation if code changes.
+5. Damien explicitly accepts H2.1B.
+6. Only then define H2.1C.
