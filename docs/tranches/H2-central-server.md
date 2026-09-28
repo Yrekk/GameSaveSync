@@ -275,6 +275,104 @@ Review outcomes incorporated before acceptance:
 
 H2.1C remains inspection-only. Durable `AuthorizedClassification` persistence is a later capability and, per Nexus, must live outside an ambiguous/rejected inspected resource.
 
+## Active implementation slice — H2.1D metadata readiness and capability policy
+
+H2.1D turns the validated H2.1C inspection result into a deterministic, fail-closed operational/readiness view without executing any administrative mutation.
+
+### Objective
+
+Answer:
+
+```text
+Given the current metadata-database inspection,
+what operational mode is safe and which capabilities may be considered?
+```
+
+### Operational modes
+
+H2.1D introduces four metadata-authority modes:
+
+```text
+Normal
+Maintenance
+RestrictedRecovery
+OutOfService
+```
+
+Semantics:
+
+- `Normal` — metadata authority is trusted enough for normal operation.
+- `Maintenance` — normal authority is unavailable, but the observed condition is expected/administratively actionable, for example first-time initialization or pending migration.
+- `RestrictedRecovery` — normal authority is unsafe; only status/diagnostic/recovery-oriented behavior may remain.
+- `OutOfService` — the Server process remains alive for status/diagnostics, but no currently known safe maintenance or recovery path is available.
+
+`OutOfService` does **not** mean process death.
+
+### Recovery availability distinction
+
+Snapshot discovery/validation is not implemented in H2.1D.
+
+The readiness policy therefore distinguishes recovery availability conceptually:
+
+```text
+Unknown
+Available
+Unavailable
+```
+
+For states requiring recovery:
+
+- `Unknown` → `RestrictedRecovery` without claiming restore is available;
+- `Available` → `RestrictedRecovery` and recovery capabilities may be allowed by policy;
+- `Unavailable` → `OutOfService`.
+
+This lets later snapshot infrastructure provide real recovery evidence without changing the operational-mode vocabulary.
+
+### Initial readiness direction
+
+```text
+Ready
+→ Normal
+→ synchronization authority allowed
+
+Missing
+→ Maintenance
+→ explicit initialization may be policy-allowed
+→ never initialize automatically
+
+MigrationRequired
+→ Maintenance
+→ explicit migration may be policy-allowed
+→ never migrate automatically
+
+ambiguous CandidateStates without authorized classification
+→ Maintenance
+→ RequiresAdministratorClassification = true
+→ no normal authority
+
+Invalid / TooNew / Unavailable
+→ RestrictedRecovery while recovery availability is unknown/available
+→ OutOfService when recovery is known unavailable
+→ no normal authority
+```
+
+Exact capability identifiers are implementation details of H2.1D, but the policy must remain provider-neutral and Application-owned.
+
+### Explicitly not in H2.1D
+
+- persistence of `AuthorizedClassification`;
+- Admin classification UI/HTTP/CLI flow;
+- database initialization execution;
+- migration execution;
+- snapshot creation, discovery, validation or rotation;
+- snapshot restore;
+- restricted-recovery operation coordinator;
+- `GET /api/system/status`;
+- profile/business persistence schema;
+- save-payload storage implementation.
+
+H2.1D is policy/readiness only. Classification, capability availability and operation execution remain distinct layers.
+
 ## Candidate H2 slices
 
 These are planning candidates, not implementation commitments. They must be confirmed during the H2 design discussion.
@@ -346,15 +444,13 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-H2.1C is closed and accepted.
+Implement H2.1D exactly as scoped above:
 
-Before writing more code:
+1. add provider-neutral readiness/mode/capability models in `GameSave.Application`;
+2. derive readiness from H2.1C inspection without mutation;
+3. cover the state/recovery matrix with focused Application tests;
+4. run CI and perform the mandatory pedagogical review before acceptance.
 
-1. verify the remote branch/HEAD and read this tranche + `CURRENT_HANDOFF.md`;
-2. choose and explicitly scope the next H2 slice;
-3. review its architecture and boundaries with Damien;
-4. only then implement it.
+Do not implement classification persistence, database mutations, snapshots, HTTP transport or business persistence in H2.1D.
 
-Do not silently pull initialization, migration execution, snapshot/restore, runtime recovery mode, system-status transport or business persistence into the next slice without an explicit scope decision.
-
-No promotion to `deploy/succumbrae` or `main` is authorized by this closure.
+No promotion to `deploy/succumbrae` or `main` is authorized.
