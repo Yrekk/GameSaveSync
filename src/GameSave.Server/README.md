@@ -8,7 +8,7 @@ The server is the ASP.NET Core host/composition root.
 
 It depends on Application, Contracts and the concrete Persistence/Storage modules needed for dependency wiring. It must not become a second copy of domain logic, persistence logic or administrative orchestration.
 
-Current H2 startup behavior, unchanged through validated H2.1C:
+Current H2 startup behavior, unchanged through validated H2.1D:
 
 - reads and validates the metadata database path;
 - registers Persistence in dependency injection, including the H2.1C inspection provider;
