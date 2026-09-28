@@ -6,6 +6,13 @@ namespace GameSave.Persistence.Tests;
 public sealed class GameSaveDbContextTests
 {
     [Fact]
+    public void PersistenceEfTypes_AreNotPublicInfrastructureSurface()
+    {
+        Assert.False(typeof(GameSaveDbContext).IsPublic);
+        Assert.False(typeof(GameSaveDbContextDesignFactory).IsPublic);
+    }
+
+    [Fact]
     public async Task DbContext_CanOpenSqliteConnection()
     {
         var options = new DbContextOptionsBuilder<GameSaveDbContext>()

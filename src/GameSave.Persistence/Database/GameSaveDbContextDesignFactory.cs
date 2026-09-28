@@ -6,7 +6,7 @@ namespace GameSave.Persistence.Database;
 /// <summary>
 /// Design-time factory used only for authoring versioned EF migrations.
 /// </summary>
-public sealed class GameSaveDbContextDesignFactory
+internal sealed class GameSaveDbContextDesignFactory
     : IDesignTimeDbContextFactory<GameSaveDbContext>
 {
     public GameSaveDbContext CreateDbContext(string[] args)
