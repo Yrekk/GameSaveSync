@@ -14,11 +14,11 @@ Reusable administrative operations such as future database initialization, migra
 
 This project is designed to remain reusable from Server adapters, HTTP endpoints, desktop/local UI, maintenance tooling and the future Web Admin/IA layer.
 
-## H2.1C metadata database inspection
+## Validated H2.1C metadata database inspection
 
 Application owns the read-only inspection contract: state vocabulary, observed facts, candidate classifications, structured findings, the suggestion, the provider port and the reusable inspection use case.
 
-The result deliberately has no authoritative selected `State` property and no presentation prose. `InspectionFinding` exposes stable Nexus-compatible `code + details`; Admin/CLI/IA adapters render human text downstream.
+The result deliberately has no authoritative selected `State` property and no presentation prose. `InspectionFinding` exposes stable Nexus-compatible `code + details`; details accept transport-safe primitive values and primitive collections, copied into immutable/read-only storage. Admin/CLI/IA adapters render human text downstream.
 
 The inspection use case must not initialize, migrate, restore, bind or repair the database as a side effect.
 
