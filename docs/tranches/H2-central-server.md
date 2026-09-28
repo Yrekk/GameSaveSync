@@ -333,7 +333,8 @@ This lets later snapshot infrastructure provide real recovery evidence without c
 ```text
 Ready
 → Normal
-→ synchronization authority allowed
+→ metadata authority available
+→ later system synchronization availability still depends on Storage/other readiness dimensions
 
 Missing
 → Maintenance
@@ -356,7 +357,7 @@ Invalid / TooNew / Unavailable
 → no normal authority
 ```
 
-Exact capability identifiers are implementation details of H2.1D, but the policy must remain provider-neutral and Application-owned.
+H2.1D exposes readiness-safe capabilities only. Final executable/authorized capabilities remain the intersection of readiness policy, implementation availability, operation-specific preconditions and later authorization policy.
 
 ### Explicitly not in H2.1D
 
