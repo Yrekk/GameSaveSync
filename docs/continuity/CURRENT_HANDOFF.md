@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1D — Metadata readiness and capability policy (fully validated and explicitly accepted; next H2 slice not yet scoped)
+**Current tranche:** H2.1E — Durable authorized metadata classification (scope accepted; implementation starting)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -396,16 +396,29 @@ CI run `36412299755` is green:
 
 Damien completed the matching local validation successfully and explicitly accepted H2.1D on 28 September 2026 after the pedagogical review.
 
+## H2.1E — ACCEPTED SCOPE, IMPLEMENTATION STARTING
+
+H2.1E persists ambiguous authorized classifications outside the inspected metadata database.
+
+Accepted decisions:
+
+- control-plane storage = human-readable XML;
+- complete decision history retained;
+- atomic file replacement;
+- missing XML = valid empty history;
+- malformed/unreadable XML = fail closed and never silently overwrite;
+- stable actor/resource identifiers + human-readable label snapshots;
+- actor reference + actor label required;
+- rationale mandatory when selected state differs from inspector suggestion;
+- deterministic single-state classifications are not persisted;
+- expected inspection revision must still match a fresh reinspection before write;
+- stale history remains audit-only;
+- shared fresh-revision and human-label rules are centralized in NexusPrincipia.
+
 ## NEXT EXACT ACTION
 
-H2.1D is closed. Do not start another implementation slice from assumptions.
+Implement the H2.1E Application contracts/use cases, SQLite inspection revision context and XML Persistence adapter, then validate the full decision/reuse/failure matrix.
 
-Next session:
+No lifecycle mutation, snapshot implementation, HTTP/Admin UI or business persistence is part of H2.1E.
 
-1. verify remote branch/HEAD;
-2. read root README, this handoff and `docs/tranches/H2-central-server.md`;
-3. choose and explicitly scope the next H2 slice with Damien;
-4. perform architecture/cadrage before code;
-5. preserve the accepted inspection → classification → readiness → safe-capability separation.
-
-No promotion to `deploy/succumbrae` or `main` has been authorized by H2.1D acceptance.
+No promotion to `deploy/succumbrae` or `main` is authorized.
