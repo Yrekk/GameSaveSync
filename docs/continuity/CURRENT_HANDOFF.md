@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1C — Metadata database inspection (fully validated and explicitly accepted; next H2 slice not yet scoped)
+**Current tranche:** H2.1D — Metadata readiness and capability policy (scope accepted; implementation starting)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -350,16 +350,25 @@ GameSaveSync behavior:
 - inspection explanations use stable `code + details` findings, never authoritative free-form prose;
 - existing invalid resources are never silently overwritten.
 
+## H2.1D — ACCEPTED SCOPE, IMPLEMENTATION STARTING
+
+H2.1D adds provider-neutral readiness/capability policy on top of H2.1C inspection.
+
+Accepted modes:
+
+- `Normal`;
+- `Maintenance`;
+- `RestrictedRecovery`;
+- `OutOfService`.
+
+`OutOfService` means the Server process remains alive for status/diagnostics while no currently known safe maintenance/recovery path is available. It is not process liveness.
+
+Snapshot/recovery discovery remains out of scope. H2.1D may model recovery availability as `Unknown / Available / Unavailable` so later infrastructure can feed evidence into the policy without changing the mode vocabulary.
+
+No mutation is permitted in this slice.
+
 ## NEXT EXACT ACTION
 
-H2.1C is closed. Do not start another implementation slice from assumptions.
+Implement and test the H2.1D Application-owned readiness policy, then run CI and perform the mandatory pedagogical review before explicit acceptance.
 
-Next session:
-
-1. verify remote branch/HEAD;
-2. read root README, this handoff and `docs/tranches/H2-central-server.md`;
-3. choose and explicitly scope the next H2 slice with Damien;
-4. perform the architecture/cadrage discussion before code;
-5. preserve the accepted Nexus inspection/classification contracts.
-
-No promotion to `deploy/succumbrae` or `main` has been authorized by H2.1C acceptance.
+No promotion to `deploy/succumbrae` or `main` is authorized.
