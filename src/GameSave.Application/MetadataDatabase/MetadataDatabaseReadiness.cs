@@ -12,13 +12,13 @@ public sealed class MetadataDatabaseReadiness
         MetadataDatabaseOperationalMode mode,
         bool metadataAuthorityAvailable,
         bool requiresAdministratorClassification,
-        IEnumerable<MetadataDatabaseCapability> allowedCapabilities,
+        IEnumerable<MetadataDatabaseCapability> safeCapabilities,
         IEnumerable<InspectionFinding> findings)
     {
-        ArgumentNullException.ThrowIfNull(allowedCapabilities);
+        ArgumentNullException.ThrowIfNull(safeCapabilities);
         ArgumentNullException.ThrowIfNull(findings);
 
-        var capabilities = allowedCapabilities.Distinct().ToArray();
+        var capabilities = safeCapabilities.Distinct().ToArray();
 
         if (metadataAuthorityAvailable
             != (mode == MetadataDatabaseOperationalMode.Normal))
