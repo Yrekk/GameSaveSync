@@ -7,7 +7,7 @@
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
 **Current tranche:** H2 — Minimal central server  
-**State:** implementation complete and remote CI green; awaiting final local validation, targeted code review and Damien's explicit H2 acceptance
+**State:** H2 explicitly accepted; promotion to `develop` authorized
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -252,75 +252,24 @@ Topics:
 - HTTP adapter maps to transport DTO and owns no business policy;
 - Server startup still performs no implicit DB lifecycle mutation.
 
+## H2 FINAL ACCEPTANCE
+
+Damien explicitly accepted H2 on 28 September 2026 after:
+
+- remote CI green: 140/140 tests, Release 0 warnings / 0 errors;
+- matching local validation: 140/140 tests, 0 warnings / 0 errors;
+- manual `GET /api/system/status` smoke test with expected Maintenance/Missing/Storage Ready result;
+- targeted code review of the tricky persistence, snapshot, storage-safety and readiness mechanisms.
+
+No structural change was requested after the review.
+
+Promotion of H2 to `develop` is explicitly authorized.
+
 ## NEXT EXACT ACTION
 
-Damien performs final local validation of H2 candidate `f0c8c1ca956abb3e9932965271e4ea1fb5667121`.
+Merge `feature/h2-central-server` into `develop`, verify the merged HEAD and CI, then prepare H3 planning.
 
-Recommended local commands:
+H3 is the minimal Windows Agent tranche. Before implementation, present the concise H3 scope, what remains deliberately deferred to H4+ and the principal checkpoints (targeting H3.1 / H3.2 / H3.3 only, unless a genuinely separate architectural unit justifies otherwise).
 
-```powershell
-git pull
+No promotion to `deploy/succumbrae` or `main` is authorized.
 
-git branch --show-current
-git rev-parse HEAD
-git merge-base --is-ancestor f0c8c1ca956abb3e9932965271e4ea1fb5667121 HEAD
-$LASTEXITCODE
-git status --short
-
-dotnet restore GameSaveSync.sln
-dotnet build GameSaveSync.sln --configuration Release --no-restore
-dotnet test GameSaveSync.sln --configuration Release --no-build
-
-git diff --check
-git status --short
-```
-
-Expected:
-
-```text
-branch = feature/h2-central-server
-$LASTEXITCODE = 0
-(the implementation candidate f0c8c1ca... is included in the current HEAD; later documentation-only commits are allowed)
-
-57 Core
-39 Application
-35 Persistence
-7 Storage
-1 Server
-1 Integration
-= 140 tests passed
-```
-
-After the automated validation, perform one manual status smoke test:
-
-Terminal 1:
-
-```powershell
-dotnet run --project src/GameSave.Server
-```
-
-Terminal 2:
-
-```powershell
-Invoke-RestMethod http://localhost:5080/api/system/status | ConvertTo-Json -Depth 5
-```
-
-With a fresh local Development data directory and no initialized metadata DB, the expected broad behavior is:
-
-- HTTP 200;
-- overall mode `Maintenance`;
-- synchronization unavailable;
-- metadata state `Missing`;
-- Storage status `Ready`.
-
-Then stop the Server with Ctrl+C.
-
-After Damien confirms local validation, perform the short targeted code review above. Apply any resulting structural correction, revalidate if code changes, then Damien explicitly accepts H2.
-
-Only after H2 acceptance:
-
-- update/finalize H2 documentation;
-- promote H2 to `develop` if Damien explicitly authorizes it;
-- start **H3 in a new dedicated session**.
-
-No promotion to `deploy/succumbrae` or `main` is authorized by H2 completion.
