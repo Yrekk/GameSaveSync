@@ -11,7 +11,7 @@ public sealed class SystemStatusContractMapperTests
     [Fact]
     public void ToResponse_MapsApplicationStatusWithoutLeakingDomainTypes()
     {
-        var status = new SystemStatus(
+        var status = new GameSave.Application.SystemStatus.SystemStatus(
             SystemOperationalMode.RestrictedRecovery,
             false,
             MetadataDatabaseState.Invalid,
