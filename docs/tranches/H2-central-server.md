@@ -90,7 +90,7 @@ Scope:
 - resolve and validate an explicit metadata database path;
 - configure `GameSaveDbContext` through Persistence;
 - keep normal operational SQLite connections in existing-database-only mode so a missing DB is never silently created;
-- provide a separate, explicitly named maintenance connection mode that may create the initial database when a human-authorized migration operation eventually uses it;
+- provide a separate, explicitly named initialization connection mode that may create the initial database only when a human-authorized initialization operation eventually uses it;
 - add a versioned empty EF migration baseline so migration history starts before business schema exists;
 - prove pending/applied migration inspection against a temporary SQLite database;
 - wire the Server composition root to the configured metadata database without opening or migrating it;
@@ -161,7 +161,7 @@ The exact API surface is deliberately undecided.
 ## Design questions to answer before implementation
 
 1. **SQLite access style — RESOLVED:** EF Core with the SQLite provider is the default persistence layer. Core remains persistence-independent; raw SQL remains allowed only as an isolated, justified persistence escape hatch. See ADR-0002.
-2. **Migrations — RESOLVED:** EF migration code is authored during development, reviewed and versioned in Git. Runtime execution uses a reusable Server application use case shared by startup, desktop/API and future Web Admin entry points. Known migrations may be applied automatically or explicitly through that same mechanism. Pre-migration snapshot, application, validation and recovery-mode failure handling are one implementation, never UI-specific. See ADR-0004.
+2. **Migrations — RESOLVED:** EF migration code is authored during development, reviewed and versioned in Git. Runtime execution is always an explicit administrative action through a reusable Application use case shared by desktop/API, maintenance CLI and future Web Admin/IA entry points. Startup may inspect/report migration state but never applies migrations automatically. Initialization, migration and restore remain distinct operations. Pre-migration snapshot, application, validation and recovery-mode failure handling are one implementation, never UI-specific. See ADR-0004.
 3. **Repository placement — RESOLVED:** introduce separate `GameSave.Application` and `GameSave.Persistence` projects. Repository/capability interfaces belong to Application; EF/SQLite implementations belong to Persistence; Server remains a thin host/composition root; Contracts stays transport-only. Modules should be extractable later without prematurely becoming microservices. See ADR-0005.
 4. **Startup/failure policy — RESOLVED:** fail closed for synchronization authority, keep a restricted recovery/diagnostic mode, and use explicit validated snapshot restoration. No automatic snapshot promotion. See ADR-0003.
 5. **H2 storage scope — RESOLVED:** introduce a separate `GameSave.Storage` project. Application owns GameSaveSync-specific storage ports; Storage provides a minimal controlled local-filesystem backend in H2. H5/H8 retain transactional transfer/version publication and real Custodia integration. See ADR-0006.

@@ -16,7 +16,7 @@ The metadata database location is resolved explicitly from configuration.
 
 Operational connections use SQLite `ReadWrite` mode so a missing database cannot be silently created by normal runtime inspection/use.
 
-A separate explicitly named maintenance connection uses `ReadWriteCreate`. That path exists for future human-authorized initialization/migration operations only.
+A separate explicitly named initialization connection uses `ReadWriteCreate`. It exists only for a future human-authorized initial database creation. Migrating an existing database must use existing-database semantics and must never implicitly initialize a missing database.
 
 Server startup configures the DbContext but does not open, create or migrate the database.
 

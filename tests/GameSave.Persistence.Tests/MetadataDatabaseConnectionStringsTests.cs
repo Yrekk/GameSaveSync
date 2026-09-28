@@ -18,12 +18,12 @@ public sealed class MetadataDatabaseConnectionStringsTests
     }
 
     [Fact]
-    public void ExplicitMaintenanceConnection_AllowsDatabaseCreation()
+    public void ExplicitInitializationConnection_AllowsDatabaseCreation()
     {
         var settings = CreateSettings();
 
         var builder = new SqliteConnectionStringBuilder(
-            MetadataDatabaseConnectionStrings.ForExplicitMaintenance(settings));
+            MetadataDatabaseConnectionStrings.ForExplicitInitialization(settings));
 
         Assert.Equal(SqliteOpenMode.ReadWriteCreate, builder.Mode);
         Assert.True(builder.ForeignKeys);

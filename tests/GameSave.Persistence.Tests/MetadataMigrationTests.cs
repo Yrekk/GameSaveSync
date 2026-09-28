@@ -31,7 +31,7 @@ public sealed class MetadataMigrationTests
     }
 
     [Fact]
-    public async Task ExplicitMaintenance_CanApplyBaselineAndLeaveNoPendingMigrations()
+    public async Task ExplicitInitialization_CanApplyBaselineAndLeaveNoPendingMigrations()
     {
         var fixture = CreateFixture();
 
@@ -40,8 +40,8 @@ public sealed class MetadataMigrationTests
             Directory.CreateDirectory(
                 Path.GetDirectoryName(fixture.Settings.DatabasePath)!);
 
-            var maintenanceOptions = BuildOptions(
-                MetadataDatabaseConnectionStrings.ForExplicitMaintenance(
+            var initializationOptions = BuildOptions(
+                MetadataDatabaseConnectionStrings.ForExplicitInitialization(
                     fixture.Settings));
 
             await using (var context = new GameSaveDbContext(maintenanceOptions))

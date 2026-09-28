@@ -14,7 +14,7 @@ internal static class MetadataDatabaseConnectionStrings
         return Build(settings.DatabasePath, SqliteOpenMode.ReadWrite);
     }
 
-    public static string ForExplicitMaintenance(MetadataDatabaseSettings settings)
+    public static string ForExplicitInitialization(MetadataDatabaseSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
 

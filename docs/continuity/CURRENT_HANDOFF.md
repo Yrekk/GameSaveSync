@@ -67,7 +67,7 @@ H2.1B adds:
 - explicit metadata database path resolution relative to a known base path;
 - Persistence DI registration for `GameSaveDbContext`;
 - operational SQLite connection mode = `ReadWrite`, preventing silent creation of a missing database;
-- explicit maintenance connection mode = `ReadWriteCreate`, reserved for future human-authorized initialization/migration operations;
+- explicit initialization connection mode = `ReadWriteCreate`, reserved only for future human-authorized first-time database creation;
 - versioned empty EF baseline migration `20260928000000_InitialMetadataDatabase`;
 - design-time DbContext factory for migration authoring;
 - development-only metadata DB path configuration;
