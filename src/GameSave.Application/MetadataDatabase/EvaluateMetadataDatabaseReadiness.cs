@@ -164,7 +164,7 @@ public sealed class EvaluateMetadataDatabaseReadiness
 
         return new MetadataDatabaseReadiness(
             mode,
-            synchronizationAuthorityAvailable:
+            metadataAuthorityAvailable:
                 mode == MetadataDatabaseOperationalMode.Normal,
             requiresAdministratorClassification,
             capabilities,
