@@ -9,11 +9,13 @@ namespace GameSave.Application.MetadataDatabase;
 public sealed class MetadataDatabaseInspection
 {
     public MetadataDatabaseInspection(
+        MetadataDatabaseInspectionContext context,
         MetadataDatabaseInspectionFacts facts,
         IEnumerable<MetadataDatabaseState> candidateStates,
         MetadataDatabaseState suggestedState,
         IEnumerable<InspectionFinding> findings)
     {
+        ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(facts);
         ArgumentNullException.ThrowIfNull(candidateStates);
         ArgumentNullException.ThrowIfNull(findings);
@@ -43,11 +45,14 @@ public sealed class MetadataDatabaseInspection
                 nameof(findings));
         }
 
+        Context = context;
         Facts = facts;
         CandidateStates = Array.AsReadOnly(candidates);
         SuggestedState = suggestedState;
         Findings = Array.AsReadOnly(findingList);
     }
+
+    public MetadataDatabaseInspectionContext Context { get; }
 
     public MetadataDatabaseInspectionFacts Facts { get; }
 
