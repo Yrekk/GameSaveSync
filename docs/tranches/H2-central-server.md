@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1C FULLY VALIDATED AND EXPLICITLY ACCEPTED — NEXT H2 SLICE NOT YET SCOPED  
+**Status:** H2.1C ACCEPTED — H2.1D IMPLEMENTED CANDIDATE — CI GREEN — AWAITING REVIEW / LOCAL VALIDATION / ACCEPTANCE  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -373,6 +373,35 @@ H2.1D exposes readiness-safe capabilities only. Final executable/authorized capa
 - save-payload storage implementation.
 
 H2.1D is policy/readiness only. Classification, capability availability and operation execution remain distinct layers.
+
+### H2.1D implementation candidate
+
+Implemented in `GameSave.Application`:
+
+- `MetadataDatabaseOperationalMode`;
+- `MetadataRecoveryAvailability`;
+- `MetadataDatabaseCapability`;
+- `MetadataDatabaseReadiness`;
+- `MetadataDatabaseReadinessFindingCodes`;
+- `EvaluateMetadataDatabaseReadiness`.
+
+The evaluator is pure Application policy: it consumes H2.1C inspection + abstract recovery availability and performs no infrastructure call or mutation.
+
+CI candidate validation:
+
+```text
+run 36412100144 — SUCCESS
+Release build: 0 warnings / 0 errors
+GameSave.Core.Tests        : 57 passed
+GameSave.Application.Tests : 22 passed
+GameSave.Persistence.Tests : 24 passed
+GameSave.Storage.Tests     : 1 passed
+TOTAL                      : 104 passed
+```
+
+`GameSave.Server.Tests` and `GameSave.IntegrationTests` still intentionally have no executable tests.
+
+Candidate remains unaccepted until shared pedagogical review + Damien local validation.
 
 ## Candidate H2 slices
 
