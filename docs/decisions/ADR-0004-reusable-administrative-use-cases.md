@@ -20,7 +20,7 @@ Implementing them separately in each interface would create duplicated behavior 
 
 ## Decision
 
-Administrative operations are implemented once as reusable Server application use cases/services.
+Administrative operations are implemented once as reusable `GameSave.Application` use cases/services executed by the Server-side application.
 
 Interfaces are adapters only.
 
@@ -41,9 +41,29 @@ EF Core / SQLite / snapshots
 
 No UI owns migration, snapshot or recovery business logic.
 
+## Administrative operation distinction
+
+Several database operations may touch the same SQLite file but must not be treated as interchangeable capabilities.
+
+At minimum:
+
+```text
+InitializeMetadataDatabase
+ApplyPendingMigrations
+RestoreMetadataSnapshot
+```
+
+are separate administrative decisions.
+
+A missing database does not imply that initialization is the correct action. It may instead indicate deployment/mounting trouble, an interrupted move, a restore scenario or another incident.
+
+Likewise, a migration operation must never gain implicit database-creation semantics merely because SQLite can create a missing file.
+
+The entry point or adapter observes state and requests a specific operation; it does not silently choose among these actions.
+
 ## Migration distinction
 
-Two different activities must not be confused.
+Two different migration activities must not be confused.
 
 ### Migration authoring
 
@@ -104,7 +124,7 @@ Program.cs
 Desktop / Web Admin / maintenance adapter
 → requests explicit migration operation
 
-Application coordinator
+`GameSave.Application` coordinator
 → snapshot + migrate + validate
 ```
 

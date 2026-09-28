@@ -182,12 +182,13 @@ See `docs/decisions/ADR-0002-ef-core-sqlite-persistence.md`.
 
 ### Administrative operation reuse
 
-- database migration/snapshot/recovery logic is implemented once as Server application use cases;
+- database initialization/migration/snapshot/recovery logic is implemented once as `GameSave.Application` use cases/services executed by the Server-side application;
 - desktop/local UI, future Web Admin, startup and possible maintenance CLI are only entry-point adapters;
 - EF migration classes are authored during development and versioned in Git;
 - deployed interfaces may execute already-known migrations but do not dynamically author migration source code;
 - startup never applies schema/data migrations automatically; it may inspect/report state only;
-- explicit migration execution is requested through a reusable Application service/use case shared by Admin, maintenance CLI and future IA/tool adapters;
+- initialization, migration and restore are distinct explicit operations;
+- explicit administrative execution is requested through reusable `GameSave.Application` services/use cases shared by Admin, maintenance CLI and future IA/tool adapters;
 - authoritative DB operations execute on Succumbrae, even when requested remotely;
 - authorization for destructive/admin operations will be defined at the transport/Admin boundary.
 
