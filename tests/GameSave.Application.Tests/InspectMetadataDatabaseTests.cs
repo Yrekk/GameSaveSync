@@ -9,6 +9,11 @@ public sealed class InspectMetadataDatabaseTests
     public async Task ExecuteAsync_DelegatesInspectionToProvider()
     {
         var expected = new MetadataDatabaseInspection(
+            new MetadataDatabaseInspectionContext(
+                "metadata:test",
+                "Test metadata database",
+                "revision:test",
+                MetadataDatabaseClassificationPolicy.CurrentVersion),
             new MetadataDatabaseInspectionFacts(
                 false,
                 false,
