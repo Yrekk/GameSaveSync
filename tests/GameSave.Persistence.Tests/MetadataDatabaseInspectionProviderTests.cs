@@ -14,7 +14,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
     public async Task Missing_DoesNotCreateDatabase()
     {
         using var fixture = CreateFixture();
-        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var provider = CreateProvider(fixture);
 
         var inspection = await provider.InspectAsync();
 
@@ -29,7 +29,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
         using var fixture = CreateFixture();
         await fixture.CreateEmptyDatabaseAsync();
 
-        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var provider = CreateProvider(fixture);
         var inspection = await provider.InspectAsync();
 
         Assert.Equal(MetadataDatabaseState.Uninitialized, inspection.SuggestedState);
@@ -48,7 +48,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
         await fixture.ExecuteSqlAsync(
             "CREATE TABLE ExternalData (Id INTEGER PRIMARY KEY);");
 
-        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var provider = CreateProvider(fixture);
         var inspection = await provider.InspectAsync();
 
         Assert.Equal(MetadataDatabaseState.Invalid, inspection.SuggestedState);
@@ -64,7 +64,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
         using var fixture = CreateFixture();
         await fixture.ApplyBaselineMigrationAsync();
 
-        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var provider = CreateProvider(fixture);
         var inspection = await provider.InspectAsync();
 
         Assert.Equal(MetadataDatabaseState.Ready, inspection.SuggestedState);
@@ -86,7 +86,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
             VALUES ('20260929000000_FutureMigration', '10.0.12');
             """);
 
-        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var provider = CreateProvider(fixture);
         var inspection = await provider.InspectAsync();
 
         Assert.Equal(MetadataDatabaseState.TooNew, inspection.SuggestedState);
@@ -102,7 +102,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
             fixture.Settings.DatabasePath,
             "this is not sqlite");
 
-        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var provider = CreateProvider(fixture);
         var inspection = await provider.InspectAsync();
 
         Assert.Equal(MetadataDatabaseState.Invalid, inspection.SuggestedState);
@@ -115,7 +115,7 @@ public sealed class MetadataDatabaseInspectionProviderTests
         using var fixture = CreateFixture();
         Directory.CreateDirectory(fixture.Settings.DatabasePath);
 
-        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var provider = CreateProvider(fixture);
         var inspection = await provider.InspectAsync();
 
         Assert.Equal(MetadataDatabaseState.Unavailable, inspection.SuggestedState);
@@ -128,14 +128,30 @@ public sealed class MetadataDatabaseInspectionProviderTests
         using var fixture = CreateFixture();
         await fixture.ApplyBaselineMigrationAsync();
 
-        var first = await new SqliteMetadataDatabaseInspectionProvider(
-            fixture.Settings).InspectAsync();
-        var second = await new SqliteMetadataDatabaseInspectionProvider(
-            fixture.Settings).InspectAsync();
+        var first = await CreateProvider(fixture).InspectAsync();
+        var second = await CreateProvider(fixture).InspectAsync();
 
         Assert.Equal(first.SuggestedState, second.SuggestedState);
         Assert.Equal(first.CandidateStates, second.CandidateStates);
         Assert.Equal(first.Facts, second.Facts);
+    }
+
+    private static SqliteMetadataDatabaseInspectionProvider CreateProvider(
+        TestDatabaseFixture fixture)
+    {
+        return new SqliteMetadataDatabaseInspectionProvider(
+            fixture.Settings,
+            TestConnectionString(
+                MetadataDatabaseConnectionStrings.ForOperationalUse(
+                    fixture.Settings)));
+    }
+
+    private static string TestConnectionString(string connectionString)
+    {
+        return new SqliteConnectionStringBuilder(connectionString)
+        {
+            Pooling = false,
+        }.ToString();
     }
 
     private static TestDatabaseFixture CreateFixture()
@@ -209,12 +225,6 @@ public sealed class MetadataDatabaseInspectionProviderTests
             }
         }
 
-        private static string TestConnectionString(string connectionString)
-        {
-            return new SqliteConnectionStringBuilder(connectionString)
-            {
-                Pooling = false,
-            }.ToString();
-        }
+
     }
 }

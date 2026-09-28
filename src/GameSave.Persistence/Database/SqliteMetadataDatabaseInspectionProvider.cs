@@ -7,14 +7,38 @@ namespace GameSave.Persistence.Database;
 /// <summary>
 /// SQLite/EF implementation of read-only metadata database inspection.
 /// </summary>
-internal sealed class SqliteMetadataDatabaseInspectionProvider(
-    MetadataDatabaseSettings settings)
+internal sealed class SqliteMetadataDatabaseInspectionProvider
     : IMetadataDatabaseInspectionProvider
 {
     private const string EfMigrationHistoryTable = "__EFMigrationsHistory";
 
-    private readonly MetadataDatabaseSettings _settings =
-        settings ?? throw new ArgumentNullException(nameof(settings));
+    private readonly MetadataDatabaseSettings _settings;
+    private readonly string _connectionString;
+
+    public SqliteMetadataDatabaseInspectionProvider(
+        MetadataDatabaseSettings settings)
+        : this(
+            settings,
+            MetadataDatabaseConnectionStrings.ForOperationalUse(settings))
+    {
+    }
+
+    internal SqliteMetadataDatabaseInspectionProvider(
+        MetadataDatabaseSettings settings,
+        string connectionString)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new ArgumentException(
+                "Inspection connection string must not be empty.",
+                nameof(connectionString));
+        }
+
+        _settings = settings;
+        _connectionString = connectionString;
+    }
 
     public async Task<MetadataDatabaseInspection> InspectAsync(
         CancellationToken cancellationToken = default)
@@ -50,18 +74,23 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider(
                 ]);
         }
 
-        await using var connection = new SqliteConnection(
-            MetadataDatabaseConnectionStrings.ForOperationalUse(_settings));
+        await using var connection = new SqliteConnection(_connectionString);
 
         try
         {
             await connection.OpenAsync(cancellationToken);
         }
-        catch (SqliteException exception)
+        catch (SqliteException exception) when (IsTransientAvailabilityError(exception))
         {
             return BuildUnavailable(
                 targetMigration,
                 $"SQLite could not open the existing metadata database: error {exception.SqliteErrorCode}.");
+        }
+        catch (SqliteException exception)
+        {
+            return BuildInvalid(
+                targetMigration,
+                $"SQLite opened the file path but could not interpret it as a coherent database: error {exception.SqliteErrorCode}.");
         }
         catch (IOException)
         {
@@ -132,8 +161,7 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider(
     private IReadOnlyList<string> GetKnownMigrations()
     {
         var options = new DbContextOptionsBuilder<GameSaveDbContext>()
-            .UseSqlite(
-                MetadataDatabaseConnectionStrings.ForOperationalUse(_settings))
+            .UseSqlite(_connectionString)
             .Options;
 
         using var context = new GameSaveDbContext(options);
