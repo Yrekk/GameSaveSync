@@ -22,7 +22,9 @@ Cross-project conventions are maintained in [NexusPrincipia](https://github.com/
 - entrypoints and reusable administrative operations;
 - C# / .NET and Python conventions;
 - Debug & Observability reference;
-- Database lifecycle, readiness and explicit administrative choice.
+- Database lifecycle, readiness and explicit administrative choice;
+- inspection/classification authority and durable external Admin decisions;
+- structured machine-readable inspection findings.
 
 GameSaveSync should link to those documents rather than maintain divergent copies.
 
