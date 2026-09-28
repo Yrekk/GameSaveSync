@@ -32,18 +32,19 @@ Migrations are never applied automatically at startup.
 
 The baseline migration intentionally contains no business tables. H2.2 will add schema only when real persistence use cases arrive.
 
-## H2.1C direction
+## H2.1C metadata database inspection
 
-Persistence will implement the read-only metadata-database inspection port owned by `GameSave.Application`.
+Persistence implements the Application inspection port using SQLite and EF migration metadata.
 
-The implementation will classify the shared lifecycle states `Missing`, `Uninitialized`, `Ready`, `MigrationRequired`, `TooNew`, `Unavailable`, plus the GameSaveSync-specific `Invalid` state.
+It observes file/path presence, accessibility, SQLite integrity, migration history, current-binary migrations and non-system user tables. It returns facts plus safe candidate classifications and a reasoned suggestion.
 
-Inspection must preserve H2.1B safety:
+Inspection preserves H2.1B safety:
 
 - no missing database creation;
 - no initialization;
 - no migration execution;
 - no restore/repair side effect;
+- no authoritative administrative classification;
 - no automatic action selection.
 
-The shared lifecycle/readiness rules live in NexusPrincipia. GameSaveSync keeps only its stronger integrity/recovery extensions locally.
+The shared lifecycle/readiness and inspection/classification rules live in NexusPrincipia.

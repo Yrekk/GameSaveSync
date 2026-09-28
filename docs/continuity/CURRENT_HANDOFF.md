@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1C — Metadata database inspection (design framed from shared Nexus lifecycle/readiness model; implementation not started)
+**Current tranche:** H2.1C — Metadata database inspection (implementation candidate committed; awaiting CI/shared review/explicit acceptance)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -280,6 +280,7 @@ Authoritative shared references:
 - Debug & Observability: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/debug-observability.md
 - Entrypoints & reusable operations: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/entrypoints-and-reusable-operations.md
 - Database lifecycle/readiness: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md
+- Inspection/classification/authorized choice: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/inspection-classification-authority.md
 
 GameSaveSync keeps only project-specific workflow rules locally.
 
@@ -294,11 +295,18 @@ GameSaveSync keeps only project-specific workflow rules locally.
 7. `src/GameSave.Server/Program.cs`;
 8. actual remote branch and HEAD.
 
+## H2.1C CLASSIFICATION AUTHORITY — RESOLVED
+
+H2.1C follows the shared Nexus inspection/classification rule: facts → compatible candidates → reasoned suggestion → authorized choice later → separate operation.
+
+GameSaveSync behavior:
+
+- empty valid SQLite with no applied GameSaveSync migration → `Uninitialized | Invalid`, suggest `Uninitialized`;
+- valid SQLite with foreign/user tables and no applied GameSaveSync migration → same candidates, suggest `Invalid`;
+- technically compatible databases may still be administratively rejected as `Invalid`;
+- impossible states are never offered;
+- existing invalid resources are never silently overwritten.
+
 ## NEXT EXACT ACTION
 
-Resolve the single blocking H2.1C classification question before coding:
-
-- valid empty SQLite file with no GameSaveSync EF migration history → `Uninitialized`?
-- SQLite file with unrelated/user tables and no GameSaveSync migration history → `Invalid`?
-
-The shared lifecycle/readiness model is now centralized in NexusPrincipia. GameSaveSync should keep only its project-specific extensions locally.
+Wait for CI on the H2.1C implementation candidate, then perform the mandatory shared code/architecture review. Correct any structural issue before explicit H2.1C acceptance.

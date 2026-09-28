@@ -2,7 +2,7 @@
 
 Generic and safe game save protection and synchronization for one or more PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A and H2.1B fully validated on `feature/h2-central-server`. H2.1C metadata-database inspection is designed but not implemented; one classification question remains before coding.
+> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2.1A and H2.1B fully validated on `feature/h2-central-server`. H2.1C metadata-database inspection is implemented as a validation candidate and awaits CI/shared review/explicit acceptance.
 
 ## Purpose
 
@@ -97,7 +97,7 @@ Still intentionally deferred:
 - full machine registry;
 - Agent behavior and real save transfers.
 
-Next: define H2.1C before implementation.
+Current: validate and review the H2.1C read-only inspection implementation before acceptance.
 ## Repository structure
 
 ```text

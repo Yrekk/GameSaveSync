@@ -14,12 +14,12 @@ Reusable administrative operations such as future database initialization, migra
 
 This project is designed to remain reusable from Server adapters, HTTP endpoints, desktop/local UI, maintenance tooling and the future Web Admin/IA layer.
 
-## H2.1C direction
+## H2.1C metadata database inspection
 
-The next persistence-foundation use case is read-only metadata-database inspection.
+Application owns the read-only inspection contract: state vocabulary, observed facts, candidate classifications, suggestion/reasons, the provider port and the reusable inspection use case.
 
-Application will own the structured database-state vocabulary/result and the inspection capability contract. Persistence will implement SQLite/EF-specific detection.
+The result deliberately has no authoritative selected `State` property. Admin/CLI/IA adapters may later present the candidates, but classification authority and lifecycle mutation remain separate concerns.
 
 The inspection use case must not initialize, migrate, restore, bind or repair the database as a side effect.
 
-The shared lifecycle/readiness rules live in NexusPrincipia; this project keeps only GameSaveSync-specific state extensions and safety policy.
+Shared lifecycle/readiness and inspection/classification rules live in NexusPrincipia. GameSaveSync keeps only project-specific state semantics and safety policy.

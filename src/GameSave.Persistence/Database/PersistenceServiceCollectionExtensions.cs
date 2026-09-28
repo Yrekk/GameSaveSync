@@ -1,3 +1,4 @@
+using GameSave.Application.MetadataDatabase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +17,9 @@ public static class PersistenceServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(settings);
 
         services.AddSingleton(settings);
+        services.AddSingleton<
+            IMetadataDatabaseInspectionProvider,
+            SqliteMetadataDatabaseInspectionProvider>();
         services.AddDbContext<GameSaveDbContext>(
             options => options.UseSqlite(
                 MetadataDatabaseConnectionStrings.ForOperationalUse(settings)));

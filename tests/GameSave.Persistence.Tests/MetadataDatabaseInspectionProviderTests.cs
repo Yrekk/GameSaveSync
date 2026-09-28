@@ -1,0 +1,220 @@
+using GameSave.Application.MetadataDatabase;
+using GameSave.Persistence.Database;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+
+namespace GameSave.Persistence.Tests;
+
+public sealed class MetadataDatabaseInspectionProviderTests
+{
+    private const string InitialMigration =
+        "20260928000000_InitialMetadataDatabase";
+
+    [Fact]
+    public async Task Missing_DoesNotCreateDatabase()
+    {
+        using var fixture = CreateFixture();
+        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+
+        var inspection = await provider.InspectAsync();
+
+        Assert.Equal(MetadataDatabaseState.Missing, inspection.SuggestedState);
+        Assert.Equal([MetadataDatabaseState.Missing], inspection.CandidateStates);
+        Assert.False(File.Exists(fixture.Settings.DatabasePath));
+    }
+
+    [Fact]
+    public async Task EmptyValidDatabase_SuggestsUninitializedAndAllowsInvalid()
+    {
+        using var fixture = CreateFixture();
+        await fixture.CreateEmptyDatabaseAsync();
+
+        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var inspection = await provider.InspectAsync();
+
+        Assert.Equal(MetadataDatabaseState.Uninitialized, inspection.SuggestedState);
+        Assert.Equal(
+            [MetadataDatabaseState.Uninitialized, MetadataDatabaseState.Invalid],
+            inspection.CandidateStates);
+        Assert.True(inspection.RequiresAdministratorClassification);
+        Assert.Equal(0, inspection.Facts.UserTableCount);
+        Assert.Equal(0, inspection.Facts.AppliedMigrationCount);
+    }
+
+    [Fact]
+    public async Task DatabaseWithForeignTable_SuggestsInvalidButAllowsUninitialized()
+    {
+        using var fixture = CreateFixture();
+        await fixture.ExecuteSqlAsync(
+            "CREATE TABLE ExternalData (Id INTEGER PRIMARY KEY);");
+
+        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var inspection = await provider.InspectAsync();
+
+        Assert.Equal(MetadataDatabaseState.Invalid, inspection.SuggestedState);
+        Assert.Equal(
+            [MetadataDatabaseState.Uninitialized, MetadataDatabaseState.Invalid],
+            inspection.CandidateStates);
+        Assert.Equal(1, inspection.Facts.UserTableCount);
+    }
+
+    [Fact]
+    public async Task AppliedBaseline_SuggestsReadyAndAllowsAdministrativeInvalidation()
+    {
+        using var fixture = CreateFixture();
+        await fixture.ApplyBaselineMigrationAsync();
+
+        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var inspection = await provider.InspectAsync();
+
+        Assert.Equal(MetadataDatabaseState.Ready, inspection.SuggestedState);
+        Assert.Equal(
+            [MetadataDatabaseState.Ready, MetadataDatabaseState.Invalid],
+            inspection.CandidateStates);
+        Assert.Equal(InitialMigration, inspection.Facts.CurrentMigration);
+        Assert.Equal(InitialMigration, inspection.Facts.TargetMigration);
+    }
+
+    [Fact]
+    public async Task UnknownAppliedMigration_SuggestsTooNew()
+    {
+        using var fixture = CreateFixture();
+        await fixture.ApplyBaselineMigrationAsync();
+        await fixture.ExecuteSqlAsync(
+            """
+            INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+            VALUES ('20260929000000_FutureMigration', '10.0.12');
+            """);
+
+        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var inspection = await provider.InspectAsync();
+
+        Assert.Equal(MetadataDatabaseState.TooNew, inspection.SuggestedState);
+        Assert.Contains(MetadataDatabaseState.Invalid, inspection.CandidateStates);
+    }
+
+    [Fact]
+    public async Task CorruptDatabase_IsInvalid()
+    {
+        using var fixture = CreateFixture();
+        Directory.CreateDirectory(Path.GetDirectoryName(fixture.Settings.DatabasePath)!);
+        await File.WriteAllTextAsync(
+            fixture.Settings.DatabasePath,
+            "this is not sqlite");
+
+        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var inspection = await provider.InspectAsync();
+
+        Assert.Equal(MetadataDatabaseState.Invalid, inspection.SuggestedState);
+        Assert.Equal([MetadataDatabaseState.Invalid], inspection.CandidateStates);
+    }
+
+    [Fact]
+    public async Task DatabasePathOccupiedByDirectory_IsUnavailable()
+    {
+        using var fixture = CreateFixture();
+        Directory.CreateDirectory(fixture.Settings.DatabasePath);
+
+        var provider = new SqliteMetadataDatabaseInspectionProvider(fixture.Settings);
+        var inspection = await provider.InspectAsync();
+
+        Assert.Equal(MetadataDatabaseState.Unavailable, inspection.SuggestedState);
+        Assert.True(inspection.Facts.PathOccupiedByNonFile);
+    }
+
+    [Fact]
+    public async Task ReopenClassification_IsDeterministic()
+    {
+        using var fixture = CreateFixture();
+        await fixture.ApplyBaselineMigrationAsync();
+
+        var first = await new SqliteMetadataDatabaseInspectionProvider(
+            fixture.Settings).InspectAsync();
+        var second = await new SqliteMetadataDatabaseInspectionProvider(
+            fixture.Settings).InspectAsync();
+
+        Assert.Equal(first.SuggestedState, second.SuggestedState);
+        Assert.Equal(first.CandidateStates, second.CandidateStates);
+        Assert.Equal(first.Facts, second.Facts);
+    }
+
+    private static TestDatabaseFixture CreateFixture()
+    {
+        var root = Path.Combine(
+            Path.GetTempPath(),
+            "GameSaveSync.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        var settings = MetadataDatabaseSettings.FromConfiguredPath(
+            Path.Combine("data", "metadata.db"),
+            root);
+
+        return new TestDatabaseFixture(root, settings);
+    }
+
+    private sealed class TestDatabaseFixture(
+        string rootPath,
+        MetadataDatabaseSettings settings) : IDisposable
+    {
+        public MetadataDatabaseSettings Settings { get; } = settings;
+
+        public async Task CreateEmptyDatabaseAsync()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(Settings.DatabasePath)!);
+
+            await using var connection = new SqliteConnection(
+                TestConnectionString(
+                    MetadataDatabaseConnectionStrings
+                        .ForExplicitInitialization(Settings)));
+
+            await connection.OpenAsync();
+        }
+
+        public async Task ExecuteSqlAsync(string sql)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(Settings.DatabasePath)!);
+
+            await using var connection = new SqliteConnection(
+                TestConnectionString(
+                    MetadataDatabaseConnectionStrings
+                        .ForExplicitInitialization(Settings)));
+
+            await connection.OpenAsync();
+
+            await using var command = connection.CreateCommand();
+            command.CommandText = sql;
+            await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task ApplyBaselineMigrationAsync()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(Settings.DatabasePath)!);
+
+            var options = new DbContextOptionsBuilder<GameSaveDbContext>()
+                .UseSqlite(
+                    TestConnectionString(
+                        MetadataDatabaseConnectionStrings
+                            .ForExplicitInitialization(Settings)))
+                .Options;
+
+            await using var context = new GameSaveDbContext(options);
+            await context.Database.MigrateAsync();
+        }
+
+        public void Dispose()
+        {
+            if (Directory.Exists(rootPath))
+            {
+                Directory.Delete(rootPath, recursive: true);
+            }
+        }
+
+        private static string TestConnectionString(string connectionString)
+        {
+            return new SqliteConnectionStringBuilder(connectionString)
+            {
+                Pooling = false,
+            }.ToString();
+        }
+    }
+}

@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1B FULLY VALIDATED — H2.1C DESIGN FRAMED — IMPLEMENTATION NOT STARTED  
+**Status:** H2.1B FULLY VALIDATED — H2.1C IMPLEMENTED CANDIDATE — AWAITING CI / SHARED REVIEW / ACCEPTANCE  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -117,9 +117,11 @@ The eventual manual action will be implemented only with its snapshot/validation
 
 H2.1C applies the shared NexusPrincipia database lifecycle/readiness model without implementing administrative mutation yet.
 
-Shared reference:
+Shared references:
 
 https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md
+
+https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/inspection-classification-authority.md
 
 ### Objective
 
@@ -221,14 +223,18 @@ Tests must cover the state matrix and forbidden side effects, including:
 - inspection never calling initialization/migration/restore;
 - state classification remaining deterministic on reopen.
 
-### Blocking design question before code
+### Classification authority decision — RESOLVED
 
-For an existing, valid SQLite file with **no GameSaveSync EF migration history**:
+The inspector proposes; it never owns the administrative classification.
 
-- if the file is otherwise empty, should GameSaveSync classify it as `Uninitialized`;
-- while a file containing unrelated/user tables without GameSaveSync migration history is classified as `Invalid`?
+For an existing valid SQLite database with no applied GameSaveSync migration:
 
-This distinction keeps `Uninitialized` useful without treating an arbitrary SQLite database as safe to initialize over.
+- empty database → candidates `Uninitialized | Invalid`, suggestion `Uninitialized`;
+- user/foreign tables present → candidates `Uninitialized | Invalid`, suggestion `Invalid`.
+
+The Admin may override the suggestion only with another fact-compatible candidate. The choice does not mutate the database. Later action availability derives from observed facts + authorized classification + policy, and an existing `Invalid` file must never be silently overwritten.
+
+This is now a shared NexusPrincipia architecture rule.
 ## Candidate H2 slices
 
 These are planning candidates, not implementation commitments. They must be confirmed during the H2 design discussion.
@@ -300,7 +306,9 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Resolve the H2.1C blocking classification question:
+Validate CI for the H2.1C implementation candidate, then perform the mandatory shared code/architecture review before explicit acceptance.
+
+The former blocking classification question is resolved:
 
 ```text
 existing valid empty SQLite file
@@ -312,4 +320,4 @@ existing SQLite file with unrelated/user tables
 → Invalid ?
 ```
 
-After Damien explicitly validates that distinction, implement H2.1C using the normal tranche cycle.
+The resolution is implemented as candidate-state inspection rather than automatic classification.
