@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1B IMPLEMENTATION IN PROGRESS  
+**Status:** H2.1B IMPLEMENTED — REMOTE CI GREEN — LOCAL VALIDATION PENDING  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -184,27 +184,22 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-Remote CI validation for H2.1A is green:
+H2.1B remote CI is green on commit `9c795a4`:
 
 - Release build: 0 warnings, 0 errors;
-- Core tests: 59 passed;
-- Application tests: 1 passed;
-- Persistence tests: 1 passed;
-- Storage tests: 1 passed;
-- total executed tests: 62 passed, 0 failed;
-- the existing empty Server.Tests and IntegrationTests projects still report the expected no-test warnings.
+- Core: 57 tests passed;
+- Application: 1 test passed;
+- Persistence: 8 tests passed;
+- Storage: 1 test passed;
+- total: 67 passed, 0 failed;
+- Server.Tests and IntegrationTests retain their expected no-test notices.
 
-Damien completed the local validation successfully:
+The first H2.1B CI run exposed a Windows-only test cleanup issue: Microsoft.Data.Sqlite pooling kept the temporary database file open after the functional migration assertions succeeded. The fixture now clears SQLite pools before deleting its temporary directory. Product pooling remains unchanged.
 
-- 62 executed tests passed;
-- 0 failed;
-- only the two expected no-test warnings for Server.Tests and IntegrationTests;
-- local validation accepted by Damien.
+Next:
 
-H2.1A is validated.
-
-Post-review architecture walkthrough identified and corrected one identity inconsistency before persistence: MachineId is now GUID-backed, with future UUID v7 generation owned by Application/Server rather than Core, Agent or SQLite.
-
-The hardening is now validated locally and remotely. The follow-up compile fix at commit `1e9514a` is green in CI.
-
-H2.1A is fully validated. Next: define H2.1B.
+1. Damien performs local Release build/tests/diff/status validation.
+2. Review the H2.1B code and architecture together.
+3. Correct any issue found during review.
+4. Damien explicitly accepts H2.1B.
+5. Only then define H2.1C.

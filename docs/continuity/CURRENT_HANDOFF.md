@@ -1,12 +1,12 @@
 # Current handoff
 
-**Date:** 27 September 2026  
+**Date:** 28 September 2026  
 **Repository:** `Yrekk/GameSaveSync`  
 **Working branch:** `feature/h2-central-server`  
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1A — Modular persistence foundation + MachineId hardening (validated)
+**Current tranche:** H2.1B — Metadata database bootstrap & manual migration foundation (implemented; remote CI green; local validation pending)
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -48,7 +48,43 @@ No profile persistence schema, migrations, runtime recovery coordinator, storage
 
 ## IMPLEMENTED BUT NOT YET VALIDATED
 
-None.
+### H2.1B — Metadata database bootstrap & manual migration foundation
+
+Implemented on `feature/h2-central-server`.
+
+Remote validation is green:
+
+- Release build: 0 warnings, 0 errors;
+- Core tests: 57 passed;
+- Application tests: 1 passed;
+- Persistence tests: 8 passed;
+- Storage tests: 1 passed;
+- total executed tests: 67 passed, 0 failed;
+- Server.Tests and IntegrationTests still have the two expected no-test notices.
+
+H2.1B adds:
+
+- explicit metadata database path resolution relative to a known base path;
+- Persistence DI registration for `GameSaveDbContext`;
+- operational SQLite connection mode = `ReadWrite`, preventing silent creation of a missing database;
+- explicit maintenance connection mode = `ReadWriteCreate`, reserved for future human-authorized initialization/migration operations;
+- versioned empty EF baseline migration `20260928060000_InitialMetadataDatabase`;
+- design-time DbContext factory for migration authoring;
+- development-only metadata DB path configuration;
+- migration tests proving pending/applied state and reopen behavior;
+- test proving normal operational access does not create a missing DB;
+- Server composition wiring without opening, creating or migrating the DB.
+
+Migration execution is deliberately NOT implemented yet.
+
+GameSaveSync now has an explicit invariant: startup may inspect migration state later, but it never applies schema/data migrations automatically.
+
+Commits:
+
+- `cfb41d2` — H2.1B implementation;
+- `9c795a4` — Windows SQLite test-pool cleanup fix.
+
+Local validation by Damien is still required before H2.1B can be accepted.
 
 ## VALIDATED POST-REVIEW HARDENING
 
@@ -113,7 +149,6 @@ See `docs/decisions/ADR-0007-first-system-status-api.md`.
 - approved correction changes MachineId to a non-empty `Guid` value object;
 - future new identities are generated as UUID v7 by the authoritative Application/Server enrollment workflow, not by Core, Agent or SQLite;
 - Persistence stores the assigned GUID; no database IDENTITY/autoincrement substitutes for MachineId;
-- this correction is implemented after the validated H2.1A baseline and requires local validation before the next slice;
 - H2 introduces a stable opaque `MachineId` value object;
 - MachineId identifies a logical GameSaveSync machine, not hostname, username or a specific Agent installation;
 - a new PC always receives a new MachineId;
@@ -243,4 +278,15 @@ GameSaveSync keeps only project-specific workflow rules locally.
 
 ## NEXT EXACT ACTION
 
-Define H2.1B from the now fully validated H2.1A baseline, keeping the validated module boundaries and GUID-based MachineId semantics intact.
+Damien runs the local H2.1B validation:
+
+```powershell
+dotnet build GameSaveSync.sln --configuration Release
+dotnet test GameSaveSync.sln --configuration Release --no-build
+git diff --check
+git status --short
+```
+
+If local validation is green, perform the H2.1B code/architecture review together before explicit tranche acceptance.
+
+Do not start H2.1C until that review and acceptance are complete.
