@@ -8,7 +8,7 @@ Application may depend on `GameSave.Core`.
 
 It must not depend on EF Core/SQLite, ASP.NET Core, desktop/Web UI technology or NAS/SMB-specific implementations.
 
-Repository and capability interfaces belong here only when a real use case requires them. H2.1B still avoids speculative interfaces.
+Repository and capability interfaces belong here only when a real use case requires them. H2 continues to avoid speculative interfaces.
 
 Reusable administrative operations such as future database initialization, migration, snapshot and restore coordination belong here rather than in `Program.cs`, HTTP endpoints, Admin UI or IA/tool adapters.
 
