@@ -68,7 +68,7 @@ H2.1B adds:
 - Persistence DI registration for `GameSaveDbContext`;
 - operational SQLite connection mode = `ReadWrite`, preventing silent creation of a missing database;
 - explicit maintenance connection mode = `ReadWriteCreate`, reserved for future human-authorized initialization/migration operations;
-- versioned empty EF baseline migration `20260928060000_InitialMetadataDatabase`;
+- versioned empty EF baseline migration `20260928000000_InitialMetadataDatabase`;
 - design-time DbContext factory for migration authoring;
 - development-only metadata DB path configuration;
 - migration tests proving pending/applied state and reopen behavior;

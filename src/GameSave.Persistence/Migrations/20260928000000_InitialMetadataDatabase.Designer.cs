@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GameSave.Persistence.Migrations;
 
 [DbContext(typeof(GameSaveDbContext))]
-[Migration("20260928060000_InitialMetadataDatabase")]
+[Migration("20260928000000_InitialMetadataDatabase")]
 partial class InitialMetadataDatabase
 {
     protected override void BuildTargetModel(ModelBuilder modelBuilder)

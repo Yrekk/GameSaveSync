@@ -7,7 +7,7 @@ namespace GameSave.Persistence.Tests;
 public sealed class MetadataMigrationTests
 {
     private const string InitialMigration =
-        "20260928060000_InitialMetadataDatabase";
+        "20260928000000_InitialMetadataDatabase";
 
     [Fact]
     public async Task OperationalConnection_DoesNotCreateMissingDatabase()
