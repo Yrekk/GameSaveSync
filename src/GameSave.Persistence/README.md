@@ -32,11 +32,11 @@ Migrations are never applied automatically at startup.
 
 The baseline migration intentionally contains no business tables. H2.2 will add schema only when real persistence use cases arrive.
 
-## H2.1C metadata database inspection
+## Validated H2.1C metadata database inspection
 
 Persistence implements the Application inspection port using SQLite and EF migration metadata.
 
-It observes file/path presence, accessibility, SQLite integrity, migration history, current-binary migrations and non-system user tables. It returns facts plus Nexus-compatible structured findings, safe candidate classifications and a suggestion.
+It observes file/path presence, accessibility, SQLite integrity, migration history, current-binary migrations and non-system user tables. The provider owns SQLite/EF I/O and observed facts; the dedicated classifier interprets valid accessible-database observations into Nexus-compatible findings, candidate classifications and a suggestion. SQLite integrity facts remain independent from later GameSaveSync schema/history coherence classification.
 
 Inspection preserves H2.1B safety:
 
