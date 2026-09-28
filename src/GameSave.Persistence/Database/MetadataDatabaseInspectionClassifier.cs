@@ -6,10 +6,12 @@ namespace GameSave.Persistence.Database;
 internal static class MetadataDatabaseInspectionClassifier
 {
     public static MetadataDatabaseInspection ClassifyAccessibleDatabase(
+        MetadataDatabaseInspectionContext context,
         MetadataDatabaseInspectionFacts facts,
         IReadOnlyList<string> knownMigrations,
         IReadOnlyList<string> appliedMigrations)
     {
+        ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(facts);
         ArgumentNullException.ThrowIfNull(knownMigrations);
         ArgumentNullException.ThrowIfNull(appliedMigrations);
@@ -42,6 +44,7 @@ internal static class MetadataDatabaseInspectionClassifier
                         MetadataDatabaseFindingCodes.UserObjectsAbsent));
 
             return new MetadataDatabaseInspection(
+                context,
                 facts,
                 [MetadataDatabaseState.Uninitialized, MetadataDatabaseState.Invalid],
                 hasUserTables
@@ -59,6 +62,7 @@ internal static class MetadataDatabaseInspectionClassifier
         if (unknownApplied.Length > 0)
         {
             return new MetadataDatabaseInspection(
+                context,
                 facts,
                 [MetadataDatabaseState.TooNew, MetadataDatabaseState.Invalid],
                 MetadataDatabaseState.TooNew,
@@ -81,6 +85,7 @@ internal static class MetadataDatabaseInspectionClassifier
             StringComparer.Ordinal))
         {
             return new MetadataDatabaseInspection(
+                context,
                 facts,
                 [MetadataDatabaseState.Invalid],
                 MetadataDatabaseState.Invalid,
@@ -93,6 +98,7 @@ internal static class MetadataDatabaseInspectionClassifier
         if (appliedMigrations.Count < knownMigrations.Count)
         {
             return new MetadataDatabaseInspection(
+                context,
                 facts,
                 [MetadataDatabaseState.MigrationRequired],
                 MetadataDatabaseState.MigrationRequired,
@@ -110,6 +116,7 @@ internal static class MetadataDatabaseInspectionClassifier
         if (appliedMigrations.Count == knownMigrations.Count)
         {
             return new MetadataDatabaseInspection(
+                context,
                 facts,
                 [MetadataDatabaseState.Ready],
                 MetadataDatabaseState.Ready,
