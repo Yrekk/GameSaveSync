@@ -1,3 +1,4 @@
+using GameSave.Application.Inspection;
 using GameSave.Application.MetadataDatabase;
 
 namespace GameSave.Persistence.Database;
@@ -23,6 +24,22 @@ internal static class MetadataDatabaseInspectionClassifier
         if (appliedMigrations.Count == 0)
         {
             var hasUserTables = facts.UserTableCount.GetValueOrDefault() > 0;
+            var findings = new List<InspectionFinding>
+            {
+                new(MetadataDatabaseFindingCodes.SchemaUninitialized),
+                new(MetadataDatabaseFindingCodes.ApplicationHistoryAbsent),
+            };
+
+            findings.Add(
+                hasUserTables
+                    ? new InspectionFinding(
+                        MetadataDatabaseFindingCodes.NonApplicationObjectsPresent,
+                        new Dictionary<string, object?>
+                        {
+                            ["object_count"] = facts.UserTableCount.GetValueOrDefault(),
+                        })
+                    : new InspectionFinding(
+                        MetadataDatabaseFindingCodes.UserObjectsAbsent));
 
             return new MetadataDatabaseInspection(
                 facts,
@@ -30,21 +47,13 @@ internal static class MetadataDatabaseInspectionClassifier
                 hasUserTables
                     ? MetadataDatabaseState.Invalid
                     : MetadataDatabaseState.Uninitialized,
-                hasUserTables
-                    ?
-                    [
-                        "No applied GameSaveSync migration was found.",
-                        "Non-system user tables are present, so the database appears foreign or intentionally unmanaged.",
-                    ]
-                    :
-                    [
-                        "No applied GameSaveSync migration was found.",
-                        "No non-system user table was found, so the database appears uninitialized.",
-                    ]);
+                findings);
         }
 
         var unknownApplied = appliedMigrations
-            .Where(migration => !knownMigrations.Contains(migration, StringComparer.Ordinal))
+            .Where(migration => !knownMigrations.Contains(
+                migration,
+                StringComparer.Ordinal))
             .ToArray();
 
         if (unknownApplied.Length > 0)
@@ -54,21 +63,30 @@ internal static class MetadataDatabaseInspectionClassifier
                 [MetadataDatabaseState.TooNew, MetadataDatabaseState.Invalid],
                 MetadataDatabaseState.TooNew,
                 [
-                    "The database contains migration identifiers that are unknown to this GameSaveSync binary.",
-                    $"Unknown migration count: {unknownApplied.Length}.",
+                    new InspectionFinding(
+                        MetadataDatabaseFindingCodes.SchemaNewerThanRuntime,
+                        new Dictionary<string, object?>
+                        {
+                            ["unknown_count"] = unknownApplied.Length,
+                        }),
                 ]);
         }
 
-        var expectedPrefix = knownMigrations.Take(appliedMigrations.Count).ToArray();
+        var expectedPrefix = knownMigrations
+            .Take(appliedMigrations.Count)
+            .ToArray();
 
-        if (!appliedMigrations.SequenceEqual(expectedPrefix, StringComparer.Ordinal))
+        if (!appliedMigrations.SequenceEqual(
+            expectedPrefix,
+            StringComparer.Ordinal))
         {
             return new MetadataDatabaseInspection(
                 facts,
                 [MetadataDatabaseState.Invalid],
                 MetadataDatabaseState.Invalid,
                 [
-                    "The applied GameSaveSync migration history is not a valid prefix of the migration sequence known by this binary.",
+                    new InspectionFinding(
+                        MetadataDatabaseFindingCodes.SchemaHistoryInconsistent),
                 ]);
         }
 
@@ -76,11 +94,16 @@ internal static class MetadataDatabaseInspectionClassifier
         {
             return new MetadataDatabaseInspection(
                 facts,
-                [MetadataDatabaseState.MigrationRequired, MetadataDatabaseState.Invalid],
+                [MetadataDatabaseState.MigrationRequired],
                 MetadataDatabaseState.MigrationRequired,
                 [
-                    "The database has a valid older GameSaveSync migration history.",
-                    $"{knownMigrations.Count - appliedMigrations.Count} known migration(s) are pending.",
+                    new InspectionFinding(
+                        MetadataDatabaseFindingCodes.SchemaOutdated,
+                        new Dictionary<string, object?>
+                        {
+                            ["pending_count"] =
+                                knownMigrations.Count - appliedMigrations.Count,
+                        }),
                 ]);
         }
 
@@ -88,10 +111,11 @@ internal static class MetadataDatabaseInspectionClassifier
         {
             return new MetadataDatabaseInspection(
                 facts,
-                [MetadataDatabaseState.Ready, MetadataDatabaseState.Invalid],
+                [MetadataDatabaseState.Ready],
                 MetadataDatabaseState.Ready,
                 [
-                    "All GameSaveSync migrations known by this binary are applied in order.",
+                    new InspectionFinding(
+                        MetadataDatabaseFindingCodes.SchemaCurrent),
                 ]);
         }
 
@@ -100,7 +124,8 @@ internal static class MetadataDatabaseInspectionClassifier
             [MetadataDatabaseState.Invalid],
             MetadataDatabaseState.Invalid,
             [
-                "The migration history cannot be reconciled with the migration sequence known by this binary.",
+                new InspectionFinding(
+                    MetadataDatabaseFindingCodes.SchemaHistoryInconsistent),
             ]);
     }
 }

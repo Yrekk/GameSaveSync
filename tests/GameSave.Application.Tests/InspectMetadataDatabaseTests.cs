@@ -1,3 +1,4 @@
+using GameSave.Application.Inspection;
 using GameSave.Application.MetadataDatabase;
 
 namespace GameSave.Application.Tests;
@@ -20,7 +21,7 @@ public sealed class InspectMetadataDatabaseTests
                 "target"),
             [MetadataDatabaseState.Missing],
             MetadataDatabaseState.Missing,
-            ["missing"]);
+            [new InspectionFinding(MetadataDatabaseFindingCodes.ResourceMissing)]);
 
         var provider = new StubProvider(expected);
         var useCase = new InspectMetadataDatabase(provider);

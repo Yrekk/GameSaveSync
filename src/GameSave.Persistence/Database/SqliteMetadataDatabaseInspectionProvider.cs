@@ -1,3 +1,4 @@
+using GameSave.Application.Inspection;
 using GameSave.Application.MetadataDatabase;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -68,9 +69,10 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
                 [state],
                 state,
                 [
-                    occupiedByNonFile
-                        ? "The configured database path is occupied by a directory or another non-file resource."
-                        : "The configured metadata database file does not exist.",
+                    new InspectionFinding(
+                        occupiedByNonFile
+                            ? MetadataDatabaseFindingCodes.ResourcePathNotFile
+                            : MetadataDatabaseFindingCodes.ResourceMissing),
                 ]);
         }
 
@@ -84,26 +86,23 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
         {
             return BuildUnavailable(
                 targetMigration,
-                $"SQLite could not open the existing metadata database: error {exception.SqliteErrorCode}.");
+                providerErrorCode: exception.SqliteErrorCode);
         }
         catch (SqliteException exception)
         {
             return BuildInvalid(
                 targetMigration,
                 integrityValid: false,
-                $"SQLite opened the file path but could not interpret it as a coherent database: error {exception.SqliteErrorCode}.");
+                MetadataDatabaseFindingCodes.IntegrityFailed,
+                providerErrorCode: exception.SqliteErrorCode);
         }
         catch (IOException)
         {
-            return BuildUnavailable(
-                targetMigration,
-                "The existing metadata database file could not be opened because of an I/O failure.");
+            return BuildUnavailable(targetMigration);
         }
         catch (UnauthorizedAccessException)
         {
-            return BuildUnavailable(
-                targetMigration,
-                "The existing metadata database file could not be opened because access was denied.");
+            return BuildUnavailable(targetMigration);
         }
 
         try
@@ -113,7 +112,7 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
                 return BuildInvalid(
                     targetMigration,
                     integrityValid: false,
-                    "SQLite integrity checking reported corruption or structural inconsistency.");
+                    MetadataDatabaseFindingCodes.IntegrityFailed);
             }
 
             var tableNames = await ReadTableNamesAsync(connection, cancellationToken);
@@ -150,14 +149,15 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
         {
             return BuildUnavailable(
                 targetMigration,
-                $"SQLite became temporarily unavailable during inspection: error {exception.SqliteErrorCode}.");
+                providerErrorCode: exception.SqliteErrorCode);
         }
         catch (SqliteException exception)
         {
             return BuildInvalid(
                 targetMigration,
                 integrityValid: true,
-                $"The GameSaveSync schema or migration history could not be read coherently: error {exception.SqliteErrorCode}.");
+                MetadataDatabaseFindingCodes.SchemaReadFailed,
+                providerErrorCode: exception.SqliteErrorCode);
         }
     }
 
@@ -252,7 +252,7 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
 
     private static MetadataDatabaseInspection BuildUnavailable(
         string? targetMigration,
-        string reason)
+        int? providerErrorCode = null)
     {
         return new MetadataDatabaseInspection(
             new MetadataDatabaseInspectionFacts(
@@ -267,13 +267,23 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
                 TargetMigration: targetMigration),
             [MetadataDatabaseState.Unavailable],
             MetadataDatabaseState.Unavailable,
-            [reason]);
+            [
+                new InspectionFinding(
+                    MetadataDatabaseFindingCodes.ResourceUnavailable,
+                    providerErrorCode is null
+                        ? null
+                        : new Dictionary<string, object?>
+                        {
+                            ["provider_error_code"] = providerErrorCode.Value,
+                        }),
+            ]);
     }
 
     private static MetadataDatabaseInspection BuildInvalid(
         string? targetMigration,
         bool integrityValid,
-        string reason)
+        string findingCode,
+        int? providerErrorCode = null)
     {
         return new MetadataDatabaseInspection(
             new MetadataDatabaseInspectionFacts(
@@ -288,6 +298,15 @@ internal sealed class SqliteMetadataDatabaseInspectionProvider
                 TargetMigration: targetMigration),
             [MetadataDatabaseState.Invalid],
             MetadataDatabaseState.Invalid,
-            [reason]);
+            [
+                new InspectionFinding(
+                    findingCode,
+                    providerErrorCode is null
+                        ? null
+                        : new Dictionary<string, object?>
+                        {
+                            ["provider_error_code"] = providerErrorCode.Value,
+                        }),
+            ]);
     }
 }

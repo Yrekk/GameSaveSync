@@ -39,6 +39,10 @@ public sealed class MetadataDatabaseInspectionProviderTests
         Assert.True(inspection.RequiresAdministratorClassification);
         Assert.Equal(0, inspection.Facts.UserTableCount);
         Assert.Equal(0, inspection.Facts.AppliedMigrationCount);
+        Assert.Contains(
+            inspection.Findings,
+            finding =>
+                finding.Code == MetadataDatabaseFindingCodes.UserObjectsAbsent);
 
         var tableNames = await fixture.ReadTableNamesAsync();
         Assert.Empty(tableNames);
@@ -59,6 +63,12 @@ public sealed class MetadataDatabaseInspectionProviderTests
             [MetadataDatabaseState.Uninitialized, MetadataDatabaseState.Invalid],
             inspection.CandidateStates);
         Assert.Equal(1, inspection.Facts.UserTableCount);
+        var finding = Assert.Single(
+            inspection.Findings,
+            finding =>
+                finding.Code ==
+                MetadataDatabaseFindingCodes.NonApplicationObjectsPresent);
+        Assert.Equal(1, finding.Details["object_count"]);
     }
 
     [Fact]
@@ -72,8 +82,9 @@ public sealed class MetadataDatabaseInspectionProviderTests
 
         Assert.Equal(MetadataDatabaseState.Ready, inspection.SuggestedState);
         Assert.Equal(
-            [MetadataDatabaseState.Ready, MetadataDatabaseState.Invalid],
+            [MetadataDatabaseState.Ready],
             inspection.CandidateStates);
+        Assert.False(inspection.RequiresAdministratorClassification);
         Assert.Equal(InitialMigration, inspection.Facts.CurrentMigration);
         Assert.Equal(InitialMigration, inspection.Facts.TargetMigration);
     }
@@ -93,7 +104,9 @@ public sealed class MetadataDatabaseInspectionProviderTests
         var inspection = await provider.InspectAsync();
 
         Assert.Equal(MetadataDatabaseState.TooNew, inspection.SuggestedState);
-        Assert.Contains(MetadataDatabaseState.Invalid, inspection.CandidateStates);
+        Assert.Equal(
+            [MetadataDatabaseState.TooNew, MetadataDatabaseState.Invalid],
+            inspection.CandidateStates);
     }
 
     [Fact]

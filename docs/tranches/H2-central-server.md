@@ -123,6 +123,8 @@ https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lif
 
 https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/inspection-classification-authority.md
 
+https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/structured-inspection-findings.md
+
 ### Objective
 
 Provide one reusable, read-only application capability that answers:

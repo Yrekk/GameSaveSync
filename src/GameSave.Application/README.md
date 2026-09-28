@@ -16,9 +16,9 @@ This project is designed to remain reusable from Server adapters, HTTP endpoints
 
 ## H2.1C metadata database inspection
 
-Application owns the read-only inspection contract: state vocabulary, observed facts, candidate classifications, suggestion/reasons, the provider port and the reusable inspection use case.
+Application owns the read-only inspection contract: state vocabulary, observed facts, candidate classifications, structured findings, the suggestion, the provider port and the reusable inspection use case.
 
-The result deliberately has no authoritative selected `State` property. Admin/CLI/IA adapters may later present the candidates, but classification authority and lifecycle mutation remain separate concerns.
+The result deliberately has no authoritative selected `State` property and no presentation prose. `InspectionFinding` exposes stable Nexus-compatible `code + details`; Admin/CLI/IA adapters render human text downstream.
 
 The inspection use case must not initialize, migrate, restore, bind or repair the database as a side effect.
 

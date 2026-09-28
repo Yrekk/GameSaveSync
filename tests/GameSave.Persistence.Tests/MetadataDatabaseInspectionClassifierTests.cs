@@ -14,6 +14,9 @@ public sealed class MetadataDatabaseInspectionClassifierTests
         Assert.Equal(
             [MetadataDatabaseState.Uninitialized, MetadataDatabaseState.Invalid],
             inspection.CandidateStates);
+        Assert.Contains(
+            inspection.Findings,
+            finding => finding.Code == MetadataDatabaseFindingCodes.UserObjectsAbsent);
     }
 
     [Fact]
@@ -25,6 +28,11 @@ public sealed class MetadataDatabaseInspectionClassifierTests
         Assert.Equal(
             [MetadataDatabaseState.Uninitialized, MetadataDatabaseState.Invalid],
             inspection.CandidateStates);
+        Assert.Contains(
+            inspection.Findings,
+            finding =>
+                finding.Code ==
+                MetadataDatabaseFindingCodes.NonApplicationObjectsPresent);
     }
 
     [Fact]
@@ -38,7 +46,10 @@ public sealed class MetadataDatabaseInspectionClassifierTests
         Assert.Equal(
             MetadataDatabaseState.MigrationRequired,
             inspection.SuggestedState);
-        Assert.Contains(MetadataDatabaseState.Invalid, inspection.CandidateStates);
+        Assert.Equal(
+            [MetadataDatabaseState.MigrationRequired],
+            inspection.CandidateStates);
+        Assert.False(inspection.RequiresAdministratorClassification);
     }
 
     [Fact]
@@ -51,8 +62,9 @@ public sealed class MetadataDatabaseInspectionClassifierTests
 
         Assert.Equal(MetadataDatabaseState.Ready, inspection.SuggestedState);
         Assert.Equal(
-            [MetadataDatabaseState.Ready, MetadataDatabaseState.Invalid],
+            [MetadataDatabaseState.Ready],
             inspection.CandidateStates);
+        Assert.False(inspection.RequiresAdministratorClassification);
     }
 
     [Fact]

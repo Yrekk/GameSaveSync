@@ -281,6 +281,7 @@ Authoritative shared references:
 - Entrypoints & reusable operations: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/development/entrypoints-and-reusable-operations.md
 - Database lifecycle/readiness: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/database-lifecycle-readiness.md
 - Inspection/classification/authorized choice: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/inspection-classification-authority.md
+- Structured inspection findings: https://github.com/Yrekk/NexusPrincipia/blob/main/docs/architecture/structured-inspection-findings.md
 
 GameSaveSync keeps only project-specific workflow rules locally.
 
@@ -303,8 +304,10 @@ GameSaveSync behavior:
 
 - empty valid SQLite with no applied GameSaveSync migration → `Uninitialized | Invalid`, suggest `Uninitialized`;
 - valid SQLite with foreign/user tables and no applied GameSaveSync migration → same candidates, suggest `Invalid`;
-- technically compatible databases may still be administratively rejected as `Invalid`;
+- only genuinely ambiguous observations expose multiple candidates;
+- proven `Ready` / `MigrationRequired` states remain deterministic rather than carrying `Invalid` as a generic rejection option;
 - impossible states are never offered;
+- inspection explanations use stable `code + details` findings, never authoritative free-form prose;
 - existing invalid resources are never silently overwritten.
 
 ## NEXT EXACT ACTION

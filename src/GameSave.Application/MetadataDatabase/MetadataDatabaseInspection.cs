@@ -1,8 +1,10 @@
+using GameSave.Application.Inspection;
+
 namespace GameSave.Application.MetadataDatabase;
 
 /// <summary>
 /// Read-only inspection result: observed facts, compatible classifications,
-/// a recommendation and the evidence behind that recommendation.
+/// a recommendation and structured evidence.
 /// </summary>
 public sealed class MetadataDatabaseInspection
 {
@@ -10,11 +12,11 @@ public sealed class MetadataDatabaseInspection
         MetadataDatabaseInspectionFacts facts,
         IEnumerable<MetadataDatabaseState> candidateStates,
         MetadataDatabaseState suggestedState,
-        IEnumerable<string> reasons)
+        IEnumerable<InspectionFinding> findings)
     {
         ArgumentNullException.ThrowIfNull(facts);
         ArgumentNullException.ThrowIfNull(candidateStates);
-        ArgumentNullException.ThrowIfNull(reasons);
+        ArgumentNullException.ThrowIfNull(findings);
 
         var candidates = candidateStates.Distinct().ToArray();
 
@@ -32,21 +34,19 @@ public sealed class MetadataDatabaseInspection
                 nameof(suggestedState));
         }
 
-        var reasonList = reasons
-            .Where(reason => !string.IsNullOrWhiteSpace(reason))
-            .ToArray();
+        var findingList = findings.ToArray();
 
-        if (reasonList.Length == 0)
+        if (findingList.Length == 0)
         {
             throw new ArgumentException(
-                "At least one inspection reason is required.",
-                nameof(reasons));
+                "At least one inspection finding is required.",
+                nameof(findings));
         }
 
         Facts = facts;
         CandidateStates = Array.AsReadOnly(candidates);
         SuggestedState = suggestedState;
-        Reasons = Array.AsReadOnly(reasonList);
+        Findings = Array.AsReadOnly(findingList);
     }
 
     public MetadataDatabaseInspectionFacts Facts { get; }
@@ -55,7 +55,7 @@ public sealed class MetadataDatabaseInspection
 
     public MetadataDatabaseState SuggestedState { get; }
 
-    public IReadOnlyList<string> Reasons { get; }
+    public IReadOnlyList<InspectionFinding> Findings { get; }
 
     /// <summary>
     /// True when technical facts leave more than one safe semantic

@@ -36,7 +36,7 @@ The baseline migration intentionally contains no business tables. H2.2 will add 
 
 Persistence implements the Application inspection port using SQLite and EF migration metadata.
 
-It observes file/path presence, accessibility, SQLite integrity, migration history, current-binary migrations and non-system user tables. It returns facts plus safe candidate classifications and a reasoned suggestion.
+It observes file/path presence, accessibility, SQLite integrity, migration history, current-binary migrations and non-system user tables. It returns facts plus Nexus-compatible structured findings, safe candidate classifications and a suggestion.
 
 Inspection preserves H2.1B safety:
 
