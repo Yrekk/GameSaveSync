@@ -6,7 +6,7 @@
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2.1B — Metadata database bootstrap & manual migration foundation (shared review completed; remote CI green; post-review local revalidation pending)
+**Current tranche:** H2.1B — Metadata database bootstrap & manual migration foundation (VALIDATED); next action: define H2.1C
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
@@ -46,7 +46,7 @@ Validated H2.1A scope:
 
 No profile persistence schema, migrations, runtime recovery coordinator, storage backend or HTTP endpoint is implemented yet.
 
-## IMPLEMENTED BUT NOT YET VALIDATED
+## VALIDATED H2.1B
 
 ### H2.1B — Metadata database bootstrap & manual migration foundation
 
@@ -98,7 +98,7 @@ The shared review is now completed and produced structural corrections:
 - ADR-0004 was aligned with ADR-0005: reusable administrative use cases live in `GameSave.Application`, not in Server;
 - startup remains observation/composition only and never decides among init/migrate/restore/recovery actions.
 
-Because code changed during review, a new local validation by Damien is required before H2.1B acceptance.
+Damien completed the post-review local validation successfully and explicitly accepted H2.1B on 28 September 2026.
 
 ## VALIDATED POST-REVIEW HARDENING
 
@@ -295,17 +295,15 @@ GameSaveSync keeps only project-specific workflow rules locally.
 
 ## NEXT EXACT ACTION
 
-Run the post-review local validation:
+Define H2.1C from the validated H2.1B baseline.
 
-```powershell
-git pull
+Before implementation, use the normal tranche protocol:
 
-dotnet build GameSaveSync.sln --configuration Release
-dotnet test GameSaveSync.sln --configuration Release --no-build
-git diff --check
-git status --short
-```
+- objective;
+- scope / what will be built;
+- architecture and responsibility placement;
+- critical invariants and failure posture;
+- tests;
+- only the decisions that genuinely block coding.
 
-If this is green, Damien may explicitly accept H2.1B.
-
-Do not start H2.1C until that acceptance is recorded.
+Do not implement H2.1C until its scope is explicitly accepted.

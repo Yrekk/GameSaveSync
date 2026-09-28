@@ -1,6 +1,6 @@
 # H2 — Minimal central server
 
-**Status:** H2.1B REVIEWED — REMOTE CI GREEN — POST-REVIEW LOCAL REVALIDATION PENDING  
+**Status:** H2.1B FULLY VALIDATED — NEXT: DEFINE H2.1C  
 **Branch:** `feature/h2-central-server`  
 **Base:** `develop` after accepted H1 merge
 
@@ -184,30 +184,18 @@ For each accepted H2 slice:
 
 ## Next exact action
 
-The shared H2.1B review is complete.
+H2.1B is fully validated.
 
-Review corrections accepted and implemented:
+Validation state:
 
-- temporary SQLite test databases disable pooling locally; no global `ClearAllPools()`;
-- SQLite maintenance/creation connection builder is internal to Persistence;
-- `GameSaveDbContext` and its design-time factory are internal;
-- an architecture test protects the EF infrastructure boundary;
-- baseline migration id is `20260928000000_InitialMetadataDatabase`;
-- local Server `data/` is ignored by Git;
-- initialization, migration and restore are distinct administrative operations;
-- startup never chooses or executes these operations automatically;
-- reusable administrative use cases belong to `GameSave.Application`, with Server/Admin/CLI/future IA as adapters.
-
-Latest code CI after review corrections:
-
+- shared code/architecture review completed;
+- structural review corrections applied;
+- latest reviewed code CI green;
 - Release build: 0 warnings, 0 errors;
-- Core: 57 passed;
-- Application: 1 passed;
-- Persistence: 9 passed;
-- Storage: 1 passed;
-- total: 68 passed, 0 failed;
-- Server.Tests and IntegrationTests keep their expected no-test notices.
+- 68 tests passed remotely;
+- Damien completed post-review local validation successfully;
+- Damien explicitly accepted H2.1B.
 
-Because review changed code after Damien's first local validation, run the local Release build/tests/diff/status checks again.
+Next: define H2.1C before any implementation.
 
-If green, Damien can explicitly accept H2.1B. Only then define H2.1C.
+H2.1C must build on the accepted rules that initialization, migration and restore are distinct administrative operations; startup does not choose or execute them automatically; reusable orchestration belongs to `GameSave.Application`.
