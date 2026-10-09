@@ -6,8 +6,8 @@ The validated technical solution defines the progression below.
 | --- | --- | --- |
 | H0 | Bootstrap, boundaries, CI and documentation system | Validated |
 | H1 | Generic deterministic domain | Accepted / merged to develop |
-| H2 | Minimal central server, including SQLite metadata persistence boundary | Accepted — promotion to develop authorized |
-| H3 | Minimal Windows agent | Planned |
+| H2 | Minimal central server, including SQLite metadata persistence boundary | Accepted / merged to develop |
+| H3 | Minimal Windows agent | Planned — H3.1/H3.2/H3.3 scope accepted |
 | H4 | Replaceable minimal UI | Planned |
 | H5 | Reliable transactional transfers | Planned |
 | H6 | Generic process/folder monitoring | Planned |
@@ -56,3 +56,20 @@ The central server will use SQLite for GameSaveSync configuration and metadata. 
 H1 defines persistence-independent domain objects only. H2 completed the central persistence/storage/status foundation: SQLite lifecycle and recovery, durable classification, GameProfile persistence, local artifact storage, explicit administrative DB operations and `GET /api/system/status`.
 
 See `docs/decisions/ADR-0001-server-metadata-sqlite.md`.
+
+## Future storage topology and availability
+
+The real storage topology must be configuration-driven rather than profile-supplied physical paths.
+
+Accepted direction:
+
+- logical StorageCategory is separate from physical StorageTarget;
+- GameSaveSync uses the game-save category without prematurely implementing unrelated categories;
+- target/category routing is persisted/configurable rather than scattered as hard-coded paths;
+- Storage re-validates final root containment even when Application has already validated the logical path;
+- StorageTarget may later define optional planned-unavailability windows;
+- Custodia currently has an operational example of planned overnight downtime (approximately 00:00–08:00), but no schedule is enabled by default;
+- H5 reliable transfers must preserve pending work across temporary storage unavailability;
+- H8 materializes the real Custodia target/provider and scheduled-availability behavior.
+
+See `docs/decisions/ADR-0009-storage-targets-categories-availability.md`.
