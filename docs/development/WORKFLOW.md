@@ -86,3 +86,25 @@ A GameSaveSync tranche is accepted only when:
 - tranche documentation is current;
 - `CURRENT_HANDOFF.md` is current;
 - Damien explicitly accepts the tranche.
+
+## H3 cadence pilot
+
+H3 is the project-level trial of a more proportionate development/review cadence before promoting the rule to NexusPrincipia for later projects/tranches.
+
+For each coherent H3 sub-tranche:
+
+1. present the functional goal and the important internal checkpoints;
+2. decide with Damien whether adjacent work should be grouped or kept separate;
+3. implement the agreed lot continuously instead of manufacturing micro-slices;
+4. keep CI/tests active during the run;
+5. review a small set of important/tricky files and mechanisms;
+6. validate that Damien still has the architectural/product map needed to challenge the implementation;
+7. move to the next coherent sub-tranche only after that review/validation.
+
+The review is **not** an advanced trivia examination on technologies used internally. Niche details such as provider-specific SQL/SQLite commands are explained when relevant; prior memorization is not a development gate.
+
+The main purpose of routine tranche review is to detect lost direction: missing operational states, incorrect ownership, unsafe assumptions, or implementation drift from the intended product.
+
+Before the first V1.0 promotion from `deploy/succumbrae` to `main`, perform a separate exhaustive audit/documentation pass. That audit is the appropriate place to systematically revisit specialized mechanisms, technical debt, safety/security, cross-module coherence and unfamiliar implementation details.
+
+If the H3 cadence proves effective, update the shared NexusPrincipia operating model so H4 and later sessions inherit the same method automatically.
