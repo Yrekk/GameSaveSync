@@ -22,3 +22,5 @@ Do not create an ADR for every class, DTO, package or routine implementation cho
 - [ADR-0007 — First transport use case is read-only system status](ADR-0007-first-system-status-api.md)
 
 - [ADR-0008 — Machine identity is stable, opaque and independent from mutable host metadata](ADR-0008-stable-machine-identity.md)
+
+- [ADR-0009 — Storage destinations use configured targets, logical categories and explicit availability policy](ADR-0009-storage-targets-categories-availability.md)
