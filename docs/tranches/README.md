@@ -8,11 +8,12 @@ The document records scope, state, relevant decisions, validation and the next e
 
 - H0 — validated.
 - H1 — accepted and merged to `develop`.
-- H2 — active on `feature/h2-central-server`.
-  - H2.1A — validated.
-  - H2.1B — validated.
-  - H2.1C — validated and explicitly accepted.
-  - H2.1D — validated and explicitly accepted.
-  - Next: scope the next H2 slice before implementation.
+- H2 — accepted and merged to `develop`.
+- H3 — planned; scope accepted, implementation not started.
+  - H3.1 — machine identity and enrollment.
+  - H3.2 — durable local Agent state and typed Server client.
+  - H3.3 — Agent runtime and end-to-end handshake.
 
-Current H2 tracking document: [`H2-central-server.md`](H2-central-server.md).
+Current H3 tracking document: [`H3-minimal-windows-agent.md`](H3-minimal-windows-agent.md).
+
+The H3 split deliberately stops at H3.1/H3.2/H3.3 unless a genuinely independent architectural unit justifies another level and Damien explicitly agrees that the extra split is useful.
