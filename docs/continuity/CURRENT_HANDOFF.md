@@ -1,275 +1,161 @@
 # Current handoff
 
-**Date:** 28 September 2026  
+**Date:** 9 October 2026  
 **Repository:** `Yrekk/GameSaveSync`  
-**Working branch:** `feature/h2-central-server`  
 **Integration branch:** `develop`  
 **Deployment branch:** `deploy/succumbrae`  
 **Stable branch:** `main`  
-**Current tranche:** H2 — Minimal central server  
-**State:** H2 explicitly accepted; promotion to `develop` authorized
+**Current tranche:** H3 — Minimal Windows agent  
+**State:** H2 accepted/merged; H3 scope accepted, implementation not started
 
 Always verify the actual remote branch and HEAD before modifying the repository.
 
-## Current remote reference
+## Validated baseline
 
-Final H2 implementation candidate:
+H2 is fully accepted and merged into `develop`.
 
-```text
-f0c8c1ca956abb3e9932965271e4ea1fb5667121
-```
+Merge commit:
 
-CI:
+~~~text
+6ec4406d68e562b94b5f90685224537e11e02401
+~~~
 
-```text
-run 36424017414 — SUCCESS
-Release build: 0 warnings / 0 errors
+Post-merge CI succeeded.
 
-GameSave.Core.Tests        : 57 passed
-GameSave.Application.Tests : 39 passed
-GameSave.Persistence.Tests : 35 passed
-GameSave.Storage.Tests     : 7 passed
-GameSave.Server.Tests      : 1 passed
-GameSave.IntegrationTests  : 1 passed
-TOTAL                      : 140 passed
-```
+Final H2 validation before merge:
 
-The old "no tests available" warnings for Server.Tests and IntegrationTests are no longer expected: both projects now contain real executable tests.
+- Release build: 0 warnings / 0 errors;
+- 140/140 tests passed remotely and locally;
+- manual GET /api/system/status smoke test passed;
+- targeted code review completed;
+- Damien explicitly accepted H2.
 
-## H2 result
+No promotion to `deploy/succumbrae` or `main` has been authorized.
 
-H2 turns the ASP.NET host into the first real central GameSaveSync authority boundary while keeping later Agent/transfer/Custodia work out of scope.
+## H3 accepted scope
 
-### Metadata database foundation
+H3 creates the first real Windows Agent but deliberately does not synchronize game saves yet.
 
-Implemented:
+### H3.1 — Machine identity and enrollment
 
-- explicit configured SQLite metadata path;
-- normal operational access cannot silently create a missing DB;
-- explicit initialization semantics remain distinct from migration and restore;
-- versioned EF migrations;
-- read-only database inspection;
-- observed facts separated from semantic classification;
-- durable Admin classification outside the inspected DB;
-- human-readable XML control-plane history;
-- fresh inspection revision check before durable human decisions;
-- metadata readiness modes: `Normal / Maintenance / RestrictedRecovery / OutOfService`;
-- fail-closed behavior without equating readiness failure to Server process death.
+- minimum central machine registry;
+- Server-authoritative UUID v7 MachineId creation;
+- persistence/repository/migration;
+- minimum enrollment transport boundary;
+- mutable host metadata remains descriptive, never identity;
+- rebind to an existing MachineId stays explicit/security-sensitive.
 
-### GameProfile persistence
+### H3.2 — Durable Agent state and Server client
 
-Implemented:
+- durable local Agent bootstrap state;
+- persist/reload Server-assigned MachineId;
+- typed Agent→Server client;
+- consume central system status;
+- enrollment only when no local identity exists;
+- safe/diagnosable Server-unavailable behavior.
 
-- complete valid `GameProfile` persistence behind an Application repository port;
-- migration `20260928123000_AddGameProfiles`;
-- global `ProfileId` persistence key;
-- human-readable `DisplayName` duplicated beside the serialized aggregate for diagnostics/listing;
-- complete aggregate stored as a versioned JSON persistence document;
-- Persistence DTO/mapping remains outside Core;
-- repository round-trip and update tests.
+### H3.3 — Runtime and end-to-end handshake
 
-The JSON aggregate is intentionally not split into speculative relational tables because H2 has no use case that needs SQL queries over every nested profile field yet.
+- assemble Agent startup flow;
+- derive Agent operational/readiness state;
+- first run enrolls M1;
+- second run reuses M1;
+- no duplicate machine on restart;
+- explicit end-to-end Server/DB/Agent test;
+- Server-unavailable path tested.
 
-### Metadata snapshots and administrative operations
+Full tranche document:
 
-Implemented Application use cases:
+`docs/tranches/H3-minimal-windows-agent.md`
 
-- `InitializeMetadataDatabase`;
-- `ApplyPendingMetadataDatabaseMigrations`;
-- `CreateRollingMetadataDatabaseSnapshot`;
-- `RestoreMetadataDatabaseSnapshot`.
+## H3 design decision still required
 
-Implemented Persistence infrastructure:
+Before implementing H3.1, decide the minimum trust model for enrollment.
 
-- SQLite-safe backup through `BackupDatabase`;
-- validated snapshot candidates;
-- rolling retention = 2;
-- mandatory pre-migration snapshot;
-- explicit snapshot id for restore;
-- no automatic "restore newest";
-- active broken DB quarantined during restore;
-- post-operation reinspection;
-- no automatic startup initialization/migration/restore.
+The architecture must distinguish:
 
-Important Windows/SQLite detail:
+- creating a new logical MachineId;
+- presenting an already assigned MachineId;
+- explicitly rebinding to an existing logical machine.
 
-- snapshot source/destination/validation connections intentionally avoid pooling where file replacement/rotation is involved;
-- restore clears only the active metadata connection pool, never `ClearAllPools()`.
+Hostname, username or hardware heuristics are not identity proof.
 
-### Save artifact Storage boundary
+## Development/review cadence to test on H3
 
-Implemented:
+Use only H3.1 / H3.2 / H3.3 as the default functional split.
 
-- `IGameSaveArtifactStorage` Application port;
-- local filesystem backend in `GameSave.Storage`;
-- artifact identity includes profile + logical artifact + data root + relative path;
-- basic write/read/existence/status behavior;
-- atomic temp-file write before final replace;
-- path traversal rejected (`..`, absolute paths, etc.);
-- Storage remains separate from EF/SQLite Persistence;
-- no H5 reliable publication/version protocol yet;
-- no H8 Custodia/NAS backend yet.
+Do not create H3.1A/H3.1B-style micro-tranches unless a genuinely independent architectural unit appears and Damien agrees the extra split is useful.
 
-Storage composition does not create/touch the root path at Server startup. A broken storage target must remain diagnosable through system status instead of crashing the process before diagnostics are available.
+Before coding each lot:
 
-### First real transport boundary
+1. explain the goal and meaningful internal checkpoints;
+2. decide together whether adjacent H3 work should be grouped;
+3. implement the agreed lot continuously;
+4. keep CI/tests running;
+5. do a targeted code review of the important/tricky mechanisms.
 
-Implemented:
+Routine review checks whether Damien still has the system map needed to orient development and catch missing operational states or wrong responsibilities. It is not a knowledge test on obscure SQL/SQLite/framework internals.
 
-```text
-GET /api/system/status
-```
+A separate exhaustive audit + documentation pass is planned before first V1.0 promotion from `deploy/succumbrae` to `main`.
 
-Flow:
+If H3 validates this cadence, promote it to NexusPrincipia so H4 and later sessions inherit it.
 
-```text
-HTTP
-→ GameSave.Server adapter
-→ GetSystemStatus
-→ metadata inspect + authorized classification
-→ metadata readiness
-→ recovery snapshot availability
-→ storage readiness
-→ GameSave.Contracts DTO
-```
+## Future storage decisions captured after H2
 
-The response exposes:
+ADR-0009 records the accepted future direction.
 
-- overall operational mode;
-- synchronization availability;
-- effective metadata state;
-- metadata operational mode;
-- Admin-classification requirement;
-- migration pending signal;
-- snapshot recovery availability;
-- Storage status;
-- structured finding codes.
+### Controlled destinations
 
-Process liveness remains distinct from operational readiness.
+Do not let a profile/artifact supply an arbitrary physical destination.
 
-A real integration test boots the ASP.NET application with isolated temporary paths and calls `GET /api/system/status`.
+Use:
 
-## Explicitly still deferred after H2
+~~~text
+logical StorageCategory
+→ configured StorageTarget
+→ provider-controlled physical root/layout
+~~~
 
-H2 does **not** implement:
+GameSaveSync currently needs the game-save use case only. Broader reusable categories such as application/document may exist later, but must not be implemented speculatively.
 
-- Windows Agent behavior;
-- machine enrollment/registry workflow;
-- process detection;
-- save-folder monitoring;
-- Windows lifecycle handling;
-- transactional transfer/version publication;
-- conflict transfer protocol;
-- real Custodia storage;
-- Project Zomboid-specific profile behavior;
-- Web/Admin UI;
-- transport authentication/authorization for destructive administrative operations;
-- managed game-save recovery checkpoints.
+Target/category topology should be persisted/configurable rather than spread through hard-coded physical paths.
 
-These belong to later tranches.
+Application validates the logical contract; Storage independently verifies final physical root containment.
 
-## Shared development workflow
+### Planned Custodia downtime
 
-NexusPrincipia was updated during H2.
+Custodia may intentionally be unavailable during scheduled periods. Current real-world example: approximately 00:00–08:00.
 
-Current shared rule:
+No downtime window is enabled by default.
 
-- one functional tranche = one dedicated development session;
-- internal technical checkpoints are allowed and encouraged;
-- checkpoints are not mini-tranches and do not each require acceptance/local validation/document closure;
-- pause implementation only for real architectural/product/safety decisions;
-- continuous CI/testing during the tranche;
-- final review focuses on tricky/important code instead of exhaustive questionnaires;
-- explicit local validation + human acceptance close the functional tranche;
-- next functional tranche starts in a new session.
+Future StorageTarget configuration must be able to distinguish:
 
-Authoritative reference:
+~~~text
+planned temporary unavailability
+!=
+unexpected storage failure
+~~~
 
-`NexusPrincipia/docs/development/ai-development-operating-model.md`
+Schedules require explicit timezone semantics.
 
-## Final H2 review — files worth opening
+H5 transfer logic must leave work safely pending across storage downtime. H8 materializes the actual Custodia target/provider and planned-availability configuration.
 
-Do not review every changed file line-by-line.
+This reinforces the H2/ADR-0001 choice to keep active metadata SQLite local to Succumbrae: the control plane remains available and diagnosable while NAS payload storage is intentionally offline.
 
-The useful technical review is concentrated here:
+See:
 
-### 1. Versioned aggregate persistence
+`docs/decisions/ADR-0009-storage-targets-categories-availability.md`
 
-```text
-src/GameSave.Persistence/Profiles/GameProfileDocument.cs
-src/GameSave.Persistence/Profiles/EfGameProfileRepository.cs
-```
+## Next exact action
 
-Topics:
+Start H3 from the accepted `develop` baseline.
 
-- why Persistence owns the serialization DTO;
-- why the stored aggregate has a schema version;
-- why `ProfileId` / `DisplayName` are duplicated outside the payload;
-- why nested profile fields were not prematurely normalized into multiple SQL tables.
+Before coding H3.1:
 
-### 2. SQLite snapshot / restore
+1. verify current remote `develop` HEAD and CI;
+2. create the H3 feature branch;
+3. review `docs/tranches/H3-minimal-windows-agent.md`;
+4. resolve the H3 enrollment trust model;
+5. present H3.1 implementation checkpoints and decide the exact coding lot with Damien.
 
-```text
-src/GameSave.Persistence/Database/SqliteMetadataDatabaseSnapshotStore.cs
-```
-
-Topics:
-
-- `BackupDatabase` instead of copying a live SQLite file blindly;
-- validation before restore;
-- explicit snapshot selection;
-- broken active DB quarantine;
-- targeted pool handling;
-- why snapshot connections avoid pooling on Windows.
-
-### 3. Storage path safety
-
-```text
-src/GameSave.Application/Storage/SaveArtifactKey.cs
-src/GameSave.Storage/Local/LocalGameSaveArtifactStorage.cs
-```
-
-Topics:
-
-- provider-neutral artifact key;
-- rejection of absolute/traversal paths;
-- second containment check after `Path.GetFullPath`;
-- atomic temp write.
-
-### 4. Whole-system readiness
-
-```text
-src/GameSave.Application/SystemStatus/GetSystemStatus.cs
-src/GameSave.Server/Program.cs
-src/GameSave.Server/SystemStatus/SystemStatusContractMapper.cs
-```
-
-Topics:
-
-- metadata authority alone is not enough for synchronization availability;
-- recovery availability participates in metadata readiness;
-- Storage participates in global readiness;
-- HTTP adapter maps to transport DTO and owns no business policy;
-- Server startup still performs no implicit DB lifecycle mutation.
-
-## H2 FINAL ACCEPTANCE
-
-Damien explicitly accepted H2 on 28 September 2026 after:
-
-- remote CI green: 140/140 tests, Release 0 warnings / 0 errors;
-- matching local validation: 140/140 tests, 0 warnings / 0 errors;
-- manual `GET /api/system/status` smoke test with expected Maintenance/Missing/Storage Ready result;
-- targeted code review of the tricky persistence, snapshot, storage-safety and readiness mechanisms.
-
-No structural change was requested after the review.
-
-Promotion of H2 to `develop` is explicitly authorized.
-
-## NEXT EXACT ACTION
-
-Merge `feature/h2-central-server` into `develop`, verify the merged HEAD and CI, then prepare H3 planning.
-
-H3 is the minimal Windows Agent tranche. Before implementation, present the concise H3 scope, what remains deliberately deferred to H4+ and the principal checkpoints (targeting H3.1 / H3.2 / H3.3 only, unless a genuinely separate architectural unit justifies otherwise).
-
-No promotion to `deploy/succumbrae` or `main` is authorized.
-
+No code for H4/H5/H6/H7/H8 should be silently pulled into H3.
