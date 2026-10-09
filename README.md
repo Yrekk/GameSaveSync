@@ -2,7 +2,7 @@
 
 Generic and safe game save protection and synchronization for one or more PCs, using Windows agents, a central .NET server and NAS-backed versioned storage.
 
-> **Status:** pre-V1 — H1 accepted and merged to `develop`; H2 Minimal central server is fully validated and explicitly accepted, with promotion to `develop` authorized.
+> **Status:** pre-V1 — H1 and H2 are accepted and merged to `develop`; H3 Minimal Windows agent is planned with H3.1/H3.2/H3.3 scope accepted.
 
 ## Purpose
 
@@ -202,3 +202,5 @@ dotnet test GameSaveSync.sln --configuration Release --no-build
 ## Roadmap
 
 See [docs/roadmap.md](docs/roadmap.md).
+
+Next tranche: [H3 — Minimal Windows agent](docs/tranches/H3-minimal-windows-agent.md).
